@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../data/repositories/verify_repository.dart';
 import 'RegisterScreen.dart';
 import 'LoginScreen.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;
-  final String from; // 👈 thêm tham số này: "register" hoặc "login"
+  final String from; // "register" hoặc "login"
 
   const VerifyCodeScreen({
     super.key,
@@ -20,6 +21,8 @@ class VerifyCodeScreen extends StatefulWidget {
 class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes =
+      List.generate(6, (_) => FocusNode()); // focus cho từng ô
   final VerifyRepository _repository = VerifyRepository();
   bool _loading = false;
 
@@ -27,6 +30,9 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   void dispose() {
     for (var c in _controllers) {
       c.dispose();
+    }
+    for (var f in _focusNodes) {
+      f.dispose();
     }
     super.dispose();
   }
@@ -72,6 +78,47 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     }
   }
 
+  Widget _buildOtpField(int i) {
+    return SizedBox(
+      width: 40,
+      child: RawKeyboardListener(
+        focusNode: FocusNode(), // để lắng nghe key events
+        onKey: (event) {
+          if (event is RawKeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.backspace) {
+            final current = _controllers[i];
+            if (current.text.isEmpty && i > 0) {
+              // Trường hợp 2: ô trống, lùi về ô trước và xóa luôn ô trước
+              _controllers[i - 1].text = '';
+              FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
+            }
+          }
+        },
+        child: TextField(
+          controller: _controllers[i],
+          focusNode: _focusNodes[i],
+          textAlign: TextAlign.center,
+          maxLength: 1,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(counterText: ""),
+          onChanged: (val) {
+            if (val.isNotEmpty) {
+              if (i < 5) {
+                FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
+              }
+            } else {
+              // Trường hợp 1: ô đang có ký tự bị xóa
+              // giữ focus ở ô hiện tại
+              if (i > 0) {
+                FocusScope.of(context).requestFocus(_focusNodes[i]);
+              }
+            }
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,19 +129,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                6,
-                (i) => SizedBox(
-                  width: 40,
-                  child: TextField(
-                    controller: _controllers[i],
-                    textAlign: TextAlign.center,
-                    maxLength: 1,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(counterText: ""),
-                  ),
-                ),
-              ),
+              children: List.generate(6, (i) => _buildOtpField(i)),
             ),
             const SizedBox(height: 20),
             SizedBox(
