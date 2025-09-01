@@ -6,8 +6,6 @@ class AuthRepository {
   final AuthService service;
   AuthRepository({AuthService? service}) : service = service ?? AuthService();
 
-  /// Kiểm tra đơn giản phía client rồi gọi service.
-  /// Trả về map: { success: bool, message: String?, user: AuthModel? }
   Future<Map<String, dynamic>> register({
     required String userName,
     required String email,
@@ -38,7 +36,6 @@ class AuthRepository {
     );
 
     if (res['success'] == true) {
-      // Nếu backend trả về dữ liệu user, parse (không bắt buộc)
       AuthModel? user;
       final data = res['data'];
       if (data is Map && data['user'] is Map) {
@@ -55,6 +52,44 @@ class AuthRepository {
       };
     } else {
       return {'success': false, 'message': res['message'] ?? 'Lỗi đăng ký'};
+    }
+  }
+
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    if (email.trim().isEmpty) {
+      return {'success': false, 'message': 'Email không được để trống'};
+    }
+    if (password.isEmpty) {
+      return {'success': false, 'message': 'Mật khẩu không được để trống'};
+    }
+
+    final res = await service.login(email: email, password: password);
+
+    if (res['success'] == true) {
+      final data = res['data'];
+      // data có thể chứa token và user
+      final token = data is Map && data['token'] != null ? data['token'] : null;
+      AuthModel? user;
+      if (data is Map && data['user'] is Map) {
+        try {
+          user = AuthModel.fromJson(Map<String, dynamic>.from(data['user']));
+        } catch (_) {}
+      }
+      return {
+        'success': true,
+        'message': data['message'] ?? 'Đăng nhập thành công',
+        'token': token,
+        'user': user
+      };
+    } else {
+      return {
+        'success': false,
+        'message': res['message'] ?? 'Lỗi đăng nhập',
+        'status': res['status']
+      };
     }
   }
 }

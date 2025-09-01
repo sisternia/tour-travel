@@ -57,7 +57,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => VerifyCodeScreen(email: _emailCtrl.text.trim()),
+          builder: (_) => VerifyCodeScreen(
+            email: _emailCtrl.text.trim(),
+            from: "register",
+          ),
         ),
       );
     }
@@ -77,8 +80,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _userNameCtrl,
                   decoration: const InputDecoration(labelText: "Tên đăng nhập"),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Nhập tên đăng nhập' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Nhập tên đăng nhập'
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 TextFormField(

@@ -1,11 +1,17 @@
-// lib/presentation/screens/VerifyCode.dart
 import 'package:flutter/material.dart';
 import '../../data/repositories/verify_repository.dart';
 import 'RegisterScreen.dart';
+import 'LoginScreen.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;
-  const VerifyCodeScreen({super.key, required this.email});
+  final String from; // 👈 thêm tham số này: "register" hoặc "login"
+
+  const VerifyCodeScreen({
+    super.key,
+    required this.email,
+    required this.from,
+  });
 
   @override
   State<VerifyCodeScreen> createState() => _VerifyCodeScreenState();
@@ -37,7 +43,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     if (res['success'] == true) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }
@@ -50,6 +56,20 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(res['message'] ?? '')),
     );
+  }
+
+  void _goBack() {
+    if (widget.from == "register") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -91,12 +111,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                    );
-                  },
+                  onPressed: _goBack,
                   child: const Text("Trở về"),
                 ),
                 TextButton(

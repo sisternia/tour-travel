@@ -1,8 +1,8 @@
 // controllers/auth.controller.js
 const User = require('../models/auth.model');
-const { hashPassword } = require('../services/auth.service');
-const { sendVerifyEmail } = require('../services/verify.service');
 const Verify = require('../models/verify.model');
+const { hashPassword, comparePassword, generateToken } = require('../services/auth.service');
+const { sendVerifyEmail } = require('../services/verify.service');
 const crypto = require('crypto');
 
 const register = async (req, res) => {
@@ -38,4 +38,28 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ message: 'Thiếu email hoặc mật khẩu' });
+
+    const user = await User.findByEmail(email);
+    if (!user) return res.status(400).json({ message: 'Email không tồn tại' });
+
+    const verify = await Verify.findByUserId(user.user_id);
+    if (!verify || verify.verify_status === 0) {
+      return res.status(403).json({ message: 'Tài khoản chưa được xác nhận' });
+    }
+
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Sai mật khẩu' });
+
+    const token = generateToken({ user_id: user.user_id, email: user.email });
+    res.status(200).json({ message: 'Đăng nhập thành công', token });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+module.exports = { register, login };
