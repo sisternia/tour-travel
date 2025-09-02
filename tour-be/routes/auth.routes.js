@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { register, login } = require('../controllers/auth.controller');
-const { sendCode, verifyAccount } = require('../controllers/verify.controller');
+const { sendCode, verifyAccount, resetPassword } = require('../controllers/verify.controller');
 
 // Đăng ký
 router.post('/register', register);
@@ -15,5 +15,8 @@ router.post('/send-verify-code', sendCode);
 
 // Xác nhận tài khoản
 router.post('/verify-account', verifyAccount);
+
+// Reset password (sau khi verify-account type=forgot thành công)
+router.post('/reset-password', resetPassword);
 
 module.exports = router;

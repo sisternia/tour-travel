@@ -18,7 +18,11 @@ class VerifyService {
       );
       final decoded = response.body.isNotEmpty ? jsonDecode(response.body) : {};
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return {'success': true, 'data': decoded};
+        return {
+          'success': true,
+          'data': decoded,
+          'message': decoded['message']
+        };
       } else {
         return {
           'success': false,
@@ -31,10 +35,11 @@ class VerifyService {
     }
   }
 
-  Future<Map<String, dynamic>> verifyAccount(
-      String email, String verifyCode) async {
+  Future<Map<String, dynamic>> verifyAccount(String email, String verifyCode,
+      {String type = 'register'}) async {
     final uri = Uri.parse(ApiConstants.verifyAccount);
-    final body = jsonEncode({'email': email, 'verify_code': verifyCode});
+    final body =
+        jsonEncode({'email': email, 'verify_code': verifyCode, 'type': type});
     try {
       final response = await client.post(
         uri,
@@ -43,7 +48,40 @@ class VerifyService {
       );
       final decoded = response.body.isNotEmpty ? jsonDecode(response.body) : {};
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return {'success': true, 'data': decoded};
+        return {
+          'success': true,
+          'data': decoded,
+          'message': decoded['message']
+        };
+      } else {
+        return {
+          'success': false,
+          'message': decoded['message']?.toString() ??
+              'Lỗi server (${response.statusCode})'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Lỗi kết nối: ${e.toString()}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(
+      String email, String newPassword) async {
+    final uri = Uri.parse(ApiConstants.resetPassword);
+    final body = jsonEncode({'email': email, 'new_password': newPassword});
+    try {
+      final response = await client.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+      final decoded = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {
+          'success': true,
+          'data': decoded,
+          'message': decoded['message']
+        };
       } else {
         return {
           'success': false,

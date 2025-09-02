@@ -17,6 +17,13 @@ const User = {
     const [rows] = await db.execute('SELECT * FROM users WHERE user_id = ?', [user_id]);
     return rows[0];
   },
+  updatePassword: async (user_id, hashedPassword) => {
+    const [result] = await db.execute(
+      'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+      [hashedPassword, user_id]
+    );
+    return result;
+  },
 };
 
 module.exports = User;
