@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'LoginScreen.dart';
 import '../../data/repositories/verify_repository.dart';
 import 'VerifyCode.dart';
+import '../widgets/Button.dart';
+import '../widgets/TextField.dart';
+import '../../core/utils/Snackbar.dart';
+import '../../core/utils/Validators.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -12,8 +16,8 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  final TextEditingController _emailCtrl = TextEditingController();
-  final VerifyRepository _repo = VerifyRepository();
+  final _emailCtrl = TextEditingController();
+  final _repo = VerifyRepository();
   bool _loading = false;
 
   @override
@@ -23,28 +27,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   }
 
   Future<void> _submit() async {
-    final email = _emailCtrl.text.trim();
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nhập email')),
-      );
+    if (_emailCtrl.text.trim().isEmpty) {
+      SnackbarUtils.show(context, 'Nhập email');
       return;
     }
 
     setState(() => _loading = true);
-    final res = await _repo.sendCode(email);
+    final res = await _repo.sendCode(_emailCtrl.text.trim());
     setState(() => _loading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(res['message'] ?? '')),
-    );
+    SnackbarUtils.show(context, res['message'] ?? '');
 
     if (res['success'] == true) {
-      // Chuyển tới VerifyCode với from = 'forgot'
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => VerifyCodeScreen(email: email, from: 'forgot'),
+          builder: (_) =>
+              VerifyCodeScreen(email: _emailCtrl.text.trim(), from: 'forgot'),
         ),
       );
     }
@@ -55,24 +54,21 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     return Scaffold(
       appBar: AppBar(title: const Text("Quên mật khẩu")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
+            CustomTextField(
               controller: _emailCtrl,
-              decoration: const InputDecoration(labelText: "Email"),
+              label: "Email",
               keyboardType: TextInputType.emailAddress,
+              validator: Validators.email,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loading ? null : _submit,
-              child: _loading
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text("Xác nhận"),
+            PrimaryButton(
+              text: "Xác nhận",
+              loading: _loading,
+              onPressed: _submit,
             ),
             TextButton(
               onPressed: () {

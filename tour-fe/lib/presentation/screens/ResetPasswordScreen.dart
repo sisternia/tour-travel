@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../data/repositories/verify_repository.dart';
 import 'LoginScreen.dart';
 import 'VerifyCode.dart';
+import '../widgets/Button.dart';
+import '../widgets/TextField.dart';
+import '../../core/utils/Snackbar.dart';
+import '../../core/utils/Validators.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -13,9 +17,9 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  final TextEditingController _passCtrl = TextEditingController();
-  final TextEditingController _confirmCtrl = TextEditingController();
-  final VerifyRepository _repo = VerifyRepository();
+  final _passCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+  final _repo = VerifyRepository();
   bool _obscurePass = true;
   bool _obscureConfirm = true;
   bool _loading = false;
@@ -28,28 +32,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _submit() async {
-    final pass = _passCtrl.text;
-    final confirm = _confirmCtrl.text;
-    if (pass.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mật khẩu tối thiểu 6 ký tự')));
-      return;
-    }
-    if (pass != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mật khẩu xác nhận không khớp')));
+    final err = Validators.password(_passCtrl.text) ??
+        Validators.confirmPassword(_confirmCtrl.text, _passCtrl.text);
+    if (err != null) {
+      SnackbarUtils.show(context, err);
       return;
     }
 
     setState(() => _loading = true);
-    final res = await _repo.resetPassword(widget.email, pass);
+    final res = await _repo.resetPassword(widget.email, _passCtrl.text);
     setState(() => _loading = false);
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(res['message'] ?? '')));
+    SnackbarUtils.show(context, res['message'] ?? '');
 
     if (res['success'] == true) {
-      // Trở về Login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -71,50 +67,32 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Đặt lại mật khẩu')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text('Đặt mật khẩu mới cho: ${widget.email}'),
             const SizedBox(height: 12),
-            TextField(
+            CustomTextField(
               controller: _passCtrl,
-              obscureText: _obscurePass,
-              decoration: InputDecoration(
-                labelText: 'Mật khẩu',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                      _obscurePass ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => setState(() => _obscurePass = !_obscurePass),
-                ),
-              ),
+              label: "Mật khẩu",
+              obscure: _obscurePass,
+              toggleObscure: () => setState(() => _obscurePass = !_obscurePass),
+              validator: Validators.password,
             ),
             const SizedBox(height: 8),
-            TextField(
+            CustomTextField(
               controller: _confirmCtrl,
-              obscureText: _obscureConfirm,
-              decoration: InputDecoration(
-                labelText: 'Xác nhận mật khẩu',
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirm
-                      ? Icons.visibility
-                      : Icons.visibility_off),
-                  onPressed: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
-                ),
-              ),
+              label: "Xác nhận mật khẩu",
+              obscure: _obscureConfirm,
+              toggleObscure: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
+              validator: (v) => Validators.confirmPassword(v, _passCtrl.text),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Xác nhận'),
-              ),
+            PrimaryButton(
+              text: "Xác nhận",
+              loading: _loading,
+              onPressed: _submit,
             ),
             TextButton(onPressed: _goBack, child: const Text('Trở về')),
           ],

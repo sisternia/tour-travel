@@ -1,11 +1,16 @@
 // lib/presentation/screens/LoginScreen.dart
 import 'package:flutter/material.dart';
-import 'package:tour_fe/data/repositories/verify_repository.dart';
 import 'RegisterScreen.dart';
 import 'ForgotPassword.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/verify_repository.dart';
 import 'HomeScreen.dart';
 import 'VerifyCode.dart';
+import '../widgets/Button.dart';
+import '../widgets/TextField.dart';
+import '../../core/utils/Validators.dart';
+import '../../core/utils/Dialogs.dart';
+import '../../core/utils/Snackbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,12 +21,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _passwordCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
   bool _loading = false;
-
-  final AuthRepository _repo = AuthRepository();
+  final _repo = AuthRepository();
 
   @override
   void dispose() {
@@ -32,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _loading = true);
 
     final res = await _repo.login(
@@ -41,71 +44,37 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     setState(() => _loading = false);
-
     final message = res['message']?.toString() ?? '';
 
     if (res['success'] == true) {
-      // Đăng nhập thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      SnackbarUtils.show(context, message);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
-      final status = res['status'];
-      if (status == 403) {
-        // Chưa xác nhận tài khoản
-        _showVerifyDialog(_emailCtrl.text.trim());
-      } else {
-        // Sai mật khẩu / lỗi khác
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
+      if (res['status'] == 403) {
+        AppDialogs.showVerifyDialog(
+          context: context,
+          onConfirm: () async {
+            final verifyRepo = VerifyRepository();
+            final r = await verifyRepo.sendCode(_emailCtrl.text.trim());
+            SnackbarUtils.show(context, r['message'] ?? '');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VerifyCodeScreen(
+                  email: _emailCtrl.text.trim(),
+                  from: "login",
+                ),
+              ),
+            );
+          },
         );
+      } else {
+        SnackbarUtils.show(context, message);
       }
     }
-  }
-
-  void _showVerifyDialog(String email) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Tài khoản chưa được xác nhận"),
-        content: const Text("Bạn cần xác nhận tài khoản để tiếp tục."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Đóng"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context); // đóng dialog
-
-              // Gửi lại mã xác thực
-              final verifyRepo = VerifyRepository();
-              final res = await verifyRepo.sendCode(email);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(res['message'] ?? '')),
-              );
-
-              // Chuyển tới VerifyCode
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VerifyCodeScreen(
-                    email: email,
-                    from: "login",
-                  ),
-                ),
-              );
-            },
-            child: const Text("Xác nhận"),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -113,46 +82,26 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Đăng nhập")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFormField(
+              CustomTextField(
                 controller: _emailCtrl,
-                decoration: const InputDecoration(labelText: "Email"),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Nhập email';
-                  final emailRegex =
-                      RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
-                  if (!emailRegex.hasMatch(v.trim())) {
-                    return 'Email không hợp lệ';
-                  }
-                  return null;
-                },
+                label: "Email",
+                validator: Validators.email,
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 8),
-              TextFormField(
+              CustomTextField(
                 controller: _passwordCtrl,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: "Mật khẩu",
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Nhập mật khẩu';
-                  return null;
-                },
+                label: "Mật khẩu",
+                obscure: _obscurePassword,
+                toggleObscure: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+                validator: Validators.password,
               ),
               Align(
                 alignment: Alignment.centerLeft,
@@ -166,17 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Text("Quên mật khẩu"),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _submit,
-                  child: _loading
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text("Xác nhận"),
-                ),
+              PrimaryButton(
+                text: "Xác nhận",
+                loading: _loading,
+                onPressed: _submit,
               ),
               TextButton(
                 onPressed: () {

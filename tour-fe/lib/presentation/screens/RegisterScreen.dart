@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'LoginScreen.dart';
 import 'VerifyCode.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../widgets/Button.dart';
+import '../widgets/TextField.dart';
+import '../../core/utils/Validators.dart';
+import '../../core/utils/Snackbar.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,16 +17,14 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _userNameCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _passwordCtrl = TextEditingController();
-  final TextEditingController _confirmCtrl = TextEditingController();
-
+  final _userNameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _loading = false;
-
-  final AuthRepository _repo = AuthRepository();
+  final _repo = AuthRepository();
 
   @override
   void dispose() {
@@ -35,10 +37,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _loading = true);
 
-    final result = await _repo.register(
+    final res = await _repo.register(
       userName: _userNameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       password: _passwordCtrl.text,
@@ -46,21 +47,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     setState(() => _loading = false);
+    SnackbarUtils.show(context, res['message']?.toString() ?? '');
 
-    final message = result['message']?.toString() ?? '';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-
-    if (result['success'] == true) {
+    if (res['success'] == true) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => VerifyCodeScreen(
-            email: _emailCtrl.text.trim(),
-            from: "register",
-          ),
+          builder: (_) =>
+              VerifyCodeScreen(email: _emailCtrl.text.trim(), from: "register"),
         ),
       );
     }
@@ -71,94 +65,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Đăng ký")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
             child: Column(
               children: [
-                TextFormField(
+                CustomTextField(
                   controller: _userNameCtrl,
-                  decoration: const InputDecoration(labelText: "Tên đăng nhập"),
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Nhập tên đăng nhập'
-                      : null,
+                  label: "Tên đăng nhập",
+                  validator: (v) =>
+                      Validators.required(v, 'Nhập tên đăng nhập'),
                 ),
                 const SizedBox(height: 8),
-                TextFormField(
+                CustomTextField(
                   controller: _emailCtrl,
-                  decoration: const InputDecoration(labelText: "Email"),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Nhập email';
-                    final emailRegex =
-                        RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
-                    if (!emailRegex.hasMatch(v.trim())) {
-                      return 'Email không hợp lệ';
-                    }
-                    return null;
-                  },
+                  label: "Email",
+                  validator: Validators.email,
+                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 8),
-                TextFormField(
+                CustomTextField(
                   controller: _passwordCtrl,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: "Mật khẩu",
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Nhập mật khẩu';
-                    if (v.length < 6) return 'Mật khẩu tối thiểu 6 ký tự';
-                    return null;
-                  },
+                  label: "Mật khẩu",
+                  obscure: _obscurePassword,
+                  toggleObscure: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  validator: Validators.password,
                 ),
                 const SizedBox(height: 8),
-                TextFormField(
+                CustomTextField(
                   controller: _confirmCtrl,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    labelText: "Xác nhận mật khẩu",
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                      onPressed: () => setState(() =>
-                          _obscureConfirmPassword = !_obscureConfirmPassword),
-                    ),
+                  label: "Xác nhận mật khẩu",
+                  obscure: _obscureConfirmPassword,
+                  toggleObscure: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  validator: (v) => Validators.confirmPassword(
+                    v,
+                    _passwordCtrl.text,
                   ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Nhập xác nhận mật khẩu';
-                    if (v != _passwordCtrl.text) {
-                      return 'Mật khẩu xác nhận không khớp';
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _submit,
-                    child: _loading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text("Xác nhận"),
-                  ),
+                PrimaryButton(
+                  text: "Xác nhận",
+                  loading: _loading,
+                  onPressed: _submit,
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()));
                   },
                   child: const Text("Đã có tài khoản? Đăng nhập"),
                 ),
