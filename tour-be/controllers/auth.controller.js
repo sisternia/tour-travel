@@ -21,8 +21,14 @@ const register = async (req, res) => {
     const hashedPassword = await hashPassword(password);
     const user_id = crypto.randomBytes(3).toString('hex');
 
+    // Tạo user
     await User.create({ user_id, user_name, email, password: hashedPassword });
 
+    // Tạo user_infor với các field null
+    const user_infor_id = crypto.randomBytes(5).toString('hex');
+    await User.createUserInfo({ user_infor_id, user_id });
+
+    // Tạo verify
     const verify_id = crypto.randomBytes(3).toString('hex');
     const verify_code = Math.floor(100000 + Math.random() * 900000).toString();
 

@@ -1,14 +1,15 @@
-// lib/presentation/screens/VerifyCode.dart
+// lib/presentation/screens/verify_code_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../data/repositories/verify_repository.dart';
-import 'RegisterScreen.dart';
-import 'LoginScreen.dart';
-import 'ResetPasswordScreen.dart';
+import 'register_screen.dart';
+import 'login_screen.dart';
+import 'reset_password_screen.dart';
+import '../widgets/Button.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;
-  final String from; // "register" hoặc "login" hoặc "forgot"
+  final String from; // "register", "login" hoặc "forgot"
 
   const VerifyCodeScreen({
     super.key,
@@ -30,7 +31,6 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   @override
   void initState() {
     super.initState();
-    // focus ô đầu tiên
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
     });
@@ -50,9 +50,8 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   Future<void> _submit() async {
     final code = _controllers.map((c) => c.text).join();
     if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nhập đủ 6 số')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Nhập đủ 6 số')));
       return;
     }
 
@@ -62,21 +61,17 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     setState(() => _loading = false);
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(res['message'] ?? '')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(res['message'] ?? '')));
 
     if (res['success'] == true) {
       if (widget.from == 'forgot') {
-        // chuyển sang màn ResetPassword, truyền email
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ResetPasswordScreen(email: widget.email),
-          ),
+              builder: (_) => ResetPasswordScreen(email: widget.email)),
         );
       } else {
-        // register flow -> về Login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -90,10 +85,8 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     final res = await _repository.sendCode(widget.email);
     setState(() => _loading = false);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(res['message'] ?? '')),
-    );
-    // clear inputs and focus first
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(res['message'] ?? '')));
     for (final c in _controllers) {
       c.clear();
     }
@@ -107,7 +100,6 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
         MaterialPageRoute(builder: (_) => const RegisterScreen()),
       );
     } else {
-      // both login & forgot go back to LoginScreen (for forgot we may want Verify->Forgot but spec said back to Verify)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -123,13 +115,9 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
         onKey: (event) {
           if (event is RawKeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.backspace) {
-            final current = _controllers[i];
-            if (current.text.isEmpty && i > 0) {
-              // ô trống: lùi về ô trước và xóa ô trước
+            if (_controllers[i].text.isEmpty && i > 0) {
               _controllers[i - 1].text = '';
               FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
-            } else {
-              // nếu có ký tự trong ô thì xóa ký tự trong ô hiện tại (TextField sẽ làm việc)
             }
           }
         },
@@ -148,10 +136,6 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
               } else {
                 _focusNodes[i].unfocus();
               }
-            } else {
-              // Nếu vừa xóa ký tự ở ô có ký tự trước đó (trường hợp 1): giữ focus ở ô hiện tại
-              // Nếu ô đã rỗng và backspace => onKey xử lý sẽ lùi và clear ô trước
-              // Không cần làm gì thêm ở đây
             }
           },
         ),
@@ -162,41 +146,46 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Xác nhận tài khoản")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text('Mã sẽ được gửi tới: ${widget.email}'),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(6, (i) => _buildOtpField(i)),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text("Xác nhận"),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      // ❌ Bỏ AppBar để đồng bộ style
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(onPressed: _goBack, child: const Text("Trở về")),
-                TextButton(
-                    onPressed: _loading ? null : _resend,
-                    child: const Text("Gửi lại mã")),
+                Text(
+                  'Mã sẽ được gửi tới: ${widget.email}',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (i) => _buildOtpField(i)),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: "Xác nhận",
+                    loading: _loading,
+                    onPressed: _submit,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(onPressed: _goBack, child: const Text("Trở về")),
+                    TextButton(
+                        onPressed: _loading ? null : _resend,
+                        child: const Text("Gửi lại mã")),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

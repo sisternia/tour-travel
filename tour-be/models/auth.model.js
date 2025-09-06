@@ -1,4 +1,3 @@
-// models/auth.model.js
 const db = require('../config/db');
 
 const User = {
@@ -6,6 +5,22 @@ const User = {
     const [result] = await db.execute(
       'INSERT INTO users (user_id, user_name, email, password) VALUES (?, ?, ?, ?)',
       [user.user_id, user.user_name, user.email, user.password]
+    );
+    return result;
+  },
+  createUserInfo: async (user_infor) => {
+    const [result] = await db.execute(
+      'INSERT INTO user_infor (user_infor_id, phone, dob, citizen_id, address, bio, avatar, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        user_infor.user_infor_id,
+        null, // phone
+        null, // dob
+        null, // citizen_id
+        null, // address
+        null, // bio
+        null, // avatar
+        user_infor.user_id,
+      ]
     );
     return result;
   },
@@ -27,4 +42,3 @@ const User = {
 };
 
 module.exports = User;
-
