@@ -1,5 +1,5 @@
 // lib/data/repositories/auth_repository.dart
-import '../services/auth_service.dart';
+import '../../services/auth_service.dart';
 import '../models/auth_model.dart';
 
 class AuthRepository {

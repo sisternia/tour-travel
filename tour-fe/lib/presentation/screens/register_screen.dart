@@ -7,6 +7,7 @@ import '../widgets/Button.dart';
 import '../widgets/TextField.dart';
 import '../../core/utils/Validators.dart';
 import '../../core/utils/Snackbar.dart';
+import 'package:tour_fe/core/constants/color.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -64,78 +65,144 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ Bỏ AppBar giống LoginScreen
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Đăng ký",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+      body: Stack(
+        children: [
+          // Background gradient
+          Container(
+            decoration: const BoxDecoration(gradient: background1),
+          ),
+
+          // Illustration
+          Positioned(
+            top: 20,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/illustration.png',
+              fit: BoxFit.cover,
+              height: 230,
+            ),
+          ),
+
+          // Form container
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        "Đăng ký",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Username
+                      CustomTextField(
+                        controller: _userNameCtrl,
+                        label: "Tên đăng nhập",
+                        validator: (v) =>
+                            Validators.required(v, 'Nhập tên đăng nhập'),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Email
+                      CustomTextField(
+                        controller: _emailCtrl,
+                        label: "Email",
+                        validator: Validators.email,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Password
+                      CustomTextField(
+                        controller: _passwordCtrl,
+                        label: "Mật khẩu",
+                        obscure: _obscurePassword,
+                        toggleObscure: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
+                        validator: Validators.password,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Confirm Password
+                      CustomTextField(
+                        controller: _confirmCtrl,
+                        label: "Xác nhận mật khẩu",
+                        obscure: _obscureConfirmPassword,
+                        toggleObscure: () => setState(() =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword),
+                        validator: (v) =>
+                            Validators.confirmPassword(v, _passwordCtrl.text),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Register button
+                      PrimaryButton(
+                        text: "Đăng ký",
+                        loading: _loading,
+                        onPressed: _submit,
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.app_registration, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text("Đăng ký",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Link to login
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Đã có tài khoản? "),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const LoginScreen()),
+                              );
+                            },
+                            child: const Text(
+                              "Đăng nhập",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  CustomTextField(
-                    controller: _userNameCtrl,
-                    label: "Tên đăng nhập",
-                    validator: (v) =>
-                        Validators.required(v, 'Nhập tên đăng nhập'),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomTextField(
-                    controller: _emailCtrl,
-                    label: "Email",
-                    validator: Validators.email,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 12),
-                  CustomTextField(
-                    controller: _passwordCtrl,
-                    label: "Mật khẩu",
-                    obscure: _obscurePassword,
-                    toggleObscure: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                    validator: Validators.password,
-                  ),
-                  const SizedBox(height: 12),
-                  CustomTextField(
-                    controller: _confirmCtrl,
-                    label: "Xác nhận mật khẩu",
-                    obscure: _obscureConfirmPassword,
-                    toggleObscure: () => setState(() =>
-                        _obscureConfirmPassword = !_obscureConfirmPassword),
-                    validator: (v) =>
-                        Validators.confirmPassword(v, _passwordCtrl.text),
-                  ),
-                  const SizedBox(height: 20),
-                  PrimaryButton(
-                    text: "Xác nhận",
-                    loading: _loading,
-                    onPressed: _submit,
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text("Đã có tài khoản? Đăng nhập"),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
