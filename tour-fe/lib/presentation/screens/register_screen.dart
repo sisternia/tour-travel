@@ -88,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.75,
+              height: MediaQuery.of(context).size.height * 0.70,
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Colors.white,

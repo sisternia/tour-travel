@@ -1,6 +1,7 @@
 // lib/presentation/widgets/NavigationBar.dart
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:tour_fe/core/constants/color.dart';
 
 class NavigationBarWidget extends StatefulWidget {
   final Widget body;
@@ -29,8 +30,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         key: _bottomNavigationKey,
         items: _items,
         index: _page,
-        backgroundColor: Colors.transparent,
-        color: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(0, 188, 44, 44),
+        color: bgnavicon,
         buttonBackgroundColor: Colors.white,
         onTap: (index) {
           setState(() {

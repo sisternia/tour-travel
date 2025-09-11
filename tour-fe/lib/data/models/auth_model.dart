@@ -12,15 +12,15 @@ class AuthModel {
 
   factory AuthModel.fromJson(Map<String, dynamic> json) {
     return AuthModel(
-      userId: json['user_id']?.toString() ?? '',
-      userName: json['user_name']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      userName: json['userName']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'user_id': userId,
-        'user_name': userName,
+        'userId': userId,
+        'userName': userName,
         'email': email,
       };
 }

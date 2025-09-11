@@ -1,9 +1,12 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-// import 'presentation/screens/login_screen.dart';
-import 'package:tour_fe/presentation/screens/welcome_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'presentation/screens/login_screen.dart';
+// import 'package:tour_fe/presentation/screens/welcome_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -12,9 +15,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WelcomeScreen(),
+      theme: ThemeData(
+        primaryColor: Colors.blue,
+        textTheme: GoogleFonts.mulishTextTheme(Theme.of(context).textTheme),
+      ),
+      home: LoginScreen(),
     );
   }
 }
