@@ -1,11 +1,11 @@
-// app.js
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const authRoutes = require("./routes/auth.routes");
+const authRoutes = require("./routes/auth.route");
 const pool = require("./config/db");
-
+const tourTypeRoutes = require("./routes/tour_type.route");
+const tourRoutes = require("./routes/tours.route");
 const app = express();
 
 app.use(bodyParser.json());
@@ -21,6 +21,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/tour-types", tourTypeRoutes);
+app.use("/api/tours", tourRoutes);
 
 pool
   .getConnection()

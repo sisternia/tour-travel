@@ -29,4 +29,13 @@ class ApiConstants {
   static String get sendVerifyCode => '$baseUrl/api/auth/send-verify-code';
   static String get verifyAccount => '$baseUrl/api/auth/verify-account';
   static String get resetPassword => '$baseUrl/api/auth/reset-password';
+  // ---------------- TOUR TYPE ----------------
+  static String get tourtype => '$baseUrl/api/tour-types/tour_type';
+  // ---------------- TOURS ----------------
+  static String get tours => '$baseUrl/api/tours'; // lấy tất cả tour
+  static String get latestTours => '$baseUrl/api/tours/latest'; // tour mới nhất
+  static String tourById(int id) => '$baseUrl/api/tours/$id'; // tour theo id
+  static String updateTour(int id) => '$baseUrl/api/tours/$id'; // PUT cập nhật
+  static String deleteTour(int id) => '$baseUrl/api/tours/$id'; // DELETE
+  static String get createTour => '$baseUrl/api/tours'; // POST tạo tour
 }
