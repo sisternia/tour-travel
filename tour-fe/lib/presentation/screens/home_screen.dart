@@ -1,5 +1,6 @@
 // lib/presentation/screens/HomeScreen.dart
 import 'package:flutter/material.dart';
+import 'package:tour_fe/presentation/screens/profile_screen.dart';
 import '../widgets/NavigationBar.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -7,11 +8,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBarWidget(
-      body: Scaffold(
-        appBar: AppBar(title: const Text('Home')),
-        body: const Center(child: Text('Đăng nhập thành công')),
-      ),
+    return const NavigationBarWidget(
+      body: Center(child: Text('Đăng nhập thành công')),
     );
   }
 }

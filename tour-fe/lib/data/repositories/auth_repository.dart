@@ -1,9 +1,11 @@
 // lib/data/repositories/auth_repository.dart
 import '../../services/auth_service.dart';
+import '../../services/token_service.dart';
 import '../models/auth_model.dart';
 
 class AuthRepository {
   final AuthService service;
+  final TokenService _tokenService = TokenService();
   AuthRepository({AuthService? service}) : service = service ?? AuthService();
 
   Future<Map<String, dynamic>> register({
@@ -19,6 +21,11 @@ class AuthRepository {
       return {'success': false, 'message': 'Email không được để trống'};
     }
     final emailRegex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
+
+
+
+
+
     if (!emailRegex.hasMatch(email)) {
       return {'success': false, 'message': 'Email không hợp lệ'};
     }
@@ -72,6 +79,9 @@ class AuthRepository {
       final data = res['data'];
       // data có thể chứa token và user
       final token = data is Map && data['token'] != null ? data['token'] : null;
+      if (token != null) {
+        await _tokenService.saveToken(token);
+      }
       AuthModel? user;
       if (data is Map && data['user'] is Map) {
         try {
