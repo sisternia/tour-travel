@@ -4,6 +4,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
+const profileRoutes = require('./routes/profile.routes'); // Import profile routes
+const tourTypeRoutes = require("./routes/tours_type.route");
+const tourRoutes = require("./routes/tours.route");
 const pool = require('./config/db');
 
 const app = express();
@@ -14,11 +17,19 @@ app.use(cors({
   origin: '*' 
 }));
 
+// Serve static files from the 'assets' directory
+app.use('/assets', express.static('assets'));
+app.use('/uploads', express.static('uploads'));
+
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes); // Mount profile routes
+
+app.use("/api/tour-types", tourTypeRoutes);
+app.use("/api/tours", tourRoutes);
+
 app.get('/', (req, res) => {
   res.send('Server đang chạy!');
 });
-
-app.use('/api/auth', authRoutes);
 
 pool.getConnection()
   .then((connection) => {

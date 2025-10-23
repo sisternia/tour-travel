@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import '../screens/home_screen.dart';
-// import '../screens/profile_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
@@ -25,11 +25,9 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     _screens = [
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),
-      // const Center(child: Text('Calendar')),
       const Center(child: Text('Messages')),
       const Center(child: Text('Notifications')),
-      // const ProfileScreen(),
-      const Center(child: Text('Profile')),
+      const ProfileScreen(),
     ];
   }
 
