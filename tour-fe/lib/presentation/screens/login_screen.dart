@@ -12,8 +12,6 @@ import '../../core/utils/Validators.dart';
 import '../../core/utils/Dialogs.dart';
 import '../../core/utils/Snackbar.dart';
 import 'package:tour_fe/core/constants/color.dart';
-import 'package:tour_fe/data/models/auth_model.dart';
-import 'package:tour_fe/services/storage_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,77 +37,44 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _loading = true);
 
-    try {
-      // Gọi API login
-      final res = await _repo.login(
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text,
+    final res = await _repo.login(
+      email: _emailCtrl.text.trim(),
+      password: _passwordCtrl.text,
+    );
+
+    setState(() => _loading = false);
+    final message = res['message']?.toString() ?? '';
+
+    if (res['success'] == true) {
+      SnackbarUtils.show(context, message);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
-      print('Login response: $res');
-
-      setState(() => _loading = false);
-
-      final message = res['message']?.toString() ?? '';
-
-      if (res['success'] == true) {
-        SnackbarUtils.show(context, message);
-
-        // Lấy data từ res['data']
-        final data = res['data'] as Map<String, dynamic>?;
-
-        if (data != null) {
-          final token = data['token']?.toString();
-          final userJson = data['user'] as Map<String, dynamic>?;
-
-          if (token != null && userJson != null) {
-            final user = AuthModel.fromJson(userJson);
-
-            // Lưu token + user
-            await StorageService.saveLogin(token: token, user: user);
-            print('Saved username: ${user.userName}');
-          } else {
-            print('Warning: token hoặc user data bị null');
-          }
-        } else {
-          print('Warning: res[data] là null');
-        }
-
-        // Chuyển sang HomeScreen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+    } else {
+      if (res['status'] == 403) {
+        AppDialogs.showVerifyDialog(
+          context: context,
+          onConfirm: () async {
+            final verifyRepo = VerifyRepository();
+            final r = await verifyRepo.sendCode(_emailCtrl.text.trim());
+            SnackbarUtils.show(context, r['message'] ?? '');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VerifyCodeScreen(
+                  email: _emailCtrl.text.trim(),
+                  from: "login",
+                ),
+              ),
+            );
+          },
         );
       } else {
-        // Nếu tài khoản chưa xác nhận
-        if (res['status'] == 403) {
-          AppDialogs.showVerifyDialog(
-            context: context,
-            onConfirm: () async {
-              final verifyRepo = VerifyRepository();
-              final r = await verifyRepo.sendCode(_emailCtrl.text.trim());
-              SnackbarUtils.show(context, r['message'] ?? '');
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VerifyCodeScreen(
-                    email: _emailCtrl.text.trim(),
-                    from: "login",
-                  ),
-                ),
-              );
-            },
-          );
-        } else {
-          SnackbarUtils.show(context, message);
-        }
+        SnackbarUtils.show(context, message);
       }
-    } catch (e, st) {
-      setState(() => _loading = false);
-      print('Login error: $e\n$st');
-      SnackbarUtils.show(context, 'Đăng nhập thất bại, vui lòng thử lại');
     }
   }
 

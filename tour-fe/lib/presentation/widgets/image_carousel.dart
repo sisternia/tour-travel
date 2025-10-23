@@ -3,7 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<Map<String, String>> hotelList;
-  const ImageCarousel({Key? key, required this.hotelList}) : super(key: key);
+  const ImageCarousel({super.key, required this.hotelList});
 
   @override
   State<ImageCarousel> createState() => _ImageCarouselState();

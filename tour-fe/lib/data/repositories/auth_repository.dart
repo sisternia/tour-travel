@@ -1,10 +1,11 @@
 // lib/data/repositories/auth_repository.dart
 import '../../services/auth_service.dart';
+import '../../services/token_service.dart';
 import '../models/auth_model.dart';
-import 'package:tour_fe/services/storage_service.dart';
 
 class AuthRepository {
   final AuthService service;
+  final TokenService _tokenService = TokenService();
   AuthRepository({AuthService? service}) : service = service ?? AuthService();
 
   Future<Map<String, dynamic>> register({
@@ -20,6 +21,7 @@ class AuthRepository {
       return {'success': false, 'message': 'Email không được để trống'};
     }
     final emailRegex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
+
     if (!emailRegex.hasMatch(email)) {
       return {'success': false, 'message': 'Email không hợp lệ'};
     }
@@ -37,26 +39,19 @@ class AuthRepository {
     );
 
     if (res['success'] == true) {
-      final data = res['data'];
-      final token = data is Map && data['token'] != null ? data['token'] : null;
-
       AuthModel? user;
+      final data = res['data'];
       if (data is Map && data['user'] is Map) {
         try {
           user = AuthModel.fromJson(Map<String, dynamic>.from(data['user']));
         } catch (_) {}
       }
-      if (token != null && user != null) {
-        await StorageService.saveLogin(token: token, user: user);
-      }
-
       return {
         'success': true,
         'message': data is Map && data['message'] != null
             ? data['message']
             : 'Đăng ký thành công',
-        'token': token,
-        'user': user,
+        'user': user
       };
     } else {
       return {'success': false, 'message': res['message'] ?? 'Lỗi đăng ký'};
@@ -77,39 +72,29 @@ class AuthRepository {
     final res = await service.login(email: email, password: password);
 
     if (res['success'] == true) {
-      final backendData =
-          res['data'] as Map<String, dynamic>?; // đây là decoded
-      final data =
-          backendData?['data'] as Map<String, dynamic>?; // token + user nằm đây
-
-      String? token;
-      AuthModel? user;
-
-      if (data != null) {
-        token = data['token']?.toString();
-        if (data['user'] is Map) {
-          user = AuthModel.fromJson(Map<String, dynamic>.from(data['user']));
-        }
-
-        // Lưu vào Storage
-        if (token != null && user != null) {
-          await StorageService.saveLogin(token: token, user: user);
-        }
+      final data = res['data'];
+      // data có thể chứa token và user
+      final token = data is Map && data['token'] != null ? data['token'] : null;
+      if (token != null) {
+        await _tokenService.saveToken(token);
       }
-
+      AuthModel? user;
+      if (data is Map && data['user'] is Map) {
+        try {
+          user = AuthModel.fromJson(Map<String, dynamic>.from(data['user']));
+        } catch (_) {}
+      }
       return {
         'success': true,
-        'message': backendData?['message'] ?? 'Đăng nhập thành công',
-        'data': {
-          'token': token,
-          'user': user?.toJson(),
-        },
+        'message': data['message'] ?? 'Đăng nhập thành công',
+        'token': token,
+        'user': user
       };
     } else {
       return {
         'success': false,
         'message': res['message'] ?? 'Lỗi đăng nhập',
-        'status': res['status'],
+        'status': res['status']
       };
     }
   }

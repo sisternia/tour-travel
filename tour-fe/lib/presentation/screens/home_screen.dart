@@ -1,14 +1,16 @@
-// lib/presentation/screens/HomeScreen.dart
 import 'package:flutter/material.dart';
-import '../widgets/custom_navbar.dart';
-import '../../services/storage_service.dart';
-import 'package:tour_fe/core/constants/color.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:tour_fe/presentation/widgets/custom_icon_button.dart';
-import 'package:tour_fe/presentation/widgets/custom_tours_place_button.dart';
-import 'package:tour_fe/presentation/widgets/image_carousel.dart';
-import 'package:tour_fe/presentation/widgets/search_bar_widget.dart';
-import 'package:tour_fe/presentation/widgets/tour_list.dart';
+import 'package:tour_fe/core/constants/color.dart';
+import 'package:tour_fe/data/models/profile_model.dart';
+import 'package:tour_fe/services/profile_service.dart';
+import 'package:tour_fe/services/token_service.dart';
+
+import '../widgets/Icon_Button.dart';
+import '../widgets/Image_Carousel.dart';
+import '../widgets/Search_Bar.dart';
+import '../widgets/Tours_Place.dart';
+import '../widgets/tours_list.dart';
+import '../widgets/NavigationBar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,214 +20,172 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? _username;
   final TextEditingController searchController = TextEditingController();
+  final ProfileService _profileService = ProfileService();
+  final TokenService _tokenService = TokenService();
+
+  late Future<ProfileModel> _profileFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadUser();
+    _profileFuture = _loadProfile();
   }
 
-  Future<void> _loadUser() async {
-    final name = await StorageService.getUsername();
-    print('Loaded username: $name');
-    setState(() {
-      _username = name ?? 'Unknown word';
-    });
+  Future<ProfileModel> _loadProfile() async {
+    try {
+      final token = await _tokenService.getToken();
+      if (token == null) throw Exception('Token not found');
+      return await _profileService.getProfile(token);
+    } catch (e) {
+      debugPrint('Failed to load username in Home: $e');
+      rethrow;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return NavigationBarWidget(
       body: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(120), // cao hơn chút
-          child: Stack(
-            children: [
-              ClipPath(
-                clipper: AppBarClipper(),
-                child: Container(
-                  height: 140,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue.shade700, Colors.blue.shade400],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Hi, ${_username ?? "Guest"} 👋",
-                            style: const TextStyle(
-                                color: Color.fromARGB(179, 212, 13, 13),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 6),
-                          const Row(
-                            children: [
-                              Text(
-                                "Chúc bạn ngày mới tốt lành !",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Row(
-                        children: [
-                          CustomIconButton(
-                            icon: Icon(
-                              Ionicons.notifications_circle_outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: FutureBuilder<ProfileModel>(
+            future: _profileFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return _buildHeader(
+                    "Hi, bạn 👋", "Không thể tải tên người dùng");
+              } else if (snapshot.hasData) {
+                final profile = snapshot.data!;
+                final userName = profile.userName ?? "Bạn";
+                return _buildContent(userName);
+              } else {
+                return _buildHeader("Hi, bạn 👋", "Không có dữ liệu hồ sơ");
+              }
+            },
           ),
-        ),
-        body: ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(10),
-          children: [
-            SearchBarWidget(
-              controller: searchController,
-              onSubmitted: (value) {
-                print("Tìm kiếm: $value");
-              },
-            ),
-
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "📍Top địa điểm thịnh hành",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: kTextColor,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const ImageCarousel(
-              hotelList: [
-                {
-                  "image": "assets/images/slider1.jpg",
-                  "name": "Lũng Cú",
-                  "location": "Hà Giang",
-                },
-                {
-                  "image": "assets/images/slider2.jpg",
-                  "name": "Cầu Vàng",
-                  "location": "Đà Nẵng",
-                },
-                {
-                  "image": "assets/images/slider3.jpg",
-                  "name": "Hồ Kẻ Gỗ",
-                  "location": "Hà Tĩnh",
-                },
-                {
-                  "image": "assets/images/slider4.jpg",
-                  "name": "Phố Cổ",
-                  "location": "Hội An",
-                },
-                {
-                  "image": "assets/images/slider5.jpg",
-                  "name": "Tháp Rùa",
-                  "location": "Hà Nội",
-                },
-                {
-                  "image": "assets/images/slider6.jpg",
-                  "name": "Thị trấn hoàng hôn",
-                  "location": "Phú Quốc",
-                },
-                {
-                  "image": "assets/images/slider7.jpg",
-                  "name": "Thác Bản Giốc",
-                  "location": "Cao Bằng",
-                },
-              ],
-            ),
-
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "🗺️ Khám phá loại hình tour",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: kTextColor,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Tourist places chips
-            const TouristPlaces(),
-
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  " 🌟 Các tour nổi bật ",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: kTextColor,
-                      ),
-                ),
-              ],
-            ),
-            const TourListWidget(),
-            const SizedBox(height: 10),
-          ],
         ),
       ),
     );
   }
-}
 
-class AppBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height - 25);
-    path.quadraticBezierTo(
-      size.width / 2,
-      size.height,
-      size.width,
-      size.height - 25,
+  Widget _buildContent(String userName) {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(10),
+      children: [
+        // --- Header ---
+        _buildHeader("Hi, $userName 👋", "Chúc bạn ngày mới tốt lành!"),
+        const SizedBox(height: 20),
+
+        // --- Thanh tìm kiếm ---
+        SearchBarWidget(
+          controller: searchController,
+          onSubmitted: (value) => print("Tìm kiếm: $value"),
+        ),
+        const SizedBox(height: 20),
+
+        // --- Top địa điểm ---
+        Text(
+          "📍Top địa điểm thịnh hành",
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: kTextColor,
+              ),
+        ),
+        const SizedBox(height: 10),
+
+        const ImageCarousel(
+          hotelList: [
+            {
+              "image": "assets/images/slider1.jpg",
+              "name": "Địa điểm 1",
+              "location": "Đà Nẵng",
+            },
+            {
+              "image": "assets/images/slider2.jpg",
+              "name": "Địa điểm 2",
+              "location": "Hà Nội",
+            },
+            {
+              "image": "assets/images/slider3.jpg",
+              "name": "Địa điểm 3",
+              "location": "Đà Lạt",
+            },
+          ],
+        ),
+        const SizedBox(height: 25),
+
+        // --- Loại hình tour ---
+        Text(
+          "🗺️ Khám phá loại hình tour",
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: kTextColor,
+              ),
+        ),
+        const SizedBox(height: 10),
+        const TouristPlaces(),
+        const SizedBox(height: 25),
+
+        // --- Tour nổi bật ---
+        Text(
+          "🌟 Các tour nổi bật",
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: kTextColor,
+              ),
+        ),
+        const SizedBox(height: 10),
+        const TourListWidget(),
+      ],
     );
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
   }
 
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  Widget _buildHeader(String greeting, String subtitle) {
+    return Container(
+      height: 130,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade700, Colors.blue.shade400],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                greeting,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+          const CustomIconButton(
+            icon: Icon(Ionicons.notifications_circle_outline),
+          ),
+        ],
+      ),
+    );
+  }
 }
