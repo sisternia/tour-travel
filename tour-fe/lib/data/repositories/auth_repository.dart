@@ -22,10 +22,6 @@ class AuthRepository {
     }
     final emailRegex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
 
-
-
-
-
     if (!emailRegex.hasMatch(email)) {
       return {'success': false, 'message': 'Email không hợp lệ'};
     }

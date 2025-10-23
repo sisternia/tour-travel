@@ -1,11 +1,13 @@
 // lib/presentation/widgets/NavigationBar.dart
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:tour_fe/presentation/screens/profile_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/profile_screen.dart';
+// import '../screens/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
-  final Widget body;
-  const NavigationBarWidget({super.key, required this.body});
+  final Widget? body; // cho phép null
+  const NavigationBarWidget({super.key, this.body});
 
   @override
   State<NavigationBarWidget> createState() => _NavigationBarWidgetState();
@@ -15,13 +17,19 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   int _page = 0;
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
-  final List<Widget> _screens = [
-    const HomeScreenBody(),
-    const Center(child: Text('Calendar')),
-    const Center(child: Text('Messages')),
-    const Center(child: Text('Notifications')),
-    const ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      widget.body ?? const HomeScreen(),
+      const Center(child: Text('Calendar')),
+      const Center(child: Text('Messages')),
+      const Center(child: Text('Notifications')),
+      const ProfileScreen(),
+    ];
+  }
 
   final List<Icon> _items = const [
     Icon(Icons.home, size: 30),
@@ -34,6 +42,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      body: _screens[_page],
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         items: _items,
@@ -41,22 +51,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         backgroundColor: Colors.transparent,
         color: Colors.blueAccent,
         buttonBackgroundColor: Colors.white,
-        onTap: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
+        onTap: (index) => setState(() => _page = index),
       ),
-      body: _screens[_page],
     );
-  }
-}
-
-class HomeScreenBody extends StatelessWidget {
-  const HomeScreenBody({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Đăng nhập thành công'));
   }
 }

@@ -1,12 +1,14 @@
+// lib\presentation\screens\new_profile_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/api.dart';
+import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/presentation/screens/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 
 class NewProfileScreen extends StatefulWidget {
-  const NewProfileScreen({Key? key}) : super(key: key);
+  const NewProfileScreen({super.key});
 
   @override
   State<NewProfileScreen> createState() => _NewProfileScreenState();
@@ -15,7 +17,7 @@ class NewProfileScreen extends StatefulWidget {
 class _NewProfileScreenState extends State<NewProfileScreen> {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
-  late Future<Map<String, dynamic>> _profileFuture;
+  late Future<ProfileModel> _profileFuture;
 
   @override
   void initState() {
@@ -23,12 +25,10 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
     _profileFuture = _getProfile();
   }
 
-  Future<Map<String, dynamic>> _getProfile() async {
+  Future<ProfileModel> _getProfile() async {
     try {
       final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Token not found');
-      }
+      if (token == null) throw Exception('Token not found');
       final profile = await _profileService.getProfile(token);
       return profile;
     } catch (e) {
@@ -41,7 +41,7 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<ProfileModel>(
         future: _profileFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -60,9 +60,9 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
     );
   }
 
-  Widget _buildProfileContent(Map<String, dynamic> profile) {
-    final avatarUrl = profile['avatar'] != null
-        ? ApiConstants.baseServerUrl + profile['avatar']
+  Widget _buildProfileContent(ProfileModel profile) {
+    final avatarUrl = profile.avatar != null && profile.avatar!.isNotEmpty
+        ? ApiConstants.baseServerUrl + profile.avatar!
         : 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
     return SingleChildScrollView(
@@ -110,14 +110,14 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 70), // Space for the avatar
+          const SizedBox(height: 70),
           Text(
-            profile['fullname'] ?? profile['user_id'] ?? 'N/A',
+            profile.userName ?? profile.userId ?? 'N/A',
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            profile['email'] ?? 'N/A',
+            profile.email ?? 'N/A',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -135,7 +135,7 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
     );
   }
 
-  Widget _buildInfoCard(Map<String, dynamic> profile) {
+  Widget _buildInfoCard(ProfileModel profile) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -146,26 +146,26 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildInfoRow(Icons.phone, 'Phone number', profile['phone'] ?? 'N/A'),
+            _buildInfoRow(Icons.phone, 'Phone number', profile.phone ?? 'N/A'),
             const Divider(),
             _buildInfoRow(
-                Icons.calendar_today, 'Date of birth', profile['dob'] ?? 'N/A'),
+                Icons.calendar_today, 'Date of birth', profile.dob ?? 'N/A'),
             const Divider(),
-            _buildInfoRow(Icons.credit_card, 'Citizen ID',
-                profile['citizen_id'] ?? 'N/A'),
+            _buildInfoRow(
+                Icons.credit_card, 'Citizen ID', profile.citizenId ?? 'N/A'),
             const Divider(),
-            _buildInfoRow(Icons.home, 'Address', profile['address'] ?? 'N/A'),
+            _buildInfoRow(Icons.home, 'Address', profile.address ?? 'N/A'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFunctionalList(Map<String, dynamic> profile) {
+  Widget _buildFunctionalList(ProfileModel profile) {
     return Column(
       children: [
         _buildFunctionalListItem(
-            Icons.person_outline, 'Bio / About', profile['bio'] ?? 'N/A'),
+            Icons.person_outline, 'Bio / About', profile.bio ?? 'N/A'),
         const Divider(),
         _buildFunctionalListItem(Icons.settings, 'Settings', ''),
         const Divider(),
@@ -189,7 +189,8 @@ class _NewProfileScreenState extends State<NewProfileScreen> {
     );
   }
 
-  Widget _buildFunctionalListItem(IconData icon, String title, String subtitle) {
+  Widget _buildFunctionalListItem(
+      IconData icon, String title, String subtitle) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey),
       title: Text(title),

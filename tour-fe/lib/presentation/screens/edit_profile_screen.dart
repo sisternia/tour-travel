@@ -1,15 +1,17 @@
-import 'dart:typed_data';
+// lib\presentation\screens\edit_profile_screen.dart
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/core/constants/api.dart';
+import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({Key? key}) : super(key: key);
+  const EditProfileScreen({super.key});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -19,24 +21,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
-  
+
   XFile? _avatar;
   XFile? _coverImage;
   Uint8List? _avatarBytes;
   Uint8List? _coverImageBytes;
   String? _avatarUrl;
   String? _coverImageUrl;
-  
+
   final _userNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _dobController = TextEditingController();
   final _bioController = TextEditingController();
   final _citizenIdController = TextEditingController();
   final _addressController = TextEditingController();
-  
+
   DateTime? _dob;
   bool _isLoading = false;
-  late Future<Map<String, dynamic>> _profileFuture;
+  late Future<ProfileModel> _profileFuture;
 
   @override
   void initState() {
@@ -44,38 +46,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _profileFuture = _getProfile();
   }
 
-  Future<Map<String, dynamic>> _getProfile() async {
+  Future<ProfileModel> _getProfile() async {
     try {
       final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Token not found');
-      }
+      if (token == null) throw Exception('Token not found');
+
       final profile = await _profileService.getProfile(token);
-      
-      _userNameController.text = profile['user_name'] ?? '';
-      _phoneController.text = profile['phone'] ?? '';
-      _dobController.text = profile['dob'] ?? '';
-      if (profile['dob'] != null && profile['dob'].isNotEmpty) {
-        _dob = DateTime.parse(profile['dob']);
+
+      _userNameController.text = profile.userName ?? '';
+      _phoneController.text = profile.phone ?? '';
+      _dobController.text = profile.dob ?? '';
+      if (profile.dob != null && profile.dob!.isNotEmpty) {
+        _dob = DateTime.tryParse(profile.dob!);
       }
-      _bioController.text = profile['bio'] ?? '';
-      _citizenIdController.text = profile['citizen_id'] ?? '';
-      _addressController.text = profile['address'] ?? '';
-      
-      final avatarPath = profile['avatar'];
-      if (avatarPath != null) {
-        _avatarUrl = ApiConstants.baseServerUrl + (avatarPath as String).replaceFirst('/uploads/', '/assets/');
+      _bioController.text = profile.bio ?? '';
+      _citizenIdController.text = profile.citizenId ?? '';
+      _addressController.text = profile.address ?? '';
+
+      // Avatar URL
+      if (profile.avatar != null && profile.avatar!.isNotEmpty) {
+        _avatarUrl = ApiConstants.baseServerUrl + profile.avatar!;
       } else {
         _avatarUrl = null;
       }
 
-      final backgroundPath = profile['background'];
-      if (backgroundPath != null) {
-        _coverImageUrl = ApiConstants.baseServerUrl + (backgroundPath as String).replaceFirst('/uploads/', '/assets/');
+      // Background URL
+      if (profile.background != null && profile.background!.isNotEmpty) {
+        _coverImageUrl = ApiConstants.baseServerUrl + profile.background!;
       } else {
         _coverImageUrl = null;
       }
-      
+
       return profile;
     } catch (e) {
       debugPrint('Failed to load profile: ${e.toString()}');
@@ -95,7 +96,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickImage({required bool isCover}) async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
       setState(() {
@@ -127,11 +129,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       try {
         final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Token not found');
-        }
-        
-        Map<String, String> data = {
+        if (token == null) throw Exception('Token not found');
+
+        final data = {
           'user_name': _userNameController.text,
           'phone': _phoneController.text,
           'dob': _dobController.text,
@@ -142,7 +142,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         await _profileService.updateProfile(token, data, _avatar, _coverImage);
         if (!mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
         );
@@ -154,9 +154,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
       } finally {
         if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -171,59 +169,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: FutureBuilder<Map<String, dynamic>>(
+        child: FutureBuilder<ProfileModel>(
           future: _profileFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Failed to load profile: ${snapshot.error}'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _profileFuture = _getProfile();
-                        });
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
+              return _buildErrorState(snapshot.error.toString());
             } else if (snapshot.hasData) {
-              return Column(
-                children: [
-                  _buildHeader(context),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            _buildCoverAndAvatar(),
-                            const SizedBox(height: 50),
-                            _buildFormFields(),
-                            const SizedBox(height: 8),
-                        ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
+              return _buildProfileForm(snapshot.data!);
             } else {
               return const Center(child: Text('No profile data.'));
             }
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text('Failed to load profile: $error'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _profileFuture = _getProfile();
+              });
+            },
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileForm(ProfileModel profile) {
+    return Column(
+      children: [
+        _buildHeader(context),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildCoverAndAvatar(),
+                  const SizedBox(height: 50),
+                  _buildFormFields(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -242,10 +247,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               'Edit Profile',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black),
             ),
           ),
           TextButton(
@@ -255,17 +259,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(iosBlue),
-                    ),
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(iosBlue)),
                   )
                 : const Text(
                     'Save',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: iosBlue,
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: iosBlue),
                   ),
           ),
         ],
@@ -284,127 +286,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              gradient: (_coverImageBytes != null || _coverImageUrl != null)
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        iosBlue.withOpacity(0.8),
-                        iosBlue.withOpacity(0.6),
-                      ],
-                    ),
               image: _coverImageBytes != null
                   ? DecorationImage(
-                      image: MemoryImage(_coverImageBytes!),
-                      fit: BoxFit.cover,
-                    )
+                      image: MemoryImage(_coverImageBytes!), fit: BoxFit.cover)
                   : _coverImageUrl != null
                       ? DecorationImage(
                           image: NetworkImage(_coverImageUrl!),
+                          fit: BoxFit.cover)
+                      : const DecorationImage(
+                          image: AssetImage('assets/anhbia.jpg'),
                           fit: BoxFit.cover,
-                        )
-                      : null,
+                        ),
             ),
-            child: (_coverImageBytes == null && _coverImageUrl == null)
-                ? Image.asset(
-                    'assets/anhbia.jpg',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: 150,
-                  )
-                : null,
           ),
-          // Camera button for cover image
+          // Edit cover button
           Positioned(
-            bottom: 66, // 200 - 150 (cover image height) + 16
+            bottom: 66,
             right: 16,
             child: GestureDetector(
               onTap: () => _pickImage(isCover: true),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: iosBlue,
-                  size: 20,
-                ),
-              ),
+              child: _buildCameraButton(),
             ),
           ),
-          // Avatar positioned over cover
+          // Avatar
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: iosPink,
+                    backgroundImage: _getAvatarImageProvider(),
+                    child: (_avatarBytes == null && _avatarUrl == null)
+                        ? Image.asset('assets/illustration.png',
+                            width: 100, height: 100, fit: BoxFit.cover)
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => _pickImage(isCover: false),
+                      child: _buildCameraButton(size: 16, padding: 6),
                     ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: iosPink,
-                      backgroundImage: _getAvatarImageProvider(),
-                      child: (_avatarBytes == null && _avatarUrl == null)
-                          ? Image.asset(
-                              'assets/illustration.png',
-                              fit: BoxFit.cover,
-                              width: 100,
-                              height: 100,
-                            )
-                          : null,
-                    ),
-                    // Camera button for avatar
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () => _pickImage(isCover: false),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: iosBlue, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: iosBlue,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -413,50 +342,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Widget _buildCameraButton({double size = 20, double padding = 8}) {
+    return Container(
+      padding: EdgeInsets.all(padding),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2))
+        ],
+      ),
+      child: Icon(Icons.camera_alt, color: iosBlue, size: size),
+    );
+  }
 
   Widget _buildFormFields() {
     return Column(
       children: [
         _buildTextField(
-          controller: _userNameController,
-          labelText: 'Full Name',
-          icon: Icons.person,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter your full name';
-            }
-            return null;
-          },
-        ),
+            controller: _userNameController,
+            labelText: 'Full Name',
+            icon: Icons.person),
         const SizedBox(height: 8),
         _buildTextField(
-          controller: _phoneController,
-          labelText: 'Phone Number',
-          icon: Icons.phone,
-          keyboardType: TextInputType.phone,
-        ),
+            controller: _phoneController,
+            labelText: 'Phone Number',
+            icon: Icons.phone),
         const SizedBox(height: 8),
         _buildDatePicker(),
         const SizedBox(height: 8),
         _buildTextField(
-          controller: _bioController,
-          labelText: 'Bio',
-          icon: Icons.info,
-          maxLines: 2,
-        ),
+            controller: _bioController,
+            labelText: 'Bio',
+            icon: Icons.info,
+            maxLines: 2),
         const SizedBox(height: 8),
         _buildTextField(
-          controller: _citizenIdController,
-          labelText: 'Citizen ID',
-          icon: Icons.credit_card,
-        ),
+            controller: _citizenIdController,
+            labelText: 'Citizen ID',
+            icon: Icons.credit_card),
         const SizedBox(height: 8),
         _buildTextField(
-          controller: _addressController,
-          labelText: 'Address',
-          icon: Icons.location_on,
-          maxLines: 2,
-        ),
+            controller: _addressController,
+            labelText: 'Address',
+            icon: Icons.location_on,
+            maxLines: 2),
       ],
     );
   }
@@ -466,28 +399,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String labelText,
     required IconData icon,
     int maxLines = 1,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(icon, color: iosGray),
         filled: true,
         fillColor: iosLightGray,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
       ),
-      validator: validator ?? (value) {
-        if (value == null || value.isEmpty) {
+      validator: (value) {
+        if (value == null || value.isEmpty)
           return 'Please enter your $labelText';
-        }
         return null;
       },
     );
@@ -503,10 +430,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         filled: true,
         fillColor: iosLightGray,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
       ),
       onTap: () async {
         final values = await showCalendarDatePicker2Dialog(
@@ -518,7 +443,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           value: _dob != null ? [_dob] : [],
           dialogSize: const Size(325, 400),
         );
-
         if (values != null && values.isNotEmpty) {
           setState(() {
             _dob = values[0];
@@ -528,67 +452,4 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
     );
   }
-
-  Widget _buildActionButtons() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _goBack,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade300,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Quay lại',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _saveProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: iosBlue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Lưu thay đổi',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }
