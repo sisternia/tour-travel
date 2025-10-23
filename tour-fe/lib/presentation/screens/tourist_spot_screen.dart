@@ -1,6 +1,5 @@
 // lib/presentation/screens/tourist_spot_screen.dart
 import 'package:flutter/material.dart';
-import '../widgets/NavigationBar.dart';
 import '../widgets/Card.dart';
 import '../widgets/Category.dart';
 import '../../core/constants/color.dart';
@@ -89,47 +88,44 @@ class _TouristSpotScreenState extends State<TouristSpotScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBarWidget(
-      currentIndex: 1,
-      body: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Tour Nổi bật",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Tour Nổi bật",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
                 ),
-                const SizedBox(height: 12),
-                CategorySelector(
-                  selectedCategory: _selectedCategory,
-                  onCategorySelected: (category) {
-                    setState(() {
-                      _selectedCategory = category;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  children: filteredSpots
-                      .map((spot) => TourCard(
-                            title: spot["title"] ?? '',
-                            imageUrl: spot["imageUrl"] ?? '',
-                            country: spot["country"] ?? '',
-                            category: spot["category"] ?? '',
-                            rating: (spot["rating"] as num).toDouble(),
-                          ))
-                      .toList(),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              CategorySelector(
+                selectedCategory: _selectedCategory,
+                onCategorySelected: (category) {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              Column(
+                children: filteredSpots
+                    .map((spot) => TourCard(
+                          title: spot["title"] ?? '',
+                          imageUrl: spot["imageUrl"] ?? '',
+                          country: spot["country"] ?? '',
+                          category: spot["category"] ?? '',
+                          rating: (spot["rating"] as num).toDouble(),
+                        ))
+                    .toList(),
+              ),
+            ],
           ),
         ),
       ),

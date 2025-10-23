@@ -1,74 +1,51 @@
 // lib/presentation/widgets/NavigationBar.dart
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:ionicons/ionicons.dart';
 import '../screens/home_screen.dart';
+// import '../screens/profile_screen.dart';
 import '../screens/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
-  final Widget body;
-  final int currentIndex;
-  const NavigationBarWidget(
-      {super.key, required this.body, required this.currentIndex});
+  final Widget? body; // cho phép null
+  const NavigationBarWidget({super.key, this.body});
 
   @override
   State<NavigationBarWidget> createState() => _NavigationBarWidgetState();
 }
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
-  late int _page;
+  int _page = 0;
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
-  final List<Icon> _items = const [
-    Icon(Ionicons.home_outline, size: 30),
-    Icon(Ionicons.umbrella_outline, size: 30),
-    Icon(Ionicons.calendar_outline, size: 30),
-    Icon(Ionicons.chatbubble_outline, size: 30),
-    Icon(Ionicons.person_outline, size: 30),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
-    _page = widget.currentIndex;
+    _screens = [
+      widget.body ?? const HomeScreen(),
+      const TouristSpotScreen(),
+      // const Center(child: Text('Calendar')),
+      const Center(child: Text('Messages')),
+      const Center(child: Text('Notifications')),
+      // const ProfileScreen(),
+      const Center(child: Text('Profile')),
+    ];
   }
 
-  void _navigateToPage(int index) {
-    if (index == _page) return;
-
-    Widget target;
-    switch (index) {
-      case 0:
-        target = const HomeScreen();
-        break;
-      case 1:
-        target = const TouristSpotScreen();
-        break;
-      default:
-        setState(() {
-          _page = index;
-        });
-        return;
-    }
-
-    setState(() {
-      _page = index;
-    });
-    Future.delayed(const Duration(milliseconds: 600), () {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => target,
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-        ),
-      );
-    });
-  }
+  final List<Icon> _items = const [
+    Icon(Icons.home, size: 30),
+    Icon(Icons.calendar_today, size: 30),
+    Icon(Icons.message, size: 30),
+    Icon(Icons.notifications, size: 30),
+    Icon(Icons.person, size: 30),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      body: _screens[_page],
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         items: _items,
@@ -76,9 +53,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         backgroundColor: Colors.transparent,
         color: Colors.blueAccent,
         buttonBackgroundColor: Colors.white,
-        onTap: _navigateToPage,
+        onTap: (index) => setState(() => _page = index),
       ),
-      body: widget.body,
     );
   }
 }
