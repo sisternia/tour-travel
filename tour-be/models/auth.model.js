@@ -1,3 +1,5 @@
+// models\auth.model.js
+
 const db = require('../config/db');
 
 const User = {
