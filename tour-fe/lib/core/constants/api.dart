@@ -32,13 +32,13 @@ class ApiConstants {
   static String get updateProfile => '$baseUrl/api/profile';
 
   /// Tour Type routes
-  // static String get tourtype => '$baseUrl/api/tour-types/tour_type';
+  static String get tourtype => '$baseUrl/api/tour-types/tour_type';
 
   /// Tour routes
-  // static String get tours => '$baseUrl/api/tours';
-  // static String get latestTours => '$baseUrl/api/tours/latest';
-  // static String tourById(int id) => '$baseUrl/api/tours/$id';
-  // static String updateTour(int id) => '$baseUrl/api/tours/$id';
-  // static String deleteTour(int id) => '$baseUrl/api/tours/$id';
-  // static String get createTour => '$baseUrl/api/tours';
+  static String get tours => '$baseUrl/api/tours';
+  static String get latestTours => '$baseUrl/api/tours/latest';
+  static String tourById(int id) => '$baseUrl/api/tours/$id';
+  static String updateTour(int id) => '$baseUrl/api/tours/$id';
+  static String deleteTour(int id) => '$baseUrl/api/tours/$id';
+  static String get createTour => '$baseUrl/api/tours';
 }
