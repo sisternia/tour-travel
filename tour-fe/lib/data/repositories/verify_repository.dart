@@ -1,5 +1,5 @@
 // lib/data/repositories/verify_repository.dart
-import '../services/verify_service.dart';
+import '../../services/verify_service.dart';
 
 class VerifyRepository {
   final VerifyService service;

@@ -1,7 +1,7 @@
 // lib/data/services/verify_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../core/constants/api.dart';
+import '../core/constants/api.dart';
 
 class VerifyService {
   final http.Client client;

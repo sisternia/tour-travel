@@ -1,7 +1,7 @@
 // lib/data/services/auth_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../core/constants/api.dart';
+import '../core/constants/api.dart';
 
 class AuthService {
   final http.Client client;
