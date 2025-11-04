@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý loại Tour</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/tour_type.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <h4>Admin Panel</h4>
+    <a href="user.html">👤 Quản lý người dùng</a>
+    <a href="tour_type.html" class="active">🏷️ Quản lý loại Tour</a>
+  </div>
+
+  <div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>Danh sách loại Tour</h3>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Thêm loại Tour</button>
+    </div>
+
+    <table class="table table-bordered table-hover">
+      <thead class="table-primary">
+        <tr>
+          <th>ID</th>
+          <th>Tên loại</th>
+          <th>Ảnh</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody id="tourTypeTableBody">
+        <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Thêm / Sửa -->
+  <div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="tourTypeForm" enctype="multipart/form-data" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Thêm loại Tour</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editTypeId">
+          <div class="mb-3">
+            <label>ID loại Tour</label>
+            <input type="text" class="form-control" id="typeId" required>
+          </div>
+          <div class="mb-3">
+            <label>Tên loại Tour</label>
+            <input type="text" class="form-control" id="typeName" required>
+          </div>
+          <div class="mb-3">
+            <label>Hình ảnh</label>
+            <input type="file" class="form-control" id="typeImage">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Lưu</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/tour_type.js"></script>
+</body>
+</html>

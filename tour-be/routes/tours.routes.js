@@ -1,3 +1,5 @@
+// routes\tours.routes.js
+
 const express = require("express");
 const router = express.Router();
 const toursController = require("../controllers/tours.controller");

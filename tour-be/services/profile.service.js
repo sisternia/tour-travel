@@ -16,4 +16,8 @@ const getUserProfile = async (userId) => {
   return await Profile.getUserInfo(userId);
 };
 
-module.exports = { updateUserProfile, getUserProfile };
+const getAllProfiles = async () => {
+  return await Profile.getAllUsers();
+};
+
+module.exports = { updateUserProfile, getUserProfile, getAllProfiles };

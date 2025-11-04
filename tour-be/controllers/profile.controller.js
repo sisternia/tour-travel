@@ -1,12 +1,11 @@
 // controllers/profile.controller.js
-const { updateUserProfile, getUserProfile } = require('../services/profile.service');
+const { updateUserProfile, getUserProfile, getAllProfiles } = require('../services/profile.service');
 
 const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.user_id; // Assuming auth middleware adds user to req
+    const userId = req.user.user_id;
     const userInfo = req.body;
 
-    // Handle avatar and background assets
     if (req.files) {
       if (req.files.avatar) {
         userInfo.avatar = `/assets/avatar/${req.files.avatar[0].filename}`;
@@ -16,7 +15,6 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    // Handle empty dob
     if (userInfo.dob === '') {
       userInfo.dob = null;
     }
@@ -43,4 +41,22 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { updateProfile, getProfile };
+const getAllUserProfiles = async (req, res) => {
+  try {
+    const users = await getAllProfiles();
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const updatedUsers = users.map(u => ({
+      ...u,
+      avatar: u.avatar ? `${baseUrl}${u.avatar}` : null,
+      background: u.background ? `${baseUrl}${u.background}` : null
+    }));
+
+    res.status(200).json({ success: true, data: updatedUsers });
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { updateProfile, getProfile, getAllUserProfiles };

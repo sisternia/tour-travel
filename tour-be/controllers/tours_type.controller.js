@@ -1,11 +1,24 @@
-// controllers/tour_type.controller.js
 const TourType = require("../models/tours_type.model");
+const multer = require("multer");
+const path = require("path");
 
+// === MULTER CONFIG ===
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "assets/tour-type/");
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const fileName = Date.now() + ext;
+    cb(null, fileName);
+  },
+});
+const upload = multer({ storage });
+
+// === CONTROLLER FUNCTIONS ===
 const getAllTourTypes = async (req, res) => {
   try {
     const tourTypes = await TourType.getAll();
-
-    // ✅ Trả về mảng trực tiếp, không bọc trong "data"
     res.status(200).json(tourTypes);
   } catch (error) {
     console.error("Error fetching tour types:", error);
@@ -13,50 +26,55 @@ const getAllTourTypes = async (req, res) => {
   }
 };
 
-const getTourTypeById = async (req, res) => {
+const createTourType = async (req, res) => {
+  try {
+    const { type_id, type_name } = req.body;
+    const image = req.file ? `/assets/tour-type/${req.file.filename}` : null;
+
+    if (!type_id || !type_name)
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+
+    await TourType.create({ type_id, type_name, image });
+    res.status(201).json({ success: true, message: "Thêm loại tour thành công" });
+  } catch (error) {
+    console.error("Error creating tour type:", error);
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+const updateTourType = async (req, res) => {
   try {
     const { type_id } = req.params;
+    const { type_name } = req.body;
+    const image = req.file ? `/assets/tour-type/${req.file.filename}` : req.body.image || null;
 
-    if (!type_id) {
-      return res.status(400).json({ message: "Thiếu type_id" });
-    }
-
-    const tourType = await TourType.findById(type_id);
-    if (!tourType) {
+    const result = await TourType.update(type_id, { type_name, image });
+    if (result.affectedRows === 0)
       return res.status(404).json({ message: "Không tìm thấy loại tour" });
-    }
 
-    res.status(200).json({
-      success: true,
-      message: "Lấy loại tour theo ID thành công",
-      data: tourType,
-    });
+    res.status(200).json({ success: true, message: "Cập nhật loại tour thành công" });
   } catch (error) {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
 
-const getTourTypeByName = async (req, res) => {
+const deleteTourType = async (req, res) => {
   try {
-    const { type_name } = req.params;
-
-    if (!type_name) {
-      return res.status(400).json({ message: "Thiếu type_name" });
-    }
-
-    const tourType = await TourType.findByName(type_name);
-    if (!tourType) {
+    const { type_id } = req.params;
+    const result = await TourType.delete(type_id);
+    if (result.affectedRows === 0)
       return res.status(404).json({ message: "Không tìm thấy loại tour" });
-    }
 
-    res.status(200).json({
-      success: true,
-      message: "Lấy loại tour theo tên thành công",
-      data: tourType,
-    });
+    res.status(200).json({ success: true, message: "Xóa loại tour thành công" });
   } catch (error) {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
 
-module.exports = { getAllTourTypes, getTourTypeById, getTourTypeByName };
+module.exports = {
+  upload,
+  getAllTourTypes,
+  createTourType,
+  updateTourType,
+  deleteTourType,
+};
