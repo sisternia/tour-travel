@@ -1,6 +1,7 @@
 // lib/data/services/profile_service.dart
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:tour_fe/core/constants/api.dart';
@@ -29,7 +30,6 @@ class ProfileService {
     XFile? background,
   ) async {
     final uri = Uri.parse(ApiConstants.updateProfile);
-
     final request = http.MultipartRequest('PUT', uri)
       ..headers['Authorization'] = 'Bearer $token';
 
@@ -40,18 +40,39 @@ class ProfileService {
       }
     });
 
-    // Add avatar if exists
+    // Add avatar
     if (avatar != null) {
-      request.files
-          .add(await http.MultipartFile.fromPath('avatar', avatar.path));
+      if (kIsWeb) {
+        // 🟩 WEB: dùng bytes
+        final bytes = await avatar.readAsBytes();
+        request.files.add(http.MultipartFile.fromBytes(
+          'avatar',
+          bytes,
+          filename: avatar.name,
+        ));
+      } else {
+        // 📱 MOBILE: dùng path
+        request.files
+            .add(await http.MultipartFile.fromPath('avatar', avatar.path));
+      }
     }
 
-    // Add background if exists
+    // Add background
     if (background != null) {
-      request.files.add(
-          await http.MultipartFile.fromPath('background', background.path));
+      if (kIsWeb) {
+        final bytes = await background.readAsBytes();
+        request.files.add(http.MultipartFile.fromBytes(
+          'background',
+          bytes,
+          filename: background.name,
+        ));
+      } else {
+        request.files.add(
+            await http.MultipartFile.fromPath('background', background.path));
+      }
     }
 
+    // Gửi request
     final response = await request.send();
 
     if (response.statusCode != 200) {

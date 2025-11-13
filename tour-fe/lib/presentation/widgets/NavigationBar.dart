@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/profile_screen.dart';
-import '../screens/tourist_spot_screen.dart';
+import '../screens/profile/profile_screen.dart';
+import '../screens/tour/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
   final Widget? body; // cho phép null

@@ -1,15 +1,15 @@
-// lib\presentation\widgets\Tour_Place.dart
+// lib/presentation/widgets/Tour_Place.dart
 
 import 'package:flutter/material.dart';
-import 'package:tour_fe/data/models/tours_places_model.dart';
+import 'package:tour_fe/data/models/tours_type_model.dart';
 import 'package:tour_fe/core/constants/color.dart';
+import 'package:tour_fe/core/constants/api.dart';
 import 'package:tour_fe/services/tours_type_service.dart';
 
 class TouristPlaces extends StatefulWidget {
   const TouristPlaces({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _TouristPlacesState createState() => _TouristPlacesState();
 }
 
@@ -51,7 +51,6 @@ class _TouristPlacesState extends State<TouristPlaces> {
     }
 
     if (touristPlaces.isEmpty) {
-      // ✅ Khi không có dữ liệu
       return const Center(child: Text("Tour Type trống"));
     }
 
@@ -66,10 +65,26 @@ class _TouristPlacesState extends State<TouristPlaces> {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               final item = firstRow[index];
+
+              // ✅ Tạo URL ảnh đầy đủ
+              final imageUrl = item.images.startsWith('http')
+                  ? item.images
+                  : '${ApiConstants.baseServerUrl}${item.images}';
+
               return Chip(
                 label: Text(item.typeName),
                 avatar: CircleAvatar(
-                  backgroundImage: AssetImage(item.images),
+                  backgroundColor: Colors.grey[100],
+                  child: ClipOval(
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
                 ),
                 backgroundColor: Colors.white,
                 elevation: 0.4,

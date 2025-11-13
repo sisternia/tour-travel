@@ -1,11 +1,11 @@
-// lib/presentation/screens/verify_code_screen.dart
+// lib/presentation/screens/auth/verify_code_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../data/repositories/verify_repository.dart';
+import '../../../data/repositories/verify_repository.dart';
 import 'register_screen.dart';
 import 'login_screen.dart';
 import 'reset_password_screen.dart';
-import '../widgets/Button.dart';
+import '../../widgets/Button.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;

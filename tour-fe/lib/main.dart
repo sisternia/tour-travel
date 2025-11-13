@@ -1,6 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'presentation/screens/login_screen.dart';
+import 'presentation/screens/auth/login_screen.dart';
 // import 'package:tour_fe/presentation/screens/welcome_screen.dart';
 
 void main() {
