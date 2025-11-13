@@ -1,83 +1,186 @@
 // lib/presentation/widgets/Tours_List.dart
 import 'package:flutter/material.dart';
-import 'package:tour_fe/data/models/tours.model.dart';
-import '../../services/tours_list_service.dart';
+import 'package:ionicons/ionicons.dart';
+import '../../core/constants/color.dart';
+import '../screens/tour/details_tour_screen.dart';
 
-class TourListWidget extends StatefulWidget {
-  const TourListWidget({super.key});
+class TourCard extends StatelessWidget {
+  final int id; // <── thêm
+  final String title;
+  final String imageUrl;
+  final String country;
+  final String category;
+  final String departure;
+  final String destination;
+  final double rating;
 
-  @override
-  State<TourListWidget> createState() => _TourListWidgetState();
-}
+  const TourCard({
+    super.key,
+    required this.id, // <── thêm
+    required this.title,
+    required this.imageUrl,
+    required this.country,
+    required this.category,
+    required this.departure,
+    required this.destination,
+    required this.rating,
+  });
 
-class _TourListWidgetState extends State<TourListWidget> {
-  late Future<List<TourModel>> _futureTours;
+  void _navigateToDetails(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            DetailsCardScreen(
+          tourId: id, // <── thêm
+          title: title,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
+          final scale = Tween(begin: 0.85, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+          );
 
-  @override
-  void initState() {
-    super.initState();
-    _futureTours = TourListService().fetchTours();
+          return FadeTransition(
+            opacity: fade,
+            child: ScaleTransition(scale: scale, child: child),
+          );
+        },
+      ),
+    );
   }
+
+  IconData get destinationIcon =>
+      category == "Quốc tế" ? Ionicons.earth_outline : Ionicons.compass_outline;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<TourModel>>(
-      future: _futureTours,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Tour List trống'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Tour List trống'));
-        }
-
-        final tours = snapshot.data!;
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: tours.length,
-          itemBuilder: (context, index) {
-            final tour = tours[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 150,
+            height: 150,
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Container(
+                  color: kcontentColor,
+                  child: const Center(child: Icon(Ionicons.image_outline)),
+                ),
               ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(12),
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    tour.image,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: 150,
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                title: Text(
-                  tour.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      const Icon(Ionicons.compass_outline,
+                          size: 16, color: darkGrey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          departure,
+                          style: const TextStyle(fontSize: 12, color: darkGrey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(
+                          8,
+                          (index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                            child: Icon(
+                              Ionicons.remove_outline,
+                              size: 12,
+                              color: darkGrey,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(destinationIcon, size: 16, color: darkGrey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          destination,
+                          style: const TextStyle(fontSize: 12, color: darkGrey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    Text("Địa điểm: ${tour.destinationAddress}"),
-                    Text("Giá người lớn: ${tour.priceAdult} VND"),
-                    Text("Giá trẻ em: ${tour.priceChild} VND"),
-                  ],
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Ionicons.star,
+                              size: 16, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: darkGrey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => _navigateToDetails(context),
+                        child: const Icon(
+                          Ionicons.alert_circle_outline,
+                          color: primaryColor,
+                          size: 22,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            );
-          },
-        );
-      },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

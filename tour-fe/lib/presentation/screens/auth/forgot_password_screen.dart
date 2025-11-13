@@ -1,11 +1,11 @@
-// lib/presentation/screens/forgot_password_screen.dart
+// lib\presentation\screens\auth\forgot_password_screen.dart
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-import '../../data/repositories/verify_repository.dart';
+import '../../../data/repositories/verify_repository.dart';
 import 'verify_code_screen.dart';
-import '../widgets/Button.dart';
-import '../widgets/TextField.dart';
-import '../../core/utils/Validators.dart';
+import '../../widgets/Button.dart';
+import '../../widgets/TextField.dart';
+import '../../../core/utils/Validators.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});

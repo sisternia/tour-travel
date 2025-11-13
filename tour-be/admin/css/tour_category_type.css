@@ -1,0 +1,43 @@
+body {
+    background: #f8f9fa;
+  }
+  
+  .main-content {
+    margin-left: 260px;
+    padding: 30px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table {
+    width: 100%;
+    white-space: nowrap;
+    table-layout: auto;
+  }
+  
+  .table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 6px 10px;
+  }
+  
+  .card {
+    border-radius: 10px;
+  }
+  
+  .card-header h5 {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  
+  .btn {
+    border-radius: 6px;
+  }
+  
+  @media (max-width: 991px) {
+    .main-content .row {
+      flex-direction: column;
+    }
+  }

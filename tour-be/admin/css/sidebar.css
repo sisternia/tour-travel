@@ -1,8 +1,5 @@
-body {
-    background-color: #f8f9fa;
-    overflow-x: hidden;
-  }
-  .sidebar {
+/* /admin/css/sidebar.css */
+.sidebar {
     height: 100vh;
     width: 240px;
     position: fixed;
@@ -12,23 +9,23 @@ body {
     color: white;
     padding-top: 20px;
   }
+  .sidebar h4 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
   .sidebar a {
     color: white;
     display: block;
-    padding: 10px 20px;
+    padding: 12px 20px;
     text-decoration: none;
-    border-radius: 6px;
-    margin: 5px 10px;
+    border-radius: 8px;
+    margin: 4px 10px;
+    transition: all 0.2s ease;
   }
   .sidebar a:hover,
   .sidebar a.active {
     background-color: #0b5ed7;
-  }
-  .main-content {
-    margin-left: 260px;
-    padding: 40px;
-  }
-  img {
-    border-radius: 6px;
   }
   

@@ -1,9 +1,9 @@
-// lib\presentation\screens\new_profile_screen.dart
+// lib\presentation\screens\profile\new_profile_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/api.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
-import 'package:tour_fe/presentation/screens/edit_profile_screen.dart';
+import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 

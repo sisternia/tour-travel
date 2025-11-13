@@ -1,4 +1,4 @@
-// lib\presentation\screens\edit_profile_screen.dart
+// lib\presentation\screens\profile\edit_profile_screen.dart
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -413,8 +413,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             borderSide: BorderSide.none),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty)
+        if (value == null || value.isEmpty) {
           return 'Please enter your $labelText';
+        }
         return null;
       },
     );

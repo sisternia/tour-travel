@@ -1,36 +1,35 @@
-// lib/services/tours_type_service.dart
+// lib/services/tours_category_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tour_fe/core/constants/api.dart';
-import 'package:tour_fe/data/models/tours_type_model.dart';
+import 'package:tour_fe/data/models/tours_category_model.dart';
 
-class TourTypeService {
-  Future<List<TouristPlacesModel>> fetchTourTypes() async {
+class ToursCategoryService {
+  Future<List<ToursCategoryModel>> fetchCategories() async {
     try {
-      final response = await http.get(Uri.parse(ApiConstants.tourtype));
+      final response = await http.get(
+        Uri.parse('${ApiConstants.baseUrl}/api/tour-categories'),
+      );
 
       if (response.statusCode == 200) {
         final body = json.decode(response.body);
 
-        // ✅ Nếu trả về mảng rỗng
         if (body is List && body.isEmpty) return [];
 
-        // ✅ Nếu là object có key data (phòng khi server chưa sửa)
         if (body is Map && body.containsKey('data')) {
           return (body['data'] as List)
-              .map((e) => TouristPlacesModel.fromJson(e))
+              .map((e) => ToursCategoryModel.fromJson(e))
               .toList();
         }
 
-        // ✅ Nếu là mảng thuần túy
         if (body is List) {
-          return body.map((e) => TouristPlacesModel.fromJson(e)).toList();
+          return body.map((e) => ToursCategoryModel.fromJson(e)).toList();
         }
 
         throw Exception("Dữ liệu không hợp lệ từ server");
       } else {
         throw Exception(
-            'Failed to load tour types. Status code: ${response.statusCode}');
+            'Failed to load categories. Status code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Failed to connect to the server: $e');

@@ -1,12 +1,12 @@
-// lib/presentation/screens/register_screen.dart
+// lib/presentation/screens/auth/register_screen.dart
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'verify_code_screen.dart';
-import '../../data/repositories/auth_repository.dart';
-import '../widgets/Button.dart';
-import '../widgets/TextField.dart';
-import '../../core/utils/Validators.dart';
-import '../../core/utils/Snackbar.dart';
+import '../../../data/repositories/auth_repository.dart';
+import '../../widgets/Button.dart';
+import '../../widgets/TextField.dart';
+import '../../../core/utils/Validators.dart';
+import '../../../core/utils/Snackbar.dart';
 import 'package:tour_fe/core/constants/color.dart';
 
 class RegisterScreen extends StatefulWidget {
