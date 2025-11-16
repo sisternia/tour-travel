@@ -10,6 +10,8 @@ const tourCategoriesRoutes = require("./routes/tour_categories.routes");
 const tourRoutes = require("./routes/tours.routes");
 const tourPricesRoutes = require("./routes/tour_prices.routes");
 const tourImagesRoutes = require("./routes/tour_images.routes");
+const tourLocationsRoutes = require("./routes/tour_locations.routes");
+const mapboxRoutes = require("./routes/mapbox.routes");
 const pool = require('./config/db');
 
 const app = express();
@@ -30,6 +32,8 @@ app.use("/api/tour-categories", tourCategoriesRoutes);
 app.use("/api/tours", tourRoutes);
 app.use("/api/tour-images", tourImagesRoutes);
 app.use("/api/tour-prices", tourPricesRoutes);
+app.use("/api/tour-locations", tourLocationsRoutes);
+app.use("/api/mapbox", mapboxRoutes);
 
 app.get('/', (req, res) => {
   res.send('Server đang chạy!');

@@ -8,5 +8,7 @@ const API = {
   TOUR_PRICES: `${BASE_API}/tour-prices`,
   PROFILE: `${BASE_API}/profile`,
   USERS_ALL: `${BASE_API}/profile/all`,
-  TOUR_IMAGES: `${BASE_API}/tour-images`
+  TOUR_IMAGES: `${BASE_API}/tour-images`,
+  TOUR_LOCATIONS: `${BASE_API}/tour-locations`,
+
 };
