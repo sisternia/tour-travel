@@ -49,8 +49,13 @@ class ApiConstants {
   static String get tourAssignments => '$baseUrl/api/tour-prices/assignments';
   static String get tourPriceTours => '$baseUrl/api/tour-prices/tours';
 
-  // 🆕 Tour Images routes
+  // Tour Images routes
   static String firstImage(int tourId) =>
       '$baseUrl/api/tour-images/first/$tourId';
   static String allImages(int tourId) => '$baseUrl/api/tour-images/all/$tourId';
+
+  // Tour Locations routes
+  static String get tourLocations => '$baseUrl/api/tour-locations';
+  static String tourLocationsByTour(int tourId) =>
+      '$baseUrl/api/tour-locations/$tourId';
 }

@@ -1,5 +1,4 @@
 // lib\data\models\tours_places_model.dart
-
 class TouristPlacesModel {
   final int typeId;
   final String typeName;
