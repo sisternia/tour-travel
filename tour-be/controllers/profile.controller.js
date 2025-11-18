@@ -1,62 +1,63 @@
 // controllers/profile.controller.js
 const { updateUserProfile, getUserProfile, getAllProfiles } = require('../services/profile.service');
+const cloudinary = require("../services/cloudinary.service");
+const fs = require("fs");
+
+const extractPublicId = (url) => {
+  if (!url) return null;
+  const parts = url.split("/");
+  const file = parts.pop();
+  const idx = parts.indexOf("upload");
+  return `${parts.slice(idx + 1).join("/")}/${file.split(".")[0]}`;
+};
+
+const uploadToCloudinary = async (file, folder) => {
+  const uploaded = await cloudinary.uploader.upload(file.path, { folder });
+  fs.unlinkSync(file.path);
+  return uploaded.secure_url;
+};
 
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user.user_id;
     const userInfo = req.body;
 
+    const old = await getUserProfile(userId);
+
     if (req.files) {
       if (req.files.avatar) {
-        userInfo.avatar = `/assets/avatar/${req.files.avatar[0].filename}`;
+        const url = await uploadToCloudinary(req.files.avatar[0], "avatar");
+        const oldId = extractPublicId(old.avatar);
+        if (oldId) cloudinary.uploader.destroy(oldId);
+        userInfo.avatar = url;
       }
+
       if (req.files.background) {
-        userInfo.background = `/assets/background/${req.files.background[0].filename}`;
+        const url = await uploadToCloudinary(req.files.background[0], "background");
+        const oldId = extractPublicId(old.background);
+        if (oldId) cloudinary.uploader.destroy(oldId);
+        userInfo.background = url;
       }
     }
 
-    if (userInfo.dob === '') {
-      userInfo.dob = null;
-    }
+    if (userInfo.dob === '') userInfo.dob = null;
 
     await updateUserProfile(userId, userInfo);
-    res.status(200).json({ success: true, message: 'Profile updated successfully' });
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
 const getProfile = async (req, res) => {
-  try {
-    const userId = req.user.user_id; // Assuming auth middleware adds user to req
-    const profile = await getUserProfile(userId);
-    if (!profile) {
-      return res.status(404).json({ message: 'Profile not found' });
-    }
-    res.status(200).json(profile);
-  } catch (error) {
-    console.error('Error getting profile:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
+  const userId = req.user.user_id;
+  const profile = await getUserProfile(userId);
+  res.json(profile);
 };
 
 const getAllUserProfiles = async (req, res) => {
-  try {
-    const users = await getAllProfiles();
-
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const updatedUsers = users.map(u => ({
-      ...u,
-      avatar: u.avatar ? `${baseUrl}${u.avatar}` : null,
-      background: u.background ? `${baseUrl}${u.background}` : null
-    }));
-
-    res.status(200).json({ success: true, data: updatedUsers });
-  } catch (error) {
-    console.error('Error getting all users:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
+  const users = await getAllProfiles();
+  res.json({ success: true, data: users });
 };
 
 module.exports = { updateProfile, getProfile, getAllUserProfiles };

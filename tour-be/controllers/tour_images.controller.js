@@ -1,13 +1,21 @@
 // controllers/tour_images.controller.js
 const fs = require("fs");
-const path = require("path");
+const cloudinary = require("../services/cloudinary.service");
 const {
   TourImageFolders,
   TourImages,
   TourImageAssignment,
 } = require("../models/tour_images.model");
 
-const BASE_DIR = path.join(__dirname, "../assets/tour-images");
+const extractPublicId = (url) => {
+  if (!url) return null;
+  const parts = url.split("/");
+  const file = parts.pop();
+  const versionIndex = parts.findIndex((p) => p === "upload");
+  if (versionIndex === -1) return null;
+  const publicPath = parts.slice(versionIndex + 1).join("/") + "/" + file.split(".")[0];
+  return publicPath;
+};
 
 const TourImagesController = {
   async getFolders(req, res) {
@@ -15,25 +23,17 @@ const TourImagesController = {
       const folders = await TourImageFolders.getAllWithImages();
       res.json(folders);
     } catch (err) {
-      console.error("Lỗi khi lấy danh sách thư mục:", err);
-      res.status(500).json({ message: "Lỗi khi tải danh sách thư mục" });
+      res.status(500).json({ message: "Lỗi khi lấy danh sách thư mục" });
     }
   },
 
   async createFolder(req, res) {
     try {
       const { folder_name } = req.body;
-      if (!folder_name)
-        return res.status(400).json({ message: "Thiếu tên thư mục" });
-
-      const folderPath = path.join(BASE_DIR, folder_name);
-      if (!fs.existsSync(folderPath))
-        fs.mkdirSync(folderPath, { recursive: true });
-
+      if (!folder_name) return res.status(400).json({ message: "Thiếu tên thư mục" });
       await TourImageFolders.create(folder_name);
-      res.json({ success: true, message: "Tạo thư mục thành công" });
+      res.json({ success: true });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ message: "Lỗi khi tạo thư mục" });
     }
   },
@@ -44,65 +44,96 @@ const TourImagesController = {
       const folder_name = req.query.folder_name;
       const files = req.files;
 
-      if (!folder_id || !folder_name)
-        return res.status(400).json({ message: "Thiếu dữ liệu thư mục" });
+      if (!folder_id || !folder_name) return res.status(400).json({ message: "Thiếu dữ liệu" });
+      if (!files?.length) return res.status(400).json({ message: "Không có ảnh" });
 
-      if (!files?.length)
-        return res.status(400).json({ message: "Không có ảnh nào được tải lên" });
+      const urls = [];
 
-      const paths = files.map(
-        (f) => `/assets/tour-images/${folder_name}/${f.filename}`
-      );
-      await TourImages.addImages(folder_id, paths);
-      res.json({
-        success: true,
-        message: `Tải ${files.length} ảnh vào thư mục '${folder_name}' thành công`,
-      });
+      for (const file of files) {
+        const uploaded = await cloudinary.uploader.upload(file.path, {
+          folder: `tour-images/${folder_name}`,
+        });
+        urls.push(uploaded.secure_url);
+        try { fs.unlinkSync(file.path); } catch (e) { /* ignore */ }
+      }
+
+      await TourImages.addImages(folder_id, urls);
+      res.json({ success: true, uploaded: urls.length, urls });
     } catch (err) {
-      console.error("Lỗi upload ảnh:", err);
-      res.status(500).json({ message: "Lỗi khi tải ảnh" });
+      res.status(500).json({ message: "Lỗi upload", error: err.message });
     }
   },
 
   async getAssignments(req, res) {
-    const data = await TourImageAssignment.getAll();
-    res.json(data);
+    try {
+      const data = await TourImageAssignment.getAll();
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi" });
+    }
   },
 
   async assignImage(req, res) {
     try {
       const { tour_id, tour_img_id } = req.body;
-      if (!tour_id || !tour_img_id)
-        return res.status(400).json({ message: "Thiếu dữ liệu" });
-
+      if (!tour_id || !tour_img_id) return res.status(400).json({ message: "Thiếu dữ liệu" });
       await TourImageAssignment.create(tour_id, tour_img_id);
-      res.json({ success: true, message: "Gán ảnh thành công" });
+      res.json({ success: true });
     } catch (err) {
-      console.error("Lỗi gán ảnh:", err);
       res.status(500).json({ message: "Không thể gán ảnh (ảnh không tồn tại)" });
     }
   },
 
   async deleteAssignment(req, res) {
-    const { id } = req.params;
-    await TourImageAssignment.delete(id);
-    res.json({ success: true, message: "Hủy gán thành công" });
+    try {
+      const { id } = req.params;
+      await TourImageAssignment.delete(id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi hủy gán" });
+    }
+  },
+
+  async deleteImage(req, res) {
+    try {
+      const { id } = req.params;
+      const img = await TourImages.findById(id);
+      if (!img) return res.status(404).json({ message: "Không tồn tại" });
+
+      const publicId = extractPublicId(img.tour_img);
+      if (publicId) await cloudinary.uploader.destroy(publicId);
+
+      await TourImages.delete(id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi xóa ảnh" });
+    }
+  },
+
+  async deleteFolder(req, res) {
+    try {
+      const { folder_id } = req.params;
+      const images = await TourImages.getByFolder(folder_id);
+      for (const img of images) {
+        const publicId = extractPublicId(img.tour_img);
+        if (publicId) await cloudinary.uploader.destroy(publicId);
+      }
+      await TourImageFolders.delete(folder_id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi xóa folder" });
+    }
   },
 
   async getFirstImageByTour(req, res) {
     try {
       const { tour_id } = req.params;
-      if (!tour_id)
-        return res.status(400).json({ message: "Thiếu tour_id" });
-
+      if (!tour_id) return res.status(400).json({ message: "Thiếu tour_id" });
       const image = await TourImages.getFirstByTourId(tour_id);
-      if (!image)
-        return res.status(404).json({ message: "Chưa có ảnh cho tour này" });
-
+      if (!image) return res.status(404).json({ message: "Không có ảnh" });
       res.json(image);
     } catch (err) {
-      console.error("Lỗi lấy ảnh đầu tiên:", err);
-      res.status(500).json({ message: "Lỗi khi lấy ảnh đầu tiên" });
+      res.status(500).json({ message: "Lỗi lấy ảnh" });
     }
   },
 
@@ -110,14 +141,13 @@ const TourImagesController = {
     try {
       const { tour_id } = req.params;
       if (!tour_id) return res.status(400).json({ message: "Thiếu tour_id" });
-  
       const list = await TourImages.getAllByTourId(tour_id);
       res.json(list);
     } catch (err) {
-      console.error("Lỗi tải tất cả ảnh:", err);
       res.status(500).json({ message: "Không thể tải danh sách ảnh" });
     }
-  }  
+  },
 };
 
 module.exports = TourImagesController;
+

@@ -1,19 +1,19 @@
 // 📁 routes/tour_categories.routes.js
 const express = require("express");
 const router = express.Router();
-const TourCategoriesController = require("../controllers/tour_categories.controller");
+const controller = require("../controllers/tour_categories.controller");
 
-router.get("/", TourCategoriesController.getAllCategories);
-router.post(
-  "/",
-  TourCategoriesController.upload.single("image"),
-  TourCategoriesController.createCategory
-);
+router.get("/", controller.getAllCategories);
+
+router.post("/", controller.upload.single("image"), controller.createCategory);
+
 router.put(
   "/:category_id",
-  TourCategoriesController.upload.single("image"),
-  TourCategoriesController.updateCategory
+  controller.upload.single("image"),
+  controller.updateCategory
 );
-router.delete("/:category_id", TourCategoriesController.deleteCategory);
+
+router.delete("/:category_id", controller.deleteCategory);
 
 module.exports = router;
+
