@@ -5,6 +5,7 @@ import '../../../core/constants/color.dart';
 import '../../../core/constants/api.dart';
 import '../../../data/models/tour_images_model.dart';
 import '../../../services/tour_images_service.dart';
+import 'tour_locations_screen.dart';
 import 'tourist_spot_screen.dart';
 
 class DetailsCardScreen extends StatefulWidget {
@@ -238,7 +239,7 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
     );
   }
 
-  // 🔎 Phần mô tả dưới ảnh
+  // Phần mô tả dưới ảnh
   Widget buildInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +256,18 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                 ),
               ),
             ),
-            const Icon(Ionicons.location_outline, color: darkGrey, size: 24),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TourLocationsScreen(tourId: widget.tourId),
+                  ),
+                );
+              },
+              child: const Icon(Ionicons.location_outline,
+                  color: darkGrey, size: 24),
+            ),
           ],
         ),
         const SizedBox(height: 8),
