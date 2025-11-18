@@ -1,6 +1,5 @@
 // lib\presentation\screens\profile\profile_screen.dart
 import 'package:flutter/material.dart';
-import 'package:tour_fe/core/constants/api.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
@@ -93,15 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildCoverAvatarAndInfo(BuildContext context, ProfileModel profile) {
-    final String? backgroundPath = profile.background;
-    final String? avatarPath = profile.avatar;
-
-    final String? backgroundImage = backgroundPath != null
-        ? '${ApiConstants.baseServerUrl}${backgroundPath.replaceFirst('/uploads/', '/assets/')}'
-        : null;
-    final String? avatarImage = avatarPath != null
-        ? '${ApiConstants.baseServerUrl}${avatarPath.replaceFirst('/uploads/', '/assets/')}'
-        : null;
+    final backgroundImage = profile.background;
+    final avatarImage = profile.avatar;
 
     return Stack(
       clipBehavior: Clip.none,
