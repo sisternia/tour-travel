@@ -1,43 +1,116 @@
+/* ===== Global ===== */
 body {
-    background: #f8f9fa;
-  }
-  
+  background: #f0f2f5;
+  font-family: "Inter", sans-serif;
+}
+
+/* ===== Layout ===== */
+.main-content {
+  margin-left: 260px;
+  padding: 30px 35px;
+}
+
+/* ===== Card styles ===== */
+.card {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card-header {
+  border-bottom: none;
+  padding: 15px 20px;
+}
+
+.card-header h5 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  border-radius: 8px !important;
+  font-size: 14px;
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+.btn-light {
+  background: #fff !important;
+  border: 1px solid #ddd !important;
+}
+
+.btn-success,
+.btn-primary {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+}
+
+/* ===== Table ===== */
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  white-space: nowrap;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th {
+  background: #eef0f3 !important;
+  font-weight: 600;
+  padding: 10px 12px;
+}
+
+.table td {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+/* Hover effect */
+.table-hover tbody tr:hover {
+  background: #f6f8fa;
+}
+
+/* ===== Modal ===== */
+.modal-content {
+  border-radius: 14px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  padding: 14px 20px;
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.modal-body label {
+  font-weight: 500;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 991px) {
   .main-content {
-    margin-left: 260px;
-    padding: 30px;
+    margin-left: 0;
+    padding: 20px;
   }
-  
-  .table-container {
-    overflow-x: auto;
-  }
-  
-  .table {
-    width: 100%;
-    white-space: nowrap;
-    table-layout: auto;
-  }
-  
-  .table th, .table td {
-    vertical-align: middle;
-    text-align: center;
-    padding: 6px 10px;
-  }
-  
+
   .card {
-    border-radius: 10px;
+    margin-bottom: 20px;
   }
-  
-  .card-header h5 {
-    font-size: 17px;
-    font-weight: 600;
-  }
-  
-  .btn {
-    border-radius: 6px;
-  }
-  
-  @media (max-width: 991px) {
-    .main-content .row {
-      flex-direction: column;
-    }
-  }
+}

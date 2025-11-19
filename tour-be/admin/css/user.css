@@ -1,12 +1,93 @@
 /* /admin/css/user.css */
 body {
-  background-color: #f8f9fa;
+  /* background-color: #f8f9fa; */
   overflow-x: hidden;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .main-content {
-  margin-left: 260px;
-  padding: 40px;
+  margin-left: 260px; 
+  padding: 20px 10px;
+  transition: margin-left 0.3s ease;
 }
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 200px;
+    padding: 20px;
+  }
+}
+
+/* Card */
+.card {
+  border-radius: 12px;
+  border: none;
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Table */
+.table {
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.table thead {
+  background-color: #1036b3; 
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.table thead th {
+  border: none;
+  text-align: center;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background-color 0.3s;
+}
+
+/* Avatar và background hình ảnh */
 .table img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; 
   object-fit: cover;
+  border: 2px solid #1e40af;
+}
+
+/* Background lớn hơn, bo nhẹ */
+.table img.background-img {
+  width: 80px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Tiểu sử wrap text */
+.table td:nth-child(10) {
+  max-width: 200px;
+  white-space: normal;
+  word-wrap: break-word;
+  text-align: left;
+  padding-left: 10px;
+}
+
+/* Scroll table nếu quá dài */
+.table-responsive {
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

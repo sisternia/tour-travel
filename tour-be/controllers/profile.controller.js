@@ -2,6 +2,7 @@
 const { updateUserProfile, getUserProfile, getAllProfiles } = require('../services/profile.service');
 const cloudinary = require("../services/cloudinary.service");
 const fs = require("fs");
+const jwt = require('jsonwebtoken');
 
 const extractPublicId = (url) => {
   if (!url) return null;
@@ -17,9 +18,20 @@ const uploadToCloudinary = async (file, folder) => {
   return uploaded.secure_url;
 };
 
+const getUserFromHeader = (req) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Authentication token required');
+  }
+
+  const token = authHeader.split(' ')[1];
+  return jwt.verify(token, process.env.JWT_SECRET || 'secret');
+};
+
 const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    const user = getUserFromHeader(req);
+    const userId = user.user_id;
     const userInfo = req.body;
 
     const old = await getUserProfile(userId);
@@ -42,17 +54,26 @@ const updateProfile = async (req, res) => {
 
     if (userInfo.dob === '') userInfo.dob = null;
 
-    await updateUserProfile(userId, userInfo);
-    res.json({ success: true });
+    // await updateUserProfile(userId, userInfo);
+    // res.json({ success: true });
+      await updateUserProfile(userId, userInfo);
+      const updatedProfile = await getUserProfile(userId);
+      res.json({ success: true, data: updatedProfile });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    const status = err.message === 'Authentication token required' ? 401 : 500;
+    res.status(status).json({ message: err.message });
   }
 };
 
 const getProfile = async (req, res) => {
-  const userId = req.user.user_id;
-  const profile = await getUserProfile(userId);
-  res.json(profile);
+  try {
+    const user = getUserFromHeader(req);
+    const profile = await getUserProfile(user.user_id);
+    res.json(profile);
+  } catch (err) {
+    const status = err.message === 'Authentication token required' ? 401 : 500;
+    res.status(status).json({ message: err.message });
+  }
 };
 
 const getAllUserProfiles = async (req, res) => {

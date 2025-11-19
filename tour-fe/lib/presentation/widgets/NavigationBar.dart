@@ -22,6 +22,7 @@ class NavigationBarWidget extends StatefulWidget {
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   late int _page;
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  final GlobalKey<State<ProfileScreen>> _profileScreenKey = GlobalKey<State<ProfileScreen>>();
 
   late final List<Widget> _screens;
 
@@ -35,7 +36,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
       const TouristSpotScreen(),
       const Center(child: Text('Messages')),
       const Center(child: Text('Notifications')),
-      const ProfileScreen(),
+      ProfileScreen(key: _profileScreenKey),
     ];
   }
 
@@ -51,7 +52,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: _screens[_page],
+      body:  _screens[_page], 
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         items: _items,
@@ -59,7 +60,16 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         backgroundColor: Colors.transparent,
         color: Colors.blueAccent,
         buttonBackgroundColor: Colors.white,
-        onTap: (index) => setState(() => _page = index),
+        onTap: (index) {
+          setState(() => _page = index);
+          // Refresh ProfileScreen khi chuyển sang tab Profile
+          if (index == 4) {
+            final state = _profileScreenKey.currentState;
+            if (state != null && state is ProfileScreenState) {
+              state.refreshProfile();
+            }
+          }
+        },
       ),
     );
   }
