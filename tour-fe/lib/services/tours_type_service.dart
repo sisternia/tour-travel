@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tour_fe/core/constants/api.dart';
-import 'package:tour_fe/data/models/tours_type_model.dart';
+import 'package:tour_fe/data/models/tours_places_model.dart';
 
 class TourTypeService {
   Future<List<TouristPlacesModel>> fetchTourTypes() async {
@@ -12,14 +12,17 @@ class TourTypeService {
       if (response.statusCode == 200) {
         final body = json.decode(response.body);
 
+        // ✅ Nếu trả về mảng rỗng
         if (body is List && body.isEmpty) return [];
 
+        // ✅ Nếu là object có key data (phòng khi server chưa sửa)
         if (body is Map && body.containsKey('data')) {
           return (body['data'] as List)
               .map((e) => TouristPlacesModel.fromJson(e))
               .toList();
         }
 
+        // ✅ Nếu là mảng thuần túy
         if (body is List) {
           return body.map((e) => TouristPlacesModel.fromJson(e)).toList();
         }

@@ -1,4 +1,5 @@
-// lib/presentation/screens/home_screen.dart
+// lib\presentation\screens\home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:tour_fe/core/constants/color.dart';
@@ -10,6 +11,7 @@ import '../widgets/Icon_Button.dart';
 import '../widgets/Image_Carousel.dart';
 import '../widgets/Search_Bar.dart';
 import '../widgets/Tours_Place.dart';
+import '../widgets/tours_list.dart';
 import '../widgets/NavigationBar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,15 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return _buildMainContent("Hi, bạn 👋", "Không thể tải hồ sơ");
+                return _buildHeader(
+                    "Hi, bạn 👋", "Không thể tải tên người dùng");
               } else if (snapshot.hasData) {
                 final profile = snapshot.data!;
                 final userName = profile.userName ?? "Bạn";
-                return _buildMainContent(
-                    "Hi, $userName 👋", "Chúc bạn ngày mới tốt lành!");
+                return _buildContent(userName);
               } else {
-                return _buildMainContent(
-                    "Hi, bạn 👋", "Không có dữ liệu hồ sơ");
+                return _buildHeader("Hi, bạn 👋", "Không có dữ liệu hồ sơ");
               }
             },
           ),
@@ -72,23 +73,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMainContent(String greeting, String subtitle) {
+  Widget _buildContent(String userName) {
     return ListView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(10),
       children: [
-        // Header
-        _buildHeader(greeting, subtitle),
+        // --- Header ---
+        _buildHeader("Hi, $userName 👋", "Chúc bạn ngày mới tốt lành!"),
         const SizedBox(height: 20),
 
-        // Thanh tìm kiếm
+        // --- Thanh tìm kiếm ---
         SearchBarWidget(
           controller: searchController,
-          onSubmitted: (value) => debugPrint("Tìm kiếm: $value"),
+          onSubmitted: (value) => print("Tìm kiếm: $value"),
         ),
         const SizedBox(height: 20),
 
-        // Top địa điểm
+        // --- Top địa điểm ---
         Text(
           "📍Top địa điểm thịnh hành",
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -97,28 +98,29 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
         ),
         const SizedBox(height: 10),
+
         const ImageCarousel(
           hotelList: [
             {
               "image": "assets/images/slider1.jpg",
-              "name": "Lũng Cú",
-              "location": "Hà Giang",
-            },
-            {
-              "image": "assets/images/slider2.jpg",
-              "name": "Cầu Vàng",
+              "name": "Địa điểm 1",
               "location": "Đà Nẵng",
             },
             {
+              "image": "assets/images/slider2.jpg",
+              "name": "Địa điểm 2",
+              "location": "Hà Nội",
+            },
+            {
               "image": "assets/images/slider3.jpg",
-              "name": "Hồ Kẻ Gỗ",
-              "location": "Hà Tĩnh",
+              "name": "Địa điểm 3",
+              "location": "Đà Lạt",
             },
           ],
         ),
         const SizedBox(height: 25),
 
-        // Loại hình tour
+        // --- Loại hình tour ---
         Text(
           "🗺️ Khám phá loại hình tour",
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -130,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const TouristPlaces(),
         const SizedBox(height: 25),
 
-        // Các tour nổi bật (placeholder thay cho TourList)
+        // --- Tour nổi bật ---
         Text(
           "🌟 Các tour nổi bật",
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -139,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
         ),
         const SizedBox(height: 10),
-        _buildPlaceholderTours(),
+        const TourListWidget(),
       ],
     );
   }
@@ -186,47 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPlaceholderTours() {
-    final tours = [
-      {"name": "Tour Hạ Long - Kỳ Quan Thế Giới", "destination": "Hạ Long"},
-      {"name": "Tour Phú Quốc - Thiên Đường Biển", "destination": "Phú Quốc"},
-      {"name": "Tour Đà Lạt - Thành Phố Ngàn Hoa", "destination": "Đà Lạt"},
-    ];
-
-    return Column(
-      children: tours.map((tour) {
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/images/slider1.jpg',
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
-            ),
-            title: Text(
-              tour["name"]!,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text("Điểm đến: ${tour["destination"]!}"),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          ),
-        );
-      }).toList(),
     );
   }
 }
