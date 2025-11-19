@@ -5,7 +5,7 @@ import '../../core/constants/color.dart';
 import '../screens/tour/details_tour_screen.dart';
 
 class TourCard extends StatelessWidget {
-  final int id; // <── thêm
+  final int id;
   final String title;
   final String imageUrl;
   final String country;
@@ -16,7 +16,7 @@ class TourCard extends StatelessWidget {
 
   const TourCard({
     super.key,
-    required this.id, // <── thêm
+    required this.id,
     required this.title,
     required this.imageUrl,
     required this.country,
@@ -27,12 +27,12 @@ class TourCard extends StatelessWidget {
   });
 
   void _navigateToDetails(BuildContext context) {
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (context, animation, secondaryAnimation) =>
             DetailsCardScreen(
-          tourId: id, // <── thêm
+          tourId: id,
           title: title,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {

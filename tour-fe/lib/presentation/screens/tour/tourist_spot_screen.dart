@@ -1,9 +1,8 @@
 // lib/presentation/screens/tour/tourist_spot_screen.dart
 import 'package:flutter/material.dart';
-import 'package:tour_fe/core/constants/api.dart';
 import '../../../core/constants/color.dart';
-import '../../../data/models/tours.model.dart';
-import '../../../services/tours.service.dart';
+import '../../../data/models/tours_model.dart';
+import '../../../services/tours_service.dart';
 import '../../widgets/Tours_List.dart';
 import '../../widgets/Tours_Category.dart';
 
@@ -75,10 +74,10 @@ class _TouristSpotScreenState extends State<TouristSpotScreen> {
                   Column(
                     children: filteredTours.map((tour) {
                       return TourCard(
-                        id: tour.id, 
+                        id: tour.id,
                         title: tour.name,
                         imageUrl: tour.firstImage.isNotEmpty
-                            ? ApiConstants.baseUrl + tour.firstImage
+                            ? tour.firstImage
                             : "https://via.placeholder.com/150",
                         country: "Việt Nam",
                         category: tour.categoryName,

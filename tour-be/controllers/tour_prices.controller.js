@@ -61,6 +61,17 @@ const getAssignments = async (req, res) => {
   }
 };
 
+const getAssignmentsByTour = async (req, res) => {
+  try {
+    const { tour_id } = req.params;
+    if (!tour_id) return res.status(400).json({ message: "Thiếu tour_id" });
+    const data = await TourPrices.getAssignmentsByTour(tour_id);
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi khi lấy bảng giá cho tour", error: err.message });
+  }
+};
+
 const createAssignment = async (req, res) => {
   try {
     const { tour_id, price_id } = req.body;
@@ -90,6 +101,7 @@ module.exports = {
   deletePrice,
   getTours,
   getAssignments,
+  getAssignmentsByTour,
   createAssignment,
   deleteAssignment,
 };

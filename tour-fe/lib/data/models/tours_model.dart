@@ -1,4 +1,4 @@
-// lib/data/models/tours.model.dart
+// lib/data/models/tours_model.dart
 class ToursModel {
   final int id;
   final String name;

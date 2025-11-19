@@ -11,6 +11,7 @@ router.delete("/prices/:price_id", controller.deletePrice);
 
 // Quản lý gán tour
 router.get("/assignments", controller.getAssignments);
+router.get("/assignment/:tour_id", controller.getAssignmentsByTour); 
 router.post("/assignments", controller.createAssignment);
 router.delete("/assignments/:id", controller.deleteAssignment);
 
@@ -18,5 +19,3 @@ router.delete("/assignments/:id", controller.deleteAssignment);
 router.get("/tours", controller.getTours);
 
 module.exports = router;
-
-
