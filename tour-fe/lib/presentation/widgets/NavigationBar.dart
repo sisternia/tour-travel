@@ -6,15 +6,21 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
-  final Widget? body; // cho phép null
-  const NavigationBarWidget({super.key, this.body});
+  final Widget? body;
+  final int initialIndex;
+
+  const NavigationBarWidget({
+    super.key,
+    this.body,
+    this.initialIndex = 0,
+  });
 
   @override
   State<NavigationBarWidget> createState() => _NavigationBarWidgetState();
 }
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
-  int _page = 0;
+  late int _page;
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   final GlobalKey<State<ProfileScreen>> _profileScreenKey = GlobalKey<State<ProfileScreen>>();
 
@@ -23,6 +29,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   @override
   void initState() {
     super.initState();
+    _page = widget.initialIndex;
+
     _screens = [
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),

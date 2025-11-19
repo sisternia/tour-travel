@@ -48,6 +48,8 @@ class ApiConstants {
   static String get tourPrices => '$baseUrl/api/tour-prices/prices';
   static String get tourAssignments => '$baseUrl/api/tour-prices/assignments';
   static String get tourPriceTours => '$baseUrl/api/tour-prices/tours';
+  static String tourAssignmentByTour(int tourId) =>
+      '$baseUrl/api/tour-prices/assignment/$tourId';
 
   // Tour Images routes
   static String firstImage(int tourId) =>

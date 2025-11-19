@@ -10,7 +10,7 @@ class TourImageModel {
 
   factory TourImageModel.fromJson(Map<String, dynamic> json) {
     return TourImageModel(
-      tourImg: json['tour_img'],
+      tourImg: json['tour_img']?.toString(),
       tourImgId: json['tour_img_id'],
     );
   }

@@ -2,13 +2,12 @@
 const db = require("../config/db");
 
 const TourPrices = {
-  // Lấy danh sách bảng giá
+
   getAllPrices: async () => {
     const [rows] = await db.execute(`SELECT * FROM tour_prices ORDER BY price_id DESC`);
     return rows;
   },
 
-  // Tạo bảng giá mới
   createPrice: async (data) => {
     const [result] = await db.execute(
       `INSERT INTO tour_prices (price_adult, price_child, valid_from, valid_to)
@@ -18,7 +17,6 @@ const TourPrices = {
     return result;
   },
 
-  // Cập nhật bảng giá
   updatePrice: async (price_id, data) => {
     const [result] = await db.execute(
       `UPDATE tour_prices 
@@ -29,22 +27,19 @@ const TourPrices = {
     return result;
   },
 
-  // Xóa bảng giá
   deletePrice: async (price_id) => {
     const [result] = await db.execute(`DELETE FROM tour_prices WHERE price_id=?`, [price_id]);
     return result;
   },
 
-  // Danh sách tour để gán giá
   getTours: async () => {
     const [rows] = await db.execute(`SELECT id, name FROM tours ORDER BY name ASC`);
     return rows;
   },
 
-  // Danh sách gán tour với bảng giá
   getAssignments: async () => {
     const [rows] = await db.execute(`
-      SELECT a.id, t.name AS tour_name, p.price_adult, p.price_child, p.valid_from, p.valid_to
+      SELECT a.id, t.name AS tour_name, p.price_adult, p.price_child, p.valid_from, p.valid_to, a.tour_id, a.price_id
       FROM tour_price_assignments a
       LEFT JOIN tours t ON a.tour_id = t.id
       LEFT JOIN tour_prices p ON a.price_id = p.price_id
@@ -53,7 +48,18 @@ const TourPrices = {
     return rows;
   },
 
-  // Gán tour với bảng giá
+  getAssignmentsByTour: async (tour_id) => {
+    const [rows] = await db.execute(`
+      SELECT a.id, t.name AS tour_name, p.price_adult, p.price_child, p.valid_from, p.valid_to, a.tour_id, a.price_id
+      FROM tour_price_assignments a
+      LEFT JOIN tours t ON a.tour_id = t.id
+      LEFT JOIN tour_prices p ON a.price_id = p.price_id
+      WHERE a.tour_id = ?
+      ORDER BY a.id DESC
+    `, [tour_id]);
+    return rows;
+  },
+
   createAssignment: async (tour_id, price_id) => {
     const [result] = await db.execute(
       `INSERT INTO tour_price_assignments (tour_id, price_id) VALUES (?, ?)`,

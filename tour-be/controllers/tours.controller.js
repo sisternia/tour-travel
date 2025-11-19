@@ -1,7 +1,6 @@
 // controllers/tours.controller.js
 const Tour = require("../models/tours.model");
 
-// === GET ALL TOURS ===
 const getAllTours = async (req, res) => {
   try {
     const tours = await Tour.getAll();
@@ -12,7 +11,6 @@ const getAllTours = async (req, res) => {
   }
 };
 
-// === CREATE TOUR ===
 const createTour = async (req, res) => {
   try {
     const {
@@ -57,7 +55,6 @@ const createTour = async (req, res) => {
   }
 };
 
-// === UPDATE TOUR ===
 const updateTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,7 +92,6 @@ const updateTour = async (req, res) => {
   }
 };
 
-// === DELETE TOUR ===
 const deleteTour = async (req, res) => {
   try {
     const { id } = req.params;

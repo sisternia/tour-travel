@@ -1,4 +1,4 @@
-// models\tour_locations.model.js
+// models/tour_locations.model.js
 const db = require("../config/db");
 
 const TourLocations = {
@@ -46,6 +46,22 @@ const TourLocations = {
     return rows[0];
   },
 
+  // ⭐ FIX: thêm kiểm tra duplicate
+  findDuplicate: async (location) => {
+    const [rows] = await db.execute(
+      `
+      SELECT *
+      FROM tour_locations
+      WHERE tour_id = ?
+        AND ABS(latitude - ?) < 0.0001
+        AND ABS(longitude - ?) < 0.0001
+      LIMIT 1
+      `,
+      [location.tour_id, location.latitude, location.longitude]
+    );
+    return rows[0] || null;
+  },
+
   create: async (location) => {
     const sql = `
       INSERT INTO tour_locations (tour_id, location_name, description, latitude, longitude)
@@ -53,10 +69,10 @@ const TourLocations = {
     `;
     const [res] = await db.execute(sql, [
       location.tour_id,
-      location.location_name,
-      location.description,
+      location.location_name || null,
+      location.description || null,
       location.latitude,
-      location.longitude
+      location.longitude,
     ]);
     return res;
   },
@@ -73,7 +89,7 @@ const TourLocations = {
       location.description,
       location.latitude,
       location.longitude,
-      id
+      id,
     ]);
     return res;
   },
@@ -88,4 +104,3 @@ const TourLocations = {
 };
 
 module.exports = TourLocations;
-
