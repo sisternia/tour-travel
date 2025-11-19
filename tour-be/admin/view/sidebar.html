@@ -1,13 +1,54 @@
 <!-- /admin/view/sidebar.html -->
 <div class="sidebar">
+  <div class="sidebar-header">
+    <img
+      src="../../assets/avatar/avatar.jpg"
+      alt="Admin Avatar"
+      class="sidebar-avatar"
+    />
     <h4>Admin Panel</h4>
-    <a href="user.html" id="link-user">Quản lý người dùng</a>
-    <a href="tour_category_type.html" id="link-tour-categories">Quản lý kiểu và loại Tour</a>
-    <a href="tour.html" id="link-tour">Quản lý Tour</a>
-    <a href="tour_prices.html" id="link-tour">Quản lý thành phần Tour</a>
-    <a href="tour_images.html" id="link-tour">Quản lý ảnh Tour</a>
-    <a href="tour_locations.html" id="link-tour">Quản lý địa chỉ Tour</a>
-    <a href="#" id="link-order">Quản lý đơn hàng</a>
   </div>
-  <script src="../js/sidebar.js"></script>
-  
+
+  <nav class="sidebar-nav">
+    <a href="user.html" id="link-user" class="sidebar-link">
+      <span class="sidebar-icon">👤</span>
+      <span class="sidebar-text">Quản lý người dùng</span>
+    </a>
+
+    <a
+      href="tour_category_type.html"
+      id="link-tour-categories"
+      class="sidebar-link"
+    >
+      <span class="sidebar-icon">📂</span>
+      <span class="sidebar-text">Quản lý kiểu và loại Tour</span>
+    </a>
+
+    <a href="tour.html" id="link-tour" class="sidebar-link">
+      <span class="sidebar-icon">🗺️</span>
+      <span class="sidebar-text">Quản lý Tour</span>
+    </a>
+
+    <a href="tour_prices.html" id="link-tour-prices" class="sidebar-link">
+      <span class="sidebar-icon">💰</span>
+      <span class="sidebar-text">Quản lý thành phần Tour</span>
+    </a>
+
+    <a href="tour_images.html" id="link-tour-images" class="sidebar-link">
+      <span class="sidebar-icon">🖼️</span>
+      <span class="sidebar-text">Quản lý ảnh Tour</span>
+    </a>
+
+    <a href="tour_locations.html" id="link-tour-locations" class="sidebar-link">
+      <span class="sidebar-icon">📍</span>
+      <span class="sidebar-text">Quản lý địa chỉ Tour</span>
+    </a>
+
+    <a href="#" id="link-order" class="sidebar-link">
+      <span class="sidebar-icon">🛒</span>
+      <span class="sidebar-text">Quản lý đơn hàng</span>
+    </a>
+  </nav>
+</div>
+
+<script src="../js/sidebar.js"></script>
