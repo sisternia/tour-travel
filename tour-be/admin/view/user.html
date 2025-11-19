@@ -1,4 +1,3 @@
-<!-- /admin/view/user.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,13 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý người dùng</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/sidebar.css">
   <link rel="stylesheet" href="../css/user.css">
 </head>
 
 <body>
-  <div id="sidebar-container"></div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4>Admin Panel</h4>
+    <a href="user.html" class="active">👤 Quản lý người dùng</a>
+    <a href="#">🗺️ Quản lý Tour</a>
+    <a href="tour_type.html">🏷️ Quản lý loại Tour</a>
+    <a href="#">📦 Quản lý đơn hàng</a>
+  </div>
 
+  <!-- Main content -->
   <div class="main-content">
     <h2 class="mb-4">Danh sách người dùng</h2>
     <div class="card shadow-sm">
@@ -42,15 +48,7 @@
     </div>
   </div>
 
-  <script>
-    fetch("sidebar.html")
-      .then((res) => res.text())
-      .then((html) => {
-        document.getElementById("sidebar-container").innerHTML = html;
-      });
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/api.js"></script>
   <script src="../js/user.js"></script>
 </body>
 </html>

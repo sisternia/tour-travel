@@ -1,53 +1,67 @@
-// lib/data/models/tours.model.dart
-class ToursModel {
+// lib/models/tours_model.dart
+class TourModel {
   final int id;
   final String name;
-  final int numberOfPeople;
-  final String startDate;
-  final String endDate;
-  final String departureAddress;
+  final double priceAdult;
+  final double priceChild;
   final String destinationAddress;
-  final String status;
-  final String categoryName;
-  final List<String> typeNames;
-  String firstImage;
-  List<String> allImages = [];
+  final String location;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? status;
+  final String image;
 
-  ToursModel({
+  TourModel({
     required this.id,
     required this.name,
-    required this.numberOfPeople,
-    required this.startDate,
-    required this.endDate,
-    required this.departureAddress,
+    required this.priceAdult,
+    required this.priceChild,
     required this.destinationAddress,
-    required this.status,
-    required this.categoryName,
-    required this.typeNames,
-    this.firstImage = "",
+    required this.location,
+    this.startDate,
+    this.endDate,
+    this.status,
+    this.image =
+        'https://danangfantasticity.com/wp-content/uploads/2020/03/da-nang-khong-to-chuc-le-ky-niem-45-nam-ngay-giai-phong.jpg',
   });
 
-  factory ToursModel.fromJson(Map<String, dynamic> json) {
-    final types = json['type_names'];
-    List<String> typeList = [];
-
-    if (types is String) {
-      typeList = types.split(',').map((e) => e.trim()).toList();
-    } else if (types is List) {
-      typeList = types.map((e) => e.toString()).toList();
-    }
-
-    return ToursModel(
+  // Convert JSON -> Model
+  factory TourModel.fromJson(Map<String, dynamic> json) {
+    return TourModel(
       id: json['id'] as int,
       name: json['name'] ?? '',
-      numberOfPeople: json['number_of_people'] ?? 0,
-      startDate: json['start_date'] ?? '',
-      endDate: json['end_date'] ?? '',
-      departureAddress: json['departure_address'] ?? '',
+      priceAdult: (json['price_adult'] is int)
+          ? (json['price_adult'] as int).toDouble()
+          : (json['price_adult'] as num).toDouble(),
+      priceChild: (json['price_child'] is int)
+          ? (json['price_child'] as int).toDouble()
+          : (json['price_child'] as num).toDouble(),
       destinationAddress: json['destination_address'] ?? '',
-      status: json['status'] ?? '',
-      categoryName: json['category_name'] ?? '',
-      typeNames: typeList,
+      location: json['location'] ?? '',
+      startDate: json['start_date'] != null
+          ? DateTime.tryParse(json['start_date'])
+          : null,
+      endDate:
+          json['end_date'] != null ? DateTime.tryParse(json['end_date']) : null,
+      status: json['status'],
+      image: json['image'] ??
+          'https://danangfantasticity.com/wp-content/uploads/2020/03/da-nang-khong-to-chuc-le-ky-niem-45-nam-ngay-giai-phong.jpg',
     );
+  }
+
+  // Convert Model -> JSON (khi POST/PUT)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price_adult': priceAdult,
+      'price_child': priceChild,
+      'destination_address': destinationAddress,
+      'location': location,
+      'start_date': startDate?.toIso8601String(),
+      'end_date': endDate?.toIso8601String(),
+      'status': status,
+      'image': image,
+    };
   }
 }

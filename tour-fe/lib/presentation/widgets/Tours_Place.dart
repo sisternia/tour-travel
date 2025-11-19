@@ -1,7 +1,7 @@
 // lib/presentation/widgets/Tour_Place.dart
 
 import 'package:flutter/material.dart';
-import 'package:tour_fe/data/models/tours_type_model.dart';
+import 'package:tour_fe/data/models/tours_places_model.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/core/constants/api.dart';
 import 'package:tour_fe/services/tours_type_service.dart';
