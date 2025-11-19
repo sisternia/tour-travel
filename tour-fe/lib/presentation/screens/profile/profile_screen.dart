@@ -6,14 +6,34 @@ import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 
+// Helper function để format date từ ISO format sang dd/MM/yyyy
+String _formatDate(String? dateString) {
+  if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
+    return 'Not set';
+  }
+  
+  try {
+    // Parse ISO format date
+    final date = DateTime.parse(dateString);
+    // Format thành dd/MM/yyyy
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day/$month/$year';
+  } catch (e) {
+    // Nếu không parse được, trả về giá trị gốc
+    return dateString;
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserver {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
   late Future<ProfileModel> _profileFuture;
@@ -21,7 +41,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _profileFuture = _getProfile();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshProfile();
+    }
   }
 
   Future<ProfileModel> _getProfile() async {
@@ -33,6 +67,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       debugPrint('Failed to load profile: $e');
       rethrow;
     }
+  }
+
+  // Public method để có thể gọi từ bên ngoài
+  void refreshProfile() {
+    if (mounted) {
+      setState(() {
+        _profileFuture = _getProfile();
+      });
+    }
+  }
+
+  void _refreshProfile() {
+    refreshProfile();
   }
 
   @override
@@ -125,12 +172,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const EditProfileScreen()),
-                  ).then((_) => setState(() => _profileFuture = _getProfile()));
+                  );
+                  // Refresh profile khi quay lại từ edit screen
+                  if (result == true || mounted) {
+                    _refreshProfile();
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),
@@ -199,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _InfoItem(Icons.person, 'Full Name', profile.userName ?? 'Not set'),
       _InfoItem(Icons.phone, 'Phone Number', profile.phone ?? 'Not set'),
       _InfoItem(
-          Icons.calendar_today, 'Date of Birth', profile.dob ?? 'Not set'),
+          Icons.calendar_today, 'Date of Birth', _formatDate(profile.dob)),
       _InfoItem(Icons.info, 'Bio', profile.bio ?? 'Not set'),
       _InfoItem(
           Icons.credit_card, 'Citizen ID', profile.citizenId ?? 'Not set'),
