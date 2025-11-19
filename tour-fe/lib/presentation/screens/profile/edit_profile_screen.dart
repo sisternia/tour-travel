@@ -43,6 +43,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isLoading = false;
   late Future<ProfileModel> _profileFuture;
 
+  String _formatDisplayDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day/$month/$year';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,9 +62,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     _userNameController.text = profile.userName ?? '';
     _phoneController.text = profile.phone ?? '';
-    _dobController.text = profile.dob ?? '';
     if (profile.dob != null && profile.dob!.isNotEmpty) {
       _dob = DateTime.tryParse(profile.dob!);
+      if (_dob != null) {
+        _dobController.text = _formatDisplayDate(_dob!);
+      } else {
+        _dobController.text = profile.dob!;
+      }
+    } else {
+      _dobController.clear();
     }
     _bioController.text = profile.bio ?? '';
     _citizenIdController.text = profile.citizenId ?? '';
@@ -105,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final data = {
         'user_name': _userNameController.text,
         'phone': _phoneController.text,
-        'dob': _dobController.text,
+        'dob': _dob != null ? _dob!.toIso8601String() : _dobController.text,
         'bio': _bioController.text,
         'citizen_id': _citizenIdController.text,
         'address': _addressController.text,
@@ -119,7 +132,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const SnackBar(content: Text('Profile updated successfully')),
       );
 
-      Navigator.pop(context);
+      // Return true để báo cho ProfileScreen biết cần refresh
+      Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -313,9 +327,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             );
 
             if (values != null && values.isNotEmpty) {
+              final selectedDate = values.first;
+              if (selectedDate == null) return;
               setState(() {
-                _dob = values[0];
-                _dobController.text = _dob!.toString().split(' ')[0];
+                _dob = selectedDate;
+                _dobController.text = _formatDisplayDate(_dob!);
               });
             }
           },

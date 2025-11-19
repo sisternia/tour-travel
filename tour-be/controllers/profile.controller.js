@@ -42,8 +42,11 @@ const updateProfile = async (req, res) => {
 
     if (userInfo.dob === '') userInfo.dob = null;
 
-    await updateUserProfile(userId, userInfo);
-    res.json({ success: true });
+    // await updateUserProfile(userId, userInfo);
+    // res.json({ success: true });
+      await updateUserProfile(userId, userInfo);
+      const updatedProfile = await getUserProfile(userId);
+      res.json({ success: true, data: updatedProfile });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
