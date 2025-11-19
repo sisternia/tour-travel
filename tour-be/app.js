@@ -6,7 +6,12 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const profileRoutes = require('./routes/profile.routes');
 const tourTypeRoutes = require("./routes/tours_type.routes");
+const tourCategoriesRoutes = require("./routes/tour_categories.routes");
 const tourRoutes = require("./routes/tours.routes");
+const tourPricesRoutes = require("./routes/tour_prices.routes");
+const tourImagesRoutes = require("./routes/tour_images.routes");
+const tourLocationsRoutes = require("./routes/tour_locations.routes");
+const mapboxRoutes = require("./services/mapbox.service");
 const pool = require('./config/db');
 
 const app = express();
@@ -23,7 +28,12 @@ app.use('/admin', express.static('admin'));
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use("/api/tour-types", tourTypeRoutes);
+app.use("/api/tour-categories", tourCategoriesRoutes);
 app.use("/api/tours", tourRoutes);
+app.use("/api/tour-images", tourImagesRoutes);
+app.use("/api/tour-prices", tourPricesRoutes);
+app.use("/api/tour-locations", tourLocationsRoutes);
+app.use("/api/mapbox", mapboxRoutes);
 
 app.get('/', (req, res) => {
   res.send('Server đang chạy!');

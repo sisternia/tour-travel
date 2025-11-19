@@ -1,4 +1,4 @@
-import 'package:tour_fe/presentation/screens/login_screen.dart';
+import 'package:tour_fe/presentation/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/onboard_model.dart';

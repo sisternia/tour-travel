@@ -1,3 +1,5 @@
+// lib/presentation/widgets/TextField.dart
+
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -7,6 +9,9 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? toggleObscure;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final int maxLines;
 
   const CustomTextField({
     super.key,
@@ -16,6 +21,9 @@ class CustomTextField extends StatelessWidget {
     this.toggleObscure,
     this.validator,
     this.keyboardType,
+    this.readOnly = false,
+    this.onTap,
+    this.maxLines = 1,
   });
 
   @override
@@ -25,17 +33,12 @@ class CustomTextField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obscure,
+        readOnly: readOnly,
+        maxLines: maxLines,
+        onTap: onTap,
         keyboardType: keyboardType,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        validator: validator != null
-            ? (value) {
-                // Chỉ validate nếu value == null hoặc trống
-                if (value == null || value.isEmpty) {
-                  return validator!(value);
-                }
-                return null;
-              }
-            : null,
+        autovalidateMode: AutovalidateMode.disabled,
+        validator: validator,
         decoration: InputDecoration(
           labelText: label,
           filled: true,
@@ -43,9 +46,9 @@ class CustomTextField extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(
             vertical: 14,
             horizontal: 16,
-          ).copyWith(bottom: 18),
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           errorStyle: const TextStyle(
