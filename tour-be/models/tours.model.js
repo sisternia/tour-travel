@@ -1,4 +1,3 @@
-// models/tours.model.js
 const db = require("../config/db");
 
 const Tour = {
@@ -7,6 +6,29 @@ const Tour = {
       "SELECT * FROM tours ORDER BY created_at DESC"
     );
     return rows;
+  },
+  getLatestWithPrices: async () => {
+    const [rows] = await db.execute(`
+    SELECT 
+      t.*, 
+      p.price_adult, 
+      p.price_child
+    FROM tours t
+    LEFT JOIN tour_price_assignments a ON a.tour_id = t.id
+    LEFT JOIN tour_prices p ON p.price_id = a.price_id
+    ORDER BY t.created_at DESC
+    LIMIT 5
+  `);
+
+    return rows;
+  },
+
+  getTourById: async (id) => {
+    const [rows] = await db.execute(
+      "SELECT * FROM tours WHERE id = ? LIMIT 1",
+      [id]
+    );
+    return rows[0] || null;
   },
 
   create: async (data) => {

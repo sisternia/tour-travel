@@ -1,4 +1,5 @@
 // lib/data/models/tours_model.dart
+
 class ToursModel {
   final int id;
   final String name;
@@ -8,10 +9,15 @@ class ToursModel {
   final String departureAddress;
   final String destinationAddress;
   final String status;
+
   final String categoryName;
   final List<String> typeNames;
+
   String firstImage;
   List<String> allImages = [];
+  final double priceAdult;
+  final double priceChild;
+  final double rating;
 
   ToursModel({
     required this.id,
@@ -25,6 +31,9 @@ class ToursModel {
     required this.categoryName,
     required this.typeNames,
     this.firstImage = "",
+    required this.priceAdult,
+    required this.priceChild,
+    this.rating = 4.7,
   });
 
   factory ToursModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +57,10 @@ class ToursModel {
       status: json['status'] ?? '',
       categoryName: json['category_name'] ?? '',
       typeNames: typeList,
+      priceAdult: (json["price_adult"] ?? 0).toDouble(),
+      priceChild: (json["price_child"] ?? 0).toDouble(),
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.7,
     );
   }
+
 }

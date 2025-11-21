@@ -1,4 +1,3 @@
-// lib/presentation/widgets/NavigationBar.dart
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import '../screens/home_screen.dart';
@@ -6,21 +5,28 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
-  final Widget? body; // cho phép null
-  const NavigationBarWidget({super.key, this.body});
+  final Widget? body;
+  final int initialIndex; // thêm tham số này
+
+  const NavigationBarWidget({
+    super.key,
+    this.body,
+    this.initialIndex = 0,
+  });
 
   @override
   State<NavigationBarWidget> createState() => _NavigationBarWidgetState();
 }
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex; // sử dụng initialIndex
     _screens = [
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),
@@ -65,26 +71,11 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
               });
             },
             tabs: const [
-              GButton(
-                icon: Icons.home,
-                iconSize: 30,
-              ),
-              GButton(
-                icon: Icons.calendar_today,
-                iconSize: 30,
-              ),
-              GButton(
-                icon: Icons.message,
-                iconSize: 30,
-              ),
-              GButton(
-                icon: Icons.notifications,
-                iconSize: 30,
-              ),
-              GButton(
-                icon: Icons.person,
-                iconSize: 30,
-              ),
+              GButton(icon: Icons.home, iconSize: 30),
+              GButton(icon: Icons.calendar_today, iconSize: 30),
+              GButton(icon: Icons.message, iconSize: 30),
+              GButton(icon: Icons.notifications, iconSize: 30),
+              GButton(icon: Icons.person, iconSize: 30),
             ],
           ),
         ),
