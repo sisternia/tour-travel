@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/api.dart';
 import '../data/models/tour_images_model.dart';
-import '../data/models/tours.model.dart';
+import '../data/models/tours_model.dart';
 import 'tour_images_service.dart';
 
 class ToursService {

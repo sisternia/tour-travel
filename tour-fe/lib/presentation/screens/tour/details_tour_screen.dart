@@ -2,11 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../core/constants/color.dart';
-import '../../../core/constants/api.dart';
 import '../../../data/models/tour_images_model.dart';
 import '../../../services/tour_images_service.dart';
+import '../../widgets/Image_List.dart';
+import '../../widgets/NavigationBar.dart';
+import '../../widgets/Tab_Tour.dart';
+import '../../widgets/Button.dart';
 import 'tour_locations_screen.dart';
-import 'tourist_spot_screen.dart';
 
 class DetailsCardScreen extends StatefulWidget {
   final int tourId;
@@ -28,12 +30,14 @@ class DetailsCardScreen extends StatefulWidget {
   State<DetailsCardScreen> createState() => _DetailsCardScreenState();
 }
 
-class _DetailsCardScreenState extends State<DetailsCardScreen> {
+class _DetailsCardScreenState extends State<DetailsCardScreen>
+    with SingleTickerProviderStateMixin {
   final TourImagesService _imgService = TourImagesService();
   late Future<List<TourImageModel>> _futureImages;
 
   int selectedIndex = 0;
   List<String> images = [];
+  bool isLoved = false;
 
   @override
   void initState() {
@@ -44,6 +48,7 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.white,
       body: SafeArea(
         child: FutureBuilder<List<TourImageModel>>(
@@ -64,20 +69,39 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
 
             final data = snap.data ?? [];
             images = data.isNotEmpty
-                ? data
-                    .map((e) => ApiConstants.baseUrl + (e.tourImg ?? ""))
-                    .toList()
+                ? data.map((e) => e.tourImg ?? "").toList()
                 : ["https://via.placeholder.com/400"];
 
-            return Column(
+            return Stack(
               children: [
-                buildImageSection(images),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: buildInfoSection(),
-                  ),
+                Column(
+                  children: [
+                    buildImageSection(images),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+                        child: buildInfoSection(),
+                      ),
+                    ),
+                  ],
                 ),
+
+                /// NÚT ĐẶT TOUR — FIXED BOTTOM
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    color: Colors.white,
+                    child: PrimaryButton(
+                      text: "Đặt Tour",
+                      onPressed: () {},
+                      loading: false,
+                    ),
+                  ),
+                )
               ],
             );
           },
@@ -86,13 +110,9 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
     );
   }
 
-  // 🖼️ PHẦN ẢNH
   Widget buildImageSection(List<String> images) {
-    int extra = images.length > 3 ? images.length - 2 : 0;
-
     return StatefulBuilder(
       builder: (context, setState) {
-        // Auto slide
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted && images.length > 1) {
             setState(() => selectedIndex = (selectedIndex + 1) % images.length);
@@ -124,7 +144,7 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
               ),
             ),
 
-            // Nút Back + Tiêu đề
+            /// BACK + HEART
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               child: Row(
@@ -135,14 +155,17 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                       Navigator.of(context).pushReplacement(
                         PageRouteBuilder(
                           pageBuilder: (context, a, b) =>
-                              const TouristSpotScreen(),
+                              const NavigationBarWidget(initialIndex: 1),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
                             final slide = Tween(
                               begin: const Offset(-1, 0),
                               end: Offset.zero,
-                            ).animate(CurvedAnimation(
-                                parent: animation, curve: Curves.easeOutCubic));
+                            ).animate(
+                              CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutCubic),
+                            );
                             return SlideTransition(
                                 position: slide, child: child);
                           },
@@ -155,107 +178,87 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                       size: 30,
                     ),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => isLoved = !isLoved);
+                    },
+                    child: SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Center(
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                              begin: 1.0, end: isLoved ? 1.3 : 1.0),
+                          duration: const Duration(milliseconds: 260),
+                          curve: Curves.easeOutBack,
+                          builder: (context, scale, child) {
+                            return Transform.scale(
+                              scale: scale,
+                              child: Icon(
+                                isLoved
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isLoved ? Colors.red : primaryColor,
+                                size: 32,
+                              ),
+                            );
+                          },
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                  const Icon(
-                    Ionicons.eyedrop_outline,
-                    color: primaryColor,
-                    size: 28,
                   ),
                 ],
               ),
             ),
 
-            // Ô ảnh nhỏ
+            /// IMAGE LIST
             if (images.length > 1)
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Column(
-                  children: List.generate(
-                    images.length <= 3 ? images.length : 3,
-                    (i) {
-                      bool isLast = i == 2 && images.length > 3;
-                      bool isSelected = selectedIndex == i;
+              ImageListWidget(
+                images: images,
+                selectedIndex: selectedIndex,
+                onSelect: (i) => setState(() => selectedIndex = i),
+              ),
 
-                      return GestureDetector(
-                        onTap: () {
-                          if (!isLast) {
-                            setState(() => selectedIndex = i);
-                          }
-                        },
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isSelected ? tPrimaryColor : Colors.white,
-                              width: 3,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: isLast
-                                ? Container(
-                                    color: Colors.black.withOpacity(0.4),
-                                    child: Center(
-                                      child: Text(
-                                        "+$extra",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Image.network(
-                                    images[i],
-                                    fit: BoxFit.cover,
-                                  ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+            /// RATING
+            Positioned(
+              bottom: -32,
+              right: 32,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade600,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.star, color: Colors.white, size: 26),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.rating.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
                 ),
               ),
+            ),
           ],
         );
       },
     );
   }
 
-  // Phần mô tả dưới ảnh
   Widget buildInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
-                ),
-              ),
-            ),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -265,68 +268,51 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                   ),
                 );
               },
-              child: const Icon(Ionicons.location_outline,
-                  color: darkGrey, size: 24),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          widget.country,
-          style: const TextStyle(fontSize: 18, color: darkGrey),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(Ionicons.star, color: Colors.amber, size: 30),
-                const SizedBox(width: 6),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.rating.toString(),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: darkGrey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text("4.500",
-                        style: TextStyle(fontSize: 14, color: darkGrey)),
-                  ],
+              child: Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
+                child: const Icon(
+                  Ionicons.location_outline,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
             ),
-            const Row(
-              children: [
-                Icon(Ionicons.heart_outline, color: primaryColor, size: 30),
-                SizedBox(width: 6),
-                Text("1.200", style: TextStyle(fontSize: 16, color: darkGrey)),
-              ],
-            ),
-            const Row(
-              children: [
-                Icon(Ionicons.chatbubble_outline,
-                    color: primaryColor, size: 30),
-                SizedBox(width: 6),
-                Text("350", style: TextStyle(fontSize: 16, color: darkGrey)),
-              ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.country,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: darkGrey,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-          "Phasellus feugiat, urna vel vestibulum fermentum...",
-          style: TextStyle(
-            fontSize: 16,
-            color: darkGrey,
-            height: 1.5,
-          ),
+        TabTourWidget(
+          description:
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+          tourId: widget.tourId,
         ),
       ],
     );
