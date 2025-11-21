@@ -3,7 +3,9 @@ const db = require("../config/db");
 
 const Tour = {
   getAll: async () => {
-    const [rows] = await db.execute("SELECT * FROM tours ORDER BY created_at DESC");
+    const [rows] = await db.execute(
+      "SELECT * FROM tours ORDER BY created_at DESC"
+    );
     return rows;
   },
 

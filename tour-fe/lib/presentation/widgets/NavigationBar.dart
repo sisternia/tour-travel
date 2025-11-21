@@ -1,6 +1,6 @@
 // lib/presentation/widgets/NavigationBar.dart
 import 'package:flutter/material.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
@@ -14,9 +14,7 @@ class NavigationBarWidget extends StatefulWidget {
 }
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
-  int _page = 0;
-  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
-  final GlobalKey<State<ProfileScreen>> _profileScreenKey = GlobalKey<State<ProfileScreen>>();
+  int _selectedIndex = 0;
 
   late final List<Widget> _screens;
 
@@ -28,40 +26,68 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
       const TouristSpotScreen(),
       const Center(child: Text('Messages')),
       const Center(child: Text('Notifications')),
-      ProfileScreen(key: _profileScreenKey),
+      const ProfileScreen(),
     ];
   }
-
-  final List<Icon> _items = const [
-    Icon(Icons.home, size: 30),
-    Icon(Icons.calendar_today, size: 30),
-    Icon(Icons.message, size: 30),
-    Icon(Icons.notifications, size: 30),
-    Icon(Icons.person, size: 30),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body:  _screens[_page], 
-      bottomNavigationBar: CurvedNavigationBar(
-        key: _bottomNavigationKey,
-        items: _items,
-        index: _page,
-        backgroundColor: Colors.transparent,
-        color: Colors.blueAccent,
-        buttonBackgroundColor: Colors.white,
-        onTap: (index) {
-          setState(() => _page = index);
-          // Refresh ProfileScreen khi chuyển sang tab Profile
-          if (index == 4) {
-            final state = _profileScreenKey.currentState;
-            if (state != null && state is ProfileScreenState) {
-              state.refreshProfile();
-            }
-          }
-        },
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+          child: GNav(
+            gap: 8,
+            backgroundColor: Colors.transparent,
+            color: Colors.white,
+            activeColor: Colors.blueAccent,
+            tabBackgroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            selectedIndex: _selectedIndex,
+            onTabChange: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            tabs: const [
+              GButton(
+                icon: Icons.home,
+                iconSize: 30,
+              ),
+              GButton(
+                icon: Icons.calendar_today,
+                iconSize: 30,
+              ),
+              GButton(
+                icon: Icons.message,
+                iconSize: 30,
+              ),
+              GButton(
+                icon: Icons.notifications,
+                iconSize: 30,
+              ),
+              GButton(
+                icon: Icons.person,
+                iconSize: 30,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

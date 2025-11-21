@@ -10,5 +10,6 @@ const API = {
   USERS_ALL: `${BASE_API}/profile/all`,
   TOUR_IMAGES: `${BASE_API}/tour-images`,
   TOUR_LOCATIONS: `${BASE_API}/tour-locations`,
-
+  TOUR_GUIDES: `${BASE_API}/tour-guides`,
+  TOUR_GUIDE_ASSIGNMENT: `${BASE_API}/tour-guide-assignment`,
 };
