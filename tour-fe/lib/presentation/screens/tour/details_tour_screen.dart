@@ -1,14 +1,15 @@
-// lib/presentation/screens/tour/details_tour_screen.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../core/constants/color.dart';
 import '../../../data/models/tour_images_model.dart';
 import '../../../services/tour_images_service.dart';
-import '../../widgets/Image_List.dart';
-import '../../widgets/NavigationBar.dart';
+// import '../../widgets/Image_List.dart';
+// import '../../widgets/NavigationBar.dart';
 import '../../widgets/Tab_Tour.dart';
 import '../../widgets/Button.dart';
-import 'tour_locations_screen.dart';
+// import 'tour_locations_screen.dart';
+import 'booking_tour_screen.dart';
 
 class DetailsCardScreen extends StatefulWidget {
   final int tourId;
@@ -30,8 +31,7 @@ class DetailsCardScreen extends StatefulWidget {
   State<DetailsCardScreen> createState() => _DetailsCardScreenState();
 }
 
-class _DetailsCardScreenState extends State<DetailsCardScreen>
-    with SingleTickerProviderStateMixin {
+class _DetailsCardScreenState extends State<DetailsCardScreen> {
   final TourImagesService _imgService = TourImagesService();
   late Future<List<TourImageModel>> _futureImages;
 
@@ -39,10 +39,31 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
   List<String> images = [];
   bool isLoved = false;
 
+  double? priceAdult;
+  double? priceChild;
+
+  Timer? slideTimer;
+
   @override
   void initState() {
     super.initState();
     _futureImages = _imgService.getAllImages(widget.tourId);
+  }
+
+  @override
+  void dispose() {
+    slideTimer?.cancel();
+    super.dispose();
+  }
+
+  void startAutoSlide() {
+    slideTimer?.cancel();
+    slideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || images.length <= 1) return;
+      setState(() {
+        selectedIndex = (selectedIndex + 1) % images.length;
+      });
+    });
   }
 
   @override
@@ -60,10 +81,8 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
 
             if (snap.hasError) {
               return Center(
-                child: Text(
-                  "Lỗi tải ảnh: ${snap.error}",
-                  style: const TextStyle(color: Colors.red),
-                ),
+                child: Text("Lỗi tải ảnh: ${snap.error}",
+                    style: const TextStyle(color: Colors.red)),
               );
             }
 
@@ -72,11 +91,13 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
                 ? data.map((e) => e.tourImg ?? "").toList()
                 : ["https://via.placeholder.com/400"];
 
+            startAutoSlide();
+
             return Stack(
               children: [
                 Column(
                   children: [
-                    buildImageSection(images),
+                    buildImageSection(),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
@@ -86,22 +107,40 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
                   ],
                 ),
 
-                /// NÚT ĐẶT TOUR — FIXED BOTTOM
+                /// NÚT ĐẶT TOUR
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
                     color: Colors.white,
+                    padding: const EdgeInsets.all(16),
                     child: PrimaryButton(
                       text: "Đặt Tour",
-                      onPressed: () {},
+                      onPressed: () {
+                        if (priceAdult == null || priceChild == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Đang tải bảng giá...")),
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookingTourScreen(
+                              tourId: widget.tourId,
+                              priceAdult: priceAdult!.toInt(),
+                              priceChild: priceChild!.toInt(),
+                            ),
+                          ),
+                        );
+                      },
                       loading: false,
                     ),
                   ),
-                )
+                ),
               ],
             );
           },
@@ -110,145 +149,41 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
     );
   }
 
-  Widget buildImageSection(List<String> images) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted && images.length > 1) {
-            setState(() => selectedIndex = (selectedIndex + 1) % images.length);
-          }
-        });
+  Widget buildImageSection() {
+    return Stack(
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: 450,
+          child: ClipRRect(
+            child: Image.network(
+              images[selectedIndex],
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
 
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 500,
-              decoration: const BoxDecoration(
-                color: kcontentColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
+        /// NÚT QUAY LẠI
+        Positioned(
+          top: 16,
+          left: 16,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                child: Image.network(
-                  images[selectedIndex],
-                  fit: BoxFit.cover,
-                ),
+              child: const Icon(
+                Ionicons.arrow_back,
+                color: Colors.white,
+                size: 28,
               ),
             ),
-
-            /// BACK + HEART
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushReplacement(
-                        PageRouteBuilder(
-                          pageBuilder: (context, a, b) =>
-                              const NavigationBarWidget(initialIndex: 1),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            final slide = Tween(
-                              begin: const Offset(-1, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeOutCubic),
-                            );
-                            return SlideTransition(
-                                position: slide, child: child);
-                          },
-                        ),
-                      );
-                    },
-                    child: const Icon(
-                      Ionicons.arrow_undo_outline,
-                      color: primaryColor,
-                      size: 30,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() => isLoved = !isLoved);
-                    },
-                    child: SizedBox(
-                      width: 56,
-                      height: 56,
-                      child: Center(
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                              begin: 1.0, end: isLoved ? 1.3 : 1.0),
-                          duration: const Duration(milliseconds: 260),
-                          curve: Curves.easeOutBack,
-                          builder: (context, scale, child) {
-                            return Transform.scale(
-                              scale: scale,
-                              child: Icon(
-                                isLoved
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: isLoved ? Colors.red : primaryColor,
-                                size: 32,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// IMAGE LIST
-            if (images.length > 1)
-              ImageListWidget(
-                images: images,
-                selectedIndex: selectedIndex,
-                onSelect: (i) => setState(() => selectedIndex = i),
-              ),
-
-            /// RATING
-            Positioned(
-              bottom: -32,
-              right: 32,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade600,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.star, color: Colors.white, size: 26),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.rating.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
@@ -256,63 +191,26 @@ class _DetailsCardScreenState extends State<DetailsCardScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TourLocationsScreen(tourId: widget.tourId),
-                  ),
-                );
-              },
-              child: Container(
-                width: 55,
-                height: 55,
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Ionicons.location_outline,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    widget.country,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: darkGrey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
+        Text(widget.title,
+            style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: primaryColor)),
+        const SizedBox(height: 16),
+
+        /// GỬI GIÁ TỪ TAB
         TabTourWidget(
-          description:
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+          description: "Lorem ipsum dolor sit amet...",
           tourId: widget.tourId,
+          onPriceLoaded: (adult, child) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              setState(() {
+                priceAdult = adult;
+                priceChild = child;
+              });
+            });
+          },
         ),
       ],
     );

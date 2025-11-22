@@ -1,4 +1,3 @@
-// lib/presentation/widgets/Tours_List.dart
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../core/constants/color.dart';
@@ -8,50 +7,40 @@ class TourCard extends StatelessWidget {
   final int id;
   final String title;
   final String imageUrl;
-  final String country;
   final String category;
   final String departure;
   final String destination;
   final double rating;
+  final int people;
+  final String duration;
+  final String priceAdult;
+  final String priceChild;
 
   const TourCard({
     super.key,
     required this.id,
     required this.title,
     required this.imageUrl,
-    required this.country,
     required this.category,
     required this.departure,
     required this.destination,
     required this.rating,
+    required this.people,
+    required this.duration,
+    required this.priceAdult,
+    required this.priceChild,
   });
 
   void _navigateToDetails(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            DetailsCardScreen(
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DetailsCardScreen(
           tourId: id,
           title: title,
         ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
-          final scale = Tween(begin: 0.85, end: 1.0).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-          );
-
-          return FadeTransition(
-            opacity: fade,
-            child: ScaleTransition(scale: scale, child: child),
-          );
-        },
       ),
     );
   }
-
-  IconData get destinationIcon =>
-      category == "Quốc tế" ? Ionicons.earth_outline : Ionicons.compass_outline;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +51,7 @@ class TourCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -70,25 +59,77 @@ class TourCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 150,
-            height: 150,
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => Container(
-                  color: kcontentColor,
-                  child: const Center(child: Icon(Ionicons.image_outline)),
+          // ============ IMAGE + BADGES (NEW) ============
+          Stack(
+            children: [
+              Container(
+                width: 140,
+                height: 140,
+                margin: const EdgeInsets.all(8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => Container(
+                      color: kcontentColor,
+                      child: const Center(
+                        child: Icon(Ionicons.image_outline, size: 32),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              Positioned(
+                left: 16,
+                top: 16,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.star, size: 13, color: Colors.amber),
+                      const SizedBox(width: 2),
+                      Text(
+                        rating.toStringAsFixed(1),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 16,
+                top: 16,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.people, size: 13, color: Colors.blue),
+                      const SizedBox(width: 3),
+                      Text(
+                        "$people",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Container(
@@ -98,20 +139,39 @@ class TourCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /// TITLE
                   Text(
                     title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: primaryColor,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
+
+                  /// CATEGORY & DURATION
+                  Row(
+                    children: [
+                      Icon(Ionicons.calendar_outline,
+                          size: 14, color: Colors.orange.shade800),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          duration,
+                          style: const TextStyle(fontSize: 12, color: darkGrey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  /// DEPARTURE → DESTINATION
                   Row(
                     children: [
                       const Icon(Ionicons.compass_outline,
-                          size: 16, color: darkGrey),
+                          size: 14, color: darkGrey),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -121,22 +181,8 @@ class TourCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(
-                          8,
-                          (index) => const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
-                            child: Icon(
-                              Ionicons.remove_outline,
-                              size: 12,
-                              color: darkGrey,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(destinationIcon, size: 16, color: darkGrey),
+                      const Icon(Ionicons.remove_outline,
+                          size: 12, color: darkGrey),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -147,30 +193,40 @@ class TourCard extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  /// PRICE & BUTTON
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      // PRICES
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Ionicons.star,
-                              size: 16, color: Colors.amber),
-                          const SizedBox(width: 4),
                           Text(
-                            rating.toString(),
-                            style: const TextStyle(
+                            "Người lớn: $priceAdult",
+                            style: TextStyle(
                               fontSize: 13,
-                              color: darkGrey,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                          Text(
+                            "Trẻ em: $priceChild",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade700,
                             ),
                           ),
                         ],
                       ),
+
                       GestureDetector(
                         onTap: () => _navigateToDetails(context),
                         child: const Icon(
-                          Ionicons.alert_circle_outline,
+                          Ionicons.information_circle_outline,
+                          size: 24,
                           color: primaryColor,
-                          size: 22,
                         ),
                       ),
                     ],

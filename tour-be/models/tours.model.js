@@ -2,11 +2,20 @@ const db = require("../config/db");
 
 const Tour = {
   getAll: async () => {
-    const [rows] = await db.execute(
-      "SELECT * FROM tours ORDER BY created_at DESC"
-    );
+    const [rows] = await db.execute(`
+    SELECT 
+      t.*, 
+      p.price_adult, 
+      p.price_child
+    FROM tours t
+    LEFT JOIN tour_price_assignments a ON a.tour_id = t.id
+    LEFT JOIN tour_prices p ON p.price_id = a.price_id
+    ORDER BY t.created_at DESC
+  `);
+
     return rows;
   },
+
   getLatestWithPrices: async () => {
     const [rows] = await db.execute(`
     SELECT 

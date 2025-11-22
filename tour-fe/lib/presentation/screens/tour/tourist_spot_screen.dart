@@ -5,6 +5,7 @@ import '../../../data/models/tours_model.dart';
 import '../../../services/tours_service.dart';
 import '../../widgets/Tours_List.dart';
 import '../../widgets/Tours_Category.dart';
+import 'package:intl/intl.dart';
 
 class TouristSpotScreen extends StatefulWidget {
   const TouristSpotScreen({super.key});
@@ -17,6 +18,30 @@ class _TouristSpotScreenState extends State<TouristSpotScreen> {
   String _selectedCategory = "Tất cả";
   final ToursService _toursService = ToursService();
   late Future<List<ToursModel>> _futureTours;
+  final NumberFormat currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: '₫',
+    decimalDigits: 0,
+  );
+  List<ToursModel> allTours = [];
+  List<ToursModel> filteredTours = [];
+
+  String getDuration(String start, String end) {
+    try {
+      final d1 = DateTime.parse(start);
+      final d2 = DateTime.parse(end);
+      final diff = d2.difference(d1).inDays;
+
+      if (diff <= 0) return "1 ngày";
+
+      final nights = diff;
+      final days = diff + 1;
+
+      return "$days ngày $nights đêm";
+    } catch (_) {
+      return "Không rõ";
+    }
+  }
 
   @override
   void initState() {
@@ -54,7 +79,7 @@ class _TouristSpotScreenState extends State<TouristSpotScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Tour Nổi bật",
+                    "Danh sách Tour",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -76,14 +101,15 @@ class _TouristSpotScreenState extends State<TouristSpotScreen> {
                       return TourCard(
                         id: tour.id,
                         title: tour.name,
-                        imageUrl: tour.firstImage.isNotEmpty
-                            ? tour.firstImage
-                            : "https://via.placeholder.com/150",
-                        country: "Việt Nam",
+                        imageUrl: tour.firstImage,
                         category: tour.categoryName,
-                        rating: 4.8,
                         departure: tour.departureAddress,
                         destination: tour.destinationAddress,
+                        rating: tour.rating,
+                        people: tour.numberOfPeople,
+                        duration: getDuration(tour.startDate, tour.endDate),
+                        priceAdult: currencyFormat.format(tour.priceAdult),
+                        priceChild: currencyFormat.format(tour.priceChild),
                       );
                     }).toList(),
                   ),

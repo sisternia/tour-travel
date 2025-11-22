@@ -11,7 +11,7 @@ String _formatDate(String? dateString) {
   if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
     return 'Not set';
   }
-  
+
   try {
     // Parse ISO format date
     final date = DateTime.parse(dateString);
@@ -33,7 +33,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserver {
+class ProfileScreenState extends State<ProfileScreen>
+    with WidgetsBindingObserver {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
   late Future<ProfileModel> _profileFuture;

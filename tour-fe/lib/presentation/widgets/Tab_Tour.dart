@@ -1,4 +1,3 @@
-// lib/presentation/widgets/Tab_Tour.dart
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/tour_prices_model.dart';
@@ -10,10 +9,14 @@ class TabTourWidget extends StatefulWidget {
   final String description;
   final int tourId;
 
+  /// 👉 Callback gửi giá người lớn + trẻ em lên màn detail
+  final Function(double adultPrice, double childPrice)? onPriceLoaded;
+
   const TabTourWidget({
     super.key,
     required this.description,
     required this.tourId,
+    this.onPriceLoaded,
   });
 
   @override
@@ -28,6 +31,10 @@ class _TabTourWidgetState extends State<TabTourWidget> {
 
   late Future<List<TourPriceAssignmentModel>> _futureAssignment;
   late Future<Map<String, dynamic>> _futureTourInfo;
+
+  bool _priceSent = false;
+
+  /// 👈 Thêm biến này để tránh gọi lại nhiều lần
 
   @override
   void initState() {
@@ -68,7 +75,6 @@ class _TabTourWidgetState extends State<TabTourWidget> {
             final isSelected = selectedTab == i;
             return Expanded(
               child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
                 onTap: () => setState(() => selectedTab = i),
                 child: Column(
                   children: [
@@ -104,18 +110,11 @@ class _TabTourWidgetState extends State<TabTourWidget> {
         if (selectedTab == 0)
           Text(
             widget.description,
-            style: const TextStyle(
-              fontSize: 16,
-              color: darkGrey,
-              height: 1.5,
-            ),
+            style: const TextStyle(fontSize: 16, color: darkGrey, height: 1.5),
           ),
         if (selectedTab == 1)
           FutureBuilder(
-            future: Future.wait([
-              _futureAssignment,
-              _futureTourInfo,
-            ]),
+            future: Future.wait([_futureAssignment, _futureTourInfo]),
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -136,69 +135,52 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                 );
               }
 
+              /// 👉 Chỉ gửi giá 1 lần duy nhất
+              if (!_priceSent && widget.onPriceLoaded != null) {
+                _priceSent = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onPriceLoaded!(
+                    assignments.first.priceAdult,
+                    assignments.first.priceChild,
+                  );
+                });
+              }
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...assignments.map((a) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Giá người lớn: ${_formatCurrency(a.priceAdult)}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: darkGrey,
-                              height: 1.5,
-                            ),
-                          ),
-                          Text(
-                            "Giá trẻ em: ${_formatCurrency(a.priceChild)}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: darkGrey,
-                              height: 1.5,
-                            ),
-                          ),
-                          Text(
-                            "Áp dụng: ${formatDate(a.validFrom)} → ${formatDate(a.validTo)}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: darkGrey,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Số lượng: ${tourData["numberOfPeople"]}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: darkGrey,
-                              height: 1.5,
-                            ),
-                          ),
-                          Text(
-                            "Trạng thái: ${tourData["status"]}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: darkGrey,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
+                children: assignments.map((a) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Giá người lớn: ${_formatCurrency(a.priceAdult)}",
+                            style:
+                                const TextStyle(fontSize: 16, color: darkGrey)),
+                        Text("Giá trẻ em: ${_formatCurrency(a.priceChild)}",
+                            style:
+                                const TextStyle(fontSize: 16, color: darkGrey)),
+                        Text(
+                          "Áp dụng: ${formatDate(a.validFrom)} → ${formatDate(a.validTo)}",
+                          style: const TextStyle(fontSize: 16, color: darkGrey),
+                        ),
+                        const SizedBox(height: 8),
+                        Text("Số lượng: ${tourData["numberOfPeople"]}",
+                            style:
+                                const TextStyle(fontSize: 16, color: darkGrey)),
+                        Text("Trạng thái: ${tourData["status"]}",
+                            style:
+                                const TextStyle(fontSize: 16, color: darkGrey)),
+                      ],
+                    ),
+                  );
+                }).toList(),
               );
             },
           ),
         if (selectedTab == 2)
-          const Text(
-            "Chưa có bình luận nào.",
-            style: TextStyle(fontSize: 16, color: darkGrey),
-          ),
+          const Text("Chưa có bình luận nào.",
+              style: TextStyle(fontSize: 16, color: darkGrey)),
       ],
     );
   }
