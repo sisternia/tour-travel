@@ -7,7 +7,6 @@ const TourLocations = require("../models/tour_locations.model");
 const { TourImages } = require("../models/tour_images.model");
 const Assignment = require("../models/tour_guide_assignment.model");
 
-// =========================== ALL TOURS ===========================
 const getAllTours = async (req, res) => {
   try {
     const search = req.query.search;
@@ -29,7 +28,6 @@ const getAllTours = async (req, res) => {
   }
 };
 
-// =========================== LATEST TOURS ===========================
 const getLatestWithPrices = async (req, res) => {
   try {
     const tours = await Tour.getLatestWithPrices();
@@ -39,7 +37,6 @@ const getLatestWithPrices = async (req, res) => {
   }
 };
 
-// =========================== TOUR BY ID (FULL DETAIL) ===========================
 const getTourById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -78,7 +75,6 @@ const getTourById = async (req, res) => {
   }
 };
 
-// =========================== CREATE TOUR ===========================
 const createTour = async (req, res) => {
   try {
     const {
@@ -123,7 +119,6 @@ const createTour = async (req, res) => {
   }
 };
 
-// =========================== UPDATE TOUR ===========================
 const updateTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,7 +136,6 @@ const updateTour = async (req, res) => {
   }
 };
 
-// =========================== DELETE TOUR ===========================
 const deleteTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,7 +151,6 @@ const deleteTour = async (req, res) => {
   }
 };
 
-// =========================== EXPORT ===========================
 module.exports = {
   getAllTours,
   getLatestWithPrices,
