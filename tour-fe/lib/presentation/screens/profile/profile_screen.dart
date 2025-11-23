@@ -11,7 +11,7 @@ String _formatDate(String? dateString) {
   if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
     return 'Not set';
   }
-  
+
   try {
     // Parse ISO format date
     final date = DateTime.parse(dateString);
@@ -33,7 +33,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserver {
+class ProfileScreenState extends State<ProfileScreen>
+    with WidgetsBindingObserver {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
   late Future<ProfileModel> _profileFuture;
@@ -87,31 +88,61 @@ class ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserve
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: FutureBuilder<ProfileModel>(
-          future: _profileFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return _buildError(snapshot.error.toString());
-            } else if (snapshot.hasData) {
-              final profile = snapshot.data!;
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildCoverAvatarAndInfo(context, profile),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 80),
-                      child: _buildInfoFields(profile),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return const Center(child: Text('No profile data.'));
-            }
-          },
+        child: Column(
+          children: [
+            _buildHeader(), // ← THÊM MỚI
+            Expanded(
+              child: FutureBuilder<ProfileModel>(
+                future: _profileFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return _buildError(snapshot.error.toString());
+                  } else if (snapshot.hasData) {
+                    final profile = snapshot.data!;
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildCoverAvatarAndInfo(context, profile),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 80),
+                            child: _buildInfoFields(profile),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const Center(child: Text('No profile data.'));
+                  }
+                },
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          ),
+          const Expanded(
+            child: Text(
+              'Profile',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 48),
+        ],
       ),
     );
   }

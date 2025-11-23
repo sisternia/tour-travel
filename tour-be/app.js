@@ -12,6 +12,7 @@ const tourPricesRoutes = require("./routes/tour_prices.routes");
 const tourImagesRoutes = require("./routes/tour_images.routes");
 const tourLocationsRoutes = require("./routes/tour_locations.routes");
 const mapboxRoutes = require("./services/mapbox.service");
+const postRoutes = require("./routes/posts.routes");
 const pool = require('./config/db');
 
 const app = express();
@@ -22,7 +23,7 @@ app.use(cors({ origin: '*' }));
 // Serve static folders
 app.use('/assets', express.static('assets'));
 
-// 🆕 Serve admin dashboard
+// Serve admin dashboard
 app.use('/admin', express.static('admin'));
 
 app.use('/api/auth', authRoutes);
@@ -34,6 +35,7 @@ app.use("/api/tour-images", tourImagesRoutes);
 app.use("/api/tour-prices", tourPricesRoutes);
 app.use("/api/tour-locations", tourLocationsRoutes);
 app.use("/api/mapbox", mapboxRoutes);
+app.use("/api/posts", postRoutes);
 
 app.get('/', (req, res) => {
   res.send('Server đang chạy!');

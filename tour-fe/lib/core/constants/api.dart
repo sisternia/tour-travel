@@ -60,4 +60,9 @@ class ApiConstants {
   static String get tourLocations => '$baseUrl/api/tour-locations';
   static String tourLocationsByTour(int tourId) =>
       '$baseUrl/api/tour-locations/$tourId';
+
+  // Post Images routes
+  static String get posts => '$baseUrl/api/posts';
+  static String updatePost(String id) => '$baseUrl/api/posts/$id';
+  static String deletePost(String id) => '$baseUrl/api/posts/$id';
 }
