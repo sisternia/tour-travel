@@ -34,8 +34,8 @@ class ProfileModel {
       bio: json['bio'],
       citizenId: json['citizen_id'],
       address: json['address'],
-      avatar: json['avatar'], // <-- TRỰC TIẾP URL CLOUDINARY
-      background: json['background'], // <-- TRỰC TIẾP URL CLOUDINARY
+      avatar: json['avatar'], 
+      background: json['background'], 
     );
   }
 }

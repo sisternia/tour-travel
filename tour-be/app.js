@@ -121,21 +121,17 @@ const tourLocationsRoutes = require("./routes/tour_locations.routes");
 const tourGuideRoutes = require("./routes/tour_guides.routes");
 const tourGuideAssignmentRoutes = require("./routes/tour_guide_assignment.routes");
 const mapboxRoutes = require("./services/mapbox.service");
+const postRoutes = require("./routes/posts.routes");
 const orderRoutes = require("./routes/order.routes");
 const vnpayRoute = require("./routes/vnpay.route");
+
 const pool = require("./config/db");
 
 const app = express();
 
-// ============================
-// FIX 1 — KHÔNG dùng body-parser nữa
-// ============================
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ============================
-// FIX 2 — chỉ dùng CORS 1 lần
-// ============================
 app.use(
   cors({
     origin: "*",
@@ -144,9 +140,10 @@ app.use(
   })
 );
 
-// Serve static files
+// Serve admin dashboard
 app.use("/assets", express.static("assets"));
 app.use("/admin", express.static("admin"));
+
 
 // API routes
 app.use("/api/auth", authRoutes);
@@ -162,14 +159,12 @@ app.use("/api/tour-guide-assignment", tourGuideAssignmentRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/vnpay", vnpayRoute);
 app.use("/api/mapbox", mapboxRoutes);
+app.use("/api/posts", postRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server đang chạy!");
 });
 
-// ============================
-// DATABASE + START SERVER
-// ============================
 pool
   .getConnection()
   .then((connection) => {

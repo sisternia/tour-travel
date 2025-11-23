@@ -1,12 +1,14 @@
+// lib/presentation/widgets/NavigationBar.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/profile/profile_screen.dart';
+import '../screens/post/post_header_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
   final Widget? body;
-  final int initialIndex; // thêm tham số này
+  final int initialIndex;
 
   const NavigationBarWidget({
     super.key,
@@ -26,13 +28,14 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex; // sử dụng initialIndex
+    _selectedIndex = widget.initialIndex;
+
     _screens = [
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),
       const Center(child: Text('Messages')),
       const Center(child: Text('Notifications')),
-      const ProfileScreen(),
+      const PostHeaderScreen(),
     ];
   }
 
@@ -66,16 +69,14 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             selectedIndex: _selectedIndex,
             onTabChange: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
+              setState(() => _selectedIndex = index);
             },
             tabs: const [
               GButton(icon: Icons.home, iconSize: 30),
               GButton(icon: Icons.calendar_today, iconSize: 30),
               GButton(icon: Icons.message, iconSize: 30),
               GButton(icon: Icons.notifications, iconSize: 30),
-              GButton(icon: Icons.person, iconSize: 30),
+              GButton(icon: Icons.edit, iconSize: 30), // icon viết bài
             ],
           ),
         ),
