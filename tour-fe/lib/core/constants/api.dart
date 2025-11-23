@@ -11,9 +11,9 @@ class ApiConstants {
   static String get baseUrl {
     if (kIsWeb) return 'http://$webHost:$port';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://$androidHost:$port';
+      return 'http://$androidHost:$port'; // Android emulator
     } else {
-      return 'http://$iosHost:$port';
+      return 'http://$iosHost:$port'; // iOS + Desktop
     }
   }
 
@@ -65,4 +65,17 @@ class ApiConstants {
   static String get posts => '$baseUrl/api/posts';
   static String updatePost(String id) => '$baseUrl/api/posts/$id';
   static String deletePost(String id) => '$baseUrl/api/posts/$id';
+
+  // Orders routes
+  static String get orders => '$baseUrl/api/orders';
+  static String orderById(int id) => '$baseUrl/api/orders/$id';
+  static String updateOrderStatus(int id) => '$baseUrl/api/orders/$id/status';
+
+// Payments routes
+  static String get payments => '$baseUrl/api/payments';
+  static String paymentByOrder(int orderId) => '$baseUrl/api/payments/$orderId';
+
+  // VNPAY routes
+  static String get createVnpayUrl => '$baseUrl/api/vnpay/create_payment_url';
+  static String get vnpayReturn => '$baseUrl/api/vnpay/return';
 }

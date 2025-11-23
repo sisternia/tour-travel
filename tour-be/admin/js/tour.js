@@ -2,25 +2,25 @@
 const TOUR_API = API.TOURS;
 const CATEGORY_API = API.TOUR_CATEGORIES;
 const TYPE_API = API.TOUR_TYPES;
+const ASSIGN_API = API.TOUR_GUIDE_ASSIGNMENT;
+const GUIDE_API = API.TOUR_GUIDES;
 
 const tbody = document.getElementById("tourTableBody");
 const modal = new bootstrap.Modal(document.getElementById("addModal"));
 const form = document.getElementById("tourForm");
 const categorySelect = document.getElementById("tour_category_id");
 const typeCheckboxContainer = document.getElementById("tourTypeCheckboxes");
+let selectedTourId = null;
 let editingId = null;
 let categories = [];
 let types = [];
 
-// Format date to dd/MM/yyyy
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   if (isNaN(date)) return dateStr;
   return date.toLocaleDateString("vi-VN");
 }
-
-// Load categories & types
 async function loadSelectOptions() {
   const [categoriesRes, typesRes] = await Promise.all([
     fetch(CATEGORY_API),
@@ -32,13 +32,13 @@ async function loadSelectOptions() {
 
   // Category SelectBox
   categorySelect.innerHTML = `<option value="">-- Chọn danh mục --</option>`;
-  categories.forEach(c => {
+  categories.forEach((c) => {
     categorySelect.innerHTML += `<option value="${c.category_id}">${c.categories_name}</option>`;
   });
 
   // Type Checkbox List
   typeCheckboxContainer.innerHTML = "";
-  types.forEach(t => {
+  types.forEach((t) => {
     typeCheckboxContainer.innerHTML += `
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="checkbox" value="${t.type_id}" id="type_${t.type_id}">
@@ -56,27 +56,29 @@ async function loadTours() {
   const data = await res.json();
   tbody.innerHTML = "";
 
-  data.forEach(tour => {
-    // Lấy tên loại tour
-    const category = categories.find(c => c.category_id === tour.tour_category_id);
+  data.forEach((tour) => {
+    const category = categories.find(
+      (c) => c.category_id === tour.tour_category_id
+    );
     const categoryName = category ? category.categories_name : "";
 
-    // Lấy danh sách tên kiểu tour
     const rawTypeValue = Array.isArray(tour.tour_type_id)
       ? tour.tour_type_id.join(",")
       : (tour.tour_type_id || "").toString();
 
-    const selectedTypeIds = rawTypeValue.split(",").map(s => s.trim()).filter(Boolean);
+    const selectedTypeIds = rawTypeValue
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     const typeNames = selectedTypeIds
-      .map(id => {
-        const type = types.find(t => t.type_id == id);
+      .map((id) => {
+        const type = types.find((t) => t.type_id == id);
         return type ? type.type_name : "";
       })
       .filter(Boolean)
       .join(", ");
 
-    // Hiển thị dòng trong bảng
     tbody.innerHTML += `
       <tr>
         <td>${tour.id}</td>
@@ -89,21 +91,32 @@ async function loadTours() {
         <td>${categoryName}</td>
         <td>${typeNames}</td>
         <td>${tour.status || ""}</td>
-        <td>
-          <button class="btn btn-warning btn-sm me-2" onclick="editTour(${tour.id})">Sửa</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteTour(${tour.id})">Xóa</button>
-        </td>
+    <td>
+  <div class="d-flex gap-2">
+    <button class="btn btn-warning btn-sm" onclick="editTour(${tour.id})">
+      <i class="bi bi-pencil-square"></i> 
+    </button>
+    <button class="btn btn-danger btn-sm" onclick="deleteTour(${tour.id})">
+      <i class="bi bi-trash"></i> 
+    </button>
+    <button class="btn btn-info btn-sm" onclick="openAssignModal(${tour.id})">
+       Chọn HDV
+    </button>
+  </div>
+</td>
+
+
+
       </tr>`;
   });
 }
 
-// Submit form (Thêm / Sửa tour)
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const selectedTypeIds = Array.from(
     document.querySelectorAll("#tourTypeCheckboxes input:checked")
-  ).map(cb => cb.value);
+  ).map((cb) => cb.value);
 
   const tourData = {
     name: document.getElementById("name").value,
@@ -138,7 +151,7 @@ form.addEventListener("submit", async (e) => {
 async function editTour(id) {
   const res = await fetch(TOUR_API);
   const tours = await res.json();
-  const tour = tours.find(t => t.id === id);
+  const tour = tours.find((t) => t.id === id);
   if (!tour) return alert("Không tìm thấy tour");
 
   editingId = id;
@@ -149,16 +162,23 @@ async function editTour(id) {
   document.getElementById("start_date").value = tour.start_date.split("T")[0];
   document.getElementById("end_date").value = tour.end_date.split("T")[0];
   document.getElementById("departure_address").value = tour.departure_address;
-  document.getElementById("destination_address").value = tour.destination_address;
-  document.getElementById("tour_category_id").value = tour.tour_category_id || "";
+  document.getElementById("destination_address").value =
+    tour.destination_address;
+  document.getElementById("tour_category_id").value =
+    tour.tour_category_id || "";
 
-  document.querySelector(`input[name="status"][value="${tour.status}"]`)?.click();
+  document
+    .querySelector(`input[name="status"][value="${tour.status}"]`)
+    ?.click();
 
   const rawTypeValue = Array.isArray(tour.tour_type_id)
     ? tour.tour_type_id.join(",")
     : (tour.tour_type_id || "").toString();
 
-  const selectedTypeIds = rawTypeValue.split(",").map(s => s.trim()).filter(Boolean);
+  const selectedTypeIds = rawTypeValue
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   document.querySelectorAll("#tourTypeCheckboxes input").forEach((checkbox) => {
     checkbox.checked = selectedTypeIds.includes(checkbox.value);
@@ -175,9 +195,120 @@ async function deleteTour(id) {
   alert(result.message);
   loadTours();
 }
+function showTab(tab) {
+  document
+    .getElementById("tab_tourList")
+    .classList.toggle("d-none", tab !== "tourList");
+  document
+    .getElementById("tab_tourGuideList")
+    .classList.toggle("d-none", tab !== "tourGuideList");
 
-// Khởi tạo
+  document
+    .getElementById("tabTourList")
+    .classList.toggle("active", tab === "tourList");
+  document
+    .getElementById("tabTourGuide")
+    .classList.toggle("active", tab === "tourGuideList");
+
+  if (tab === "tourGuideList") loadTourGuideTable();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await loadSelectOptions();
   loadTours();
 });
+async function openAssignModal(tourId) {
+  selectedTourId = tourId;
+  const res = await fetch(GUIDE_API);
+  const guides = await res.json();
+
+  const select = document.getElementById("selectGuide");
+  select.innerHTML = "";
+
+  guides.forEach((g) => {
+    select.innerHTML += `
+      <option value="${g.guide_id}">
+        ${g.guide_name} (${g.email})
+      </option>`;
+  });
+
+  // Mở modal
+  new bootstrap.Modal(document.getElementById("assignGuideModal")).show();
+}
+async function assignGuide() {
+  const guideId = document.getElementById("selectGuide").value;
+
+  if (!guideId || !selectedTourId) return alert("Thiếu dữ liệu để gán");
+
+  const res = await fetch(ASSIGN_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      tour_id: selectedTourId,
+      tour_guide_id: guideId,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) return alert(data.message);
+
+  alert("Gán hướng dẫn viên thành công!");
+
+  document
+    .getElementById("assignGuideModal")
+    .querySelector(".btn-close")
+    .click();
+}
+async function loadTourGuideTable() {
+  const tbody = document.getElementById("tourGuideTableBody");
+  tbody.innerHTML = `<tr><td colspan="4" class="text-center">Đang tải...</td></tr>`;
+
+  const res = await fetch(API.TOURS);
+  const tours = await res.json();
+
+  tbody.innerHTML = "";
+
+  for (let tour of tours) {
+    // Lấy toàn bộ guide theo tour_id
+    const guideRes = await fetch(`${API.TOUR_GUIDE_ASSIGNMENT}/${tour.id}`);
+    const guides = await guideRes.json();
+
+    // Cột Hướng dẫn viên (Avatar + Tên)
+    const guideList = guides.length
+      ? guides
+          .map(
+            (g) => `
+              <div class="d-flex align-items-center mb-1">
+                <img src="${g.avatar_image}" width="35" height="35"
+                  style="object-fit:cover;border-radius:50%;margin-right:8px;">
+                ${g.guide_name}
+              </div>
+            `
+          )
+          .join("")
+      : "<i>Chưa gán</i>";
+
+    // Cột Language Job
+    const guideLangList = guides.length
+      ? guides
+          .map(
+            (g) => `
+              <div class="mb-1">
+                ${g.language_job || "<i>Không rõ</i>"}
+              </div>
+            `
+          )
+          .join("")
+      : "<i>Không rõ</i>";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${tour.id}</td>
+        <td>${tour.name}</td>
+        <td>${guideList}</td>
+        <td>${guideLangList}</td>
+      </tr>
+    `;
+  }
+}

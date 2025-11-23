@@ -4,7 +4,7 @@ class SearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
   final Function(String)? onChanged;
   final Function(String)? onSubmitted;
-  final VoidCallback? onFilterPressed; // 👈 callback khi bấm filter
+  final VoidCallback? onFilterPressed;
 
   const SearchBarWidget({
     super.key,
@@ -18,23 +18,28 @@ class SearchBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
+        textInputAction: TextInputAction.search, // Enter = Search
         decoration: InputDecoration(
           hintText: "Tìm kiếm...",
-          prefixIcon: const Icon(Icons.search,
-              color: Color.fromARGB(231, 171, 169, 169)),
+
+          // 👉 ICON SEARCH CÓ onTap
+          prefixIcon: GestureDetector(
+            onTap: () {
+              if (onSubmitted != null) {
+                onSubmitted!(controller.text.trim());
+              }
+            },
+            child: const Icon(
+              Icons.search,
+              color: Color.fromARGB(231, 171, 169, 169),
+            ),
+          ),
+
+          // 👉 ICON FILTER
           suffixIcon: IconButton(
             icon: const Icon(Icons.filter_list, color: Colors.grey),
             onPressed: onFilterPressed ??
@@ -42,6 +47,7 @@ class SearchBarWidget extends StatelessWidget {
                   debugPrint("Filter button pressed!");
                 },
           ),
+
           filled: true,
           fillColor: Colors.white,
           contentPadding:

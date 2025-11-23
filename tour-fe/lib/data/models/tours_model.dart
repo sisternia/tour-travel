@@ -1,4 +1,5 @@
 // lib/data/models/tours_model.dart
+
 class ToursModel {
   final int id;
   final String name;
@@ -8,10 +9,16 @@ class ToursModel {
   final String departureAddress;
   final String destinationAddress;
   final String status;
+
   final String categoryName;
   final List<String> typeNames;
+
   String firstImage;
   List<String> allImages = [];
+
+  final double priceAdult;
+  final double priceChild;
+  final double rating;
 
   ToursModel({
     required this.id,
@@ -25,7 +32,27 @@ class ToursModel {
     required this.categoryName,
     required this.typeNames,
     this.firstImage = "",
+    required this.priceAdult,
+    required this.priceChild,
+    this.rating = 4.7,
   });
+
+  // ===========================
+  // 🔥 SAFE PRICE PARSING
+  // ===========================
+  static double parsePrice(dynamic value) {
+    if (value == null) return 0;
+
+    // Nếu backend trả về số -> ok
+    if (value is num) return value.toDouble();
+
+    // Nếu backend trả string, loại bỏ ký tự không phải số (.,₫,…)
+    final cleaned = value.toString().replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (cleaned.isEmpty) return 0;
+
+    return double.tryParse(cleaned) ?? 0;
+  }
 
   factory ToursModel.fromJson(Map<String, dynamic> json) {
     final types = json['type_names'];
@@ -48,6 +75,9 @@ class ToursModel {
       status: json['status'] ?? '',
       categoryName: json['category_name'] ?? '',
       typeNames: typeList,
+      priceAdult: parsePrice(json["price_adult"]),
+      priceChild: parsePrice(json["price_child"]),
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.7,
     );
   }
 }
