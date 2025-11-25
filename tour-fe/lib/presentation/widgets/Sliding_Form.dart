@@ -18,8 +18,8 @@ class SlidingForm extends StatefulWidget {
 
 class _SlidingFormState extends State<SlidingForm> {
   late double _top;
-  late double _collapsed;
-  late double _expanded;
+  late double _collapsed; // chỉ hiển thị icon
+  late double _expanded; // form mở hoàn toàn
 
   bool _expandedState = false;
   double _dragStart = 0;
@@ -29,10 +29,13 @@ class _SlidingFormState extends State<SlidingForm> {
     super.didChangeDependencies();
     final h = MediaQuery.of(context).size.height;
 
-    _collapsed = h;
-    _expanded = h - 40;
+    // ================================
+    //  LOGIC CHUẨN
+    // ================================
+    _expanded = h - widget.formHeight; // form mở
+    _collapsed = h - 60; // CHỈ CÒN ICON 42px + margin
 
-    _top = _collapsed;
+    _top = _collapsed; // start: only icon visible
   }
 
   void _toggle() {
@@ -45,7 +48,7 @@ class _SlidingFormState extends State<SlidingForm> {
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 240),
+      duration: const Duration(milliseconds: 260),
       curve: Curves.easeOutCubic,
       left: 0,
       right: 0,
@@ -56,19 +59,17 @@ class _SlidingFormState extends State<SlidingForm> {
         onVerticalDragStart: (d) => _dragStart = _top,
         onVerticalDragUpdate: (d) {
           setState(() {
-            _top = (_dragStart + d.delta.dy)
-                .clamp(_expanded - 30, _collapsed + 30);
+            _top = (_dragStart + d.delta.dy).clamp(_expanded, _collapsed);
           });
         },
         onVerticalDragEnd: (d) {
-          final mid = (_collapsed + _expanded) / 2;
-
+          final mid = (_expanded + _collapsed) / 2;
           final shouldExpand =
-              d.primaryVelocity != null && d.primaryVelocity! > 150
+              d.primaryVelocity != null && d.primaryVelocity! < -150
                   ? true
-                  : d.primaryVelocity != null && d.primaryVelocity! < -150
+                  : d.primaryVelocity != null && d.primaryVelocity! > 150
                       ? false
-                      : _top > mid;
+                      : _top < mid;
 
           setState(() {
             _expandedState = shouldExpand;
@@ -85,17 +86,44 @@ class _SlidingFormState extends State<SlidingForm> {
         },
         child: Column(
           children: [
+            const SizedBox(height: 4),
+
+            // ============================
+            // HANDLE TRÒN — LUÔN HIỂN THỊ
+            // ============================
             Container(
               width: 42,
               height: 42,
-              margin: const EdgeInsets.only(bottom: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.45),
+                color: Colors.white.withOpacity(0.55),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 6,
+                  )
+                ],
               ),
               child: const Icon(Icons.reorder, color: Colors.black87),
             ),
-            Expanded(child: widget.child),
+
+            // ============================
+            // FORM CHỈ HIỆN KHI MỞ
+            // ============================
+            Expanded(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _expandedState ? 1 : 0,
+                child: IgnorePointer(
+                  ignoring: !_expandedState,
+                  child: ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(28)),
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
