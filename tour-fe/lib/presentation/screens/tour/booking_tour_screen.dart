@@ -1,3 +1,4 @@
+// lib\presentation\screens\tour\booking_tour_screen.dart
 import 'package:flutter/material.dart';
 import '../../../services/order_service.dart';
 import 'package:ionicons/ionicons.dart';
@@ -256,47 +257,46 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     );
   }
 
-Future<void> _submitOrder() async {
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _submitOrder() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => loading = true);
-  final tokenService = TokenService();
-  final userId = await tokenService.getUserId();
+    setState(() => loading = true);
+    final tokenService = TokenService();
+    final userId = await tokenService.getUserId();
 
-  if (userId == null) {
+    if (userId == null) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Không tìm thấy tài khoản người dùng!")),
+      );
+      return;
+    }
+
+    final orderId = await OrderService.createOrder({
+      "number_of_child": child,
+      "number_of_adult": adult,
+      "name_tourist": nameCtrl.text,
+      "phone_tourist": phoneCtrl.text,
+      "email_tourist": emailCtrl.text,
+      "total": total,
+      "note": noteCtrl.text,
+      "user_id": userId,
+      "tour_id": widget.tourId,
+    });
+
     setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Không tìm thấy tài khoản người dùng!")),
-    );
-    return;
+
+    if (orderId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookingDetailScreen(orderId: orderId),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
+      );
+    }
   }
-
-  final orderId = await OrderService.createOrder({
-    "number_of_child": child,
-    "number_of_adult": adult,
-    "name_tourist": nameCtrl.text,
-    "phone_tourist": phoneCtrl.text,
-    "email_tourist": emailCtrl.text,
-    "total": total,
-    "note": noteCtrl.text,
-    "user_id": userId,        
-    "tour_id": widget.tourId,
-  });
-
-  setState(() => loading = false);
-
-  if (orderId != null) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BookingDetailScreen(orderId: orderId),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
-    );
-  }
-}
-
 }

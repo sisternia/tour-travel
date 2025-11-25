@@ -1,3 +1,5 @@
+// controllers\orders.controller.js
+
 const OrderService = require("../models/orders.model");
 module.exports = {
   getAll: async (req, res) => {

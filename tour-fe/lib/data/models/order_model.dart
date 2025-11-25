@@ -28,7 +28,6 @@ class OrderModel {
     required this.tourId,
     this.typeName,
   });
-  
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
