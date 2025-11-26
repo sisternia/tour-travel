@@ -1,51 +1,141 @@
-const OrderService = require("../models/orders.model");
-module.exports = {
+const Order = require("../models/orders.model");
+
+const OrderController = {
   getAll: async (req, res) => {
     try {
-      const [rows] = await OrderService.getAllOrders();
-      res.status(200).json(rows);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      const [rows] = await Order.getAllOrders();
+      return res.status(200).json(rows);
+    } catch (err) {
+      console.error("Get all orders error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Không thể lấy danh sách đơn hàng",
+      });
     }
   },
-
   getById: async (req, res) => {
     try {
-      const [rows] = await OrderService.getOrderById(req.params.id);
-      res.status(200).json(rows[0]);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      const { id } = req.params;
+      const [rows] = await Order.getOrderById(id);
+
+      if (!rows.length) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy đơn hàng",
+        });
+      }
+
+      return res.status(200).json(rows[0]);
+    } catch (err) {
+      console.error("Get order by id error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi server",
+      });
     }
   },
+  getByUser: async (req, res) => {
+    try {
+      const { userId } = req.params;
 
+      const [rows] = await Order.getOrdersByUser(userId);
+
+      return res.status(200).json(rows);
+    } catch (err) {
+      console.error("Get orders by user error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Không thể lấy đơn hàng của người dùng",
+      });
+    }
+  },
   create: async (req, res) => {
     try {
-      const [result] = await OrderService.createOrder(req.body);
+      const {
+        number_of_child,
+        number_of_adult,
+        name_tourist,
+        phone_tourist,
+        email_tourist,
+        total,
+        note,
+        user_id,
+        tour_id,
+      } = req.body;
 
-      res.status(201).json({
-        message: "Tạo đơn hàng thành công",
-        order_id: result.insertId,
+      if (!name_tourist || !phone_tourist || !user_id || !tour_id) {
+        return res.status(400).json({
+          success: false,
+          message: "Thiếu thông tin cần thiết để tạo đơn hàng",
+        });
+      }
+
+      const [result] = await Order.createOrder({
+        number_of_child,
+        number_of_adult,
+        name_tourist,
+        phone_tourist,
+        email_tourist,
+        total,
+        note,
+        user_id,
+        tour_id,
       });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+
+      const orderId = result.insertId;
+
+      return res.status(201).json({
+        success: true,
+        message: "Tạo đơn hàng thành công",
+        order_id: orderId,
+      });
+    } catch (err) {
+      console.error("Order create error:", err);
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Lỗi tạo đơn hàng",
+      });
     }
   },
 
   updateStatus: async (req, res) => {
     try {
-      await OrderService.updateStatus(req.params.id, req.body.type_confirm_id);
-      res.status(200).json({ message: "Cập nhật trạng thái thành công" });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      const { id } = req.params;
+      const { type_confirm_id } = req.body;
+
+      await Order.updateStatus(id, type_confirm_id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Cập nhật trạng thái thành công",
+      });
+    } catch (err) {
+      console.error("Update status error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi cập nhật trạng thái",
+      });
     }
   },
 
   delete: async (req, res) => {
     try {
-      await OrderService.deleteOrder(req.params.id);
-      res.status(200).json({ message: "Xóa đơn hàng thành công" });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      const { id } = req.params;
+
+      await Order.deleteOrder(id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Xoá đơn hàng thành công",
+      });
+    } catch (err) {
+      console.error("Delete order error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi xoá đơn hàng",
+      });
     }
   },
 };
+
+module.exports = OrderController;

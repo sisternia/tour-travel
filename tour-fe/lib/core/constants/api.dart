@@ -11,9 +11,9 @@ class ApiConstants {
   static String get baseUrl {
     if (kIsWeb) return 'http://$webHost:$port';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://$androidHost:$port'; // Android emulator
+      return 'http://$androidHost:$port';
     } else {
-      return 'http://$iosHost:$port'; // iOS + Desktop
+      return 'http://$iosHost:$port';
     }
   }
 
@@ -75,7 +75,9 @@ class ApiConstants {
   static String get payments => '$baseUrl/api/payments';
   static String paymentByOrder(int orderId) => '$baseUrl/api/payments/$orderId';
 
-  // VNPAY routes
-  static String get createVnpayUrl => '$baseUrl/api/vnpay/create_payment_url';
-  static String get vnpayReturn => '$baseUrl/api/vnpay/return';
+  static String get momoPayment => '$baseUrl/api/momo/payment';
+
+  static String momoRedirect(String orderId) =>
+      '$baseUrl/api/momo/redirect?orderId=$orderId';
+  static String get momoIpn => '$baseUrl/api/momo/ipn';
 }

@@ -106,8 +106,6 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                     ),
                   ],
                 ),
-
-                /// NÚT ĐẶT TOUR
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -162,8 +160,6 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
             ),
           ),
         ),
-
-        /// NÚT QUAY LẠI
         Positioned(
           top: 16,
           left: 16,
@@ -197,8 +193,6 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
                 fontWeight: FontWeight.bold,
                 color: primaryColor)),
         const SizedBox(height: 16),
-
-        /// GỬI GIÁ TỪ TAB
         TabTourWidget(
           description: "Lorem ipsum dolor sit amet...",
           tourId: widget.tourId,

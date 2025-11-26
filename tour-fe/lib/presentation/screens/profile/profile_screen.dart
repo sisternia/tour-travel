@@ -5,23 +5,20 @@ import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
+import '../orders/order_list_screen.dart';
 
-// Helper function để format date từ ISO format sang dd/MM/yyyy
 String _formatDate(String? dateString) {
   if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
     return 'Not set';
   }
 
   try {
-    // Parse ISO format date
     final date = DateTime.parse(dateString);
-    // Format thành dd/MM/yyyy
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     final year = date.year.toString();
     return '$day/$month/$year';
   } catch (e) {
-    // Nếu không parse được, trả về giá trị gốc
     return dateString;
   }
 }
@@ -70,7 +67,6 @@ class ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  // Public method để có thể gọi từ bên ngoài
   void refreshProfile() {
     if (mounted) {
       setState(() {
@@ -90,7 +86,7 @@ class ProfileScreenState extends State<ProfileScreen>
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(), // ← THÊM MỚI
+            _buildHeader(),
             Expanded(
               child: FutureBuilder<ProfileModel>(
                 future: _profileFuture,
@@ -177,7 +173,6 @@ class ProfileScreenState extends State<ProfileScreen>
       clipBehavior: Clip.none,
       alignment: Alignment.center,
       children: [
-        // Cover Image
         Container(
           height: 180,
           width: double.infinity,
@@ -209,7 +204,7 @@ class ProfileScreenState extends State<ProfileScreen>
                     MaterialPageRoute(
                         builder: (context) => const EditProfileScreen()),
                   );
-                  // Refresh profile khi quay lại từ edit screen
+
                   if (result == true || mounted) {
                     _refreshProfile();
                   }
@@ -226,8 +221,6 @@ class ProfileScreenState extends State<ProfileScreen>
             ),
           ),
         ),
-
-        // Avatar
         Positioned(
           top: 120,
           child: Container(
@@ -255,8 +248,6 @@ class ProfileScreenState extends State<ProfileScreen>
             ),
           ),
         ),
-
-        // User Info
         Positioned(
           top: 230,
           child: Column(
@@ -296,35 +287,51 @@ class ProfileScreenState extends State<ProfileScreen>
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
-        children: infoItems.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          final isLast = index == infoItems.length - 1;
+        children: [
+          ...infoItems.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final isLast = index == infoItems.length - 1;
 
-          return Column(
-            children: [
-              ListTile(
-                leading: Icon(item.icon, color: iosGray),
-                title: Text(item.label,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        color: iosGray,
-                        fontWeight: FontWeight.w500)),
-                subtitle: Text(
-                  item.value.isNotEmpty ? item.value : 'Not set',
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: item.value == 'Not set' ? iosGray : Colors.black,
-                      fontWeight: FontWeight.w400),
+            return Column(
+              children: [
+                ListTile(
+                  leading: Icon(item.icon, color: iosGray),
+                  title: Text(item.label,
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: iosGray,
+                          fontWeight: FontWeight.w500)),
+                  subtitle: Text(
+                    item.value.isNotEmpty ? item.value : 'Not set',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: item.value == 'Not set' ? iosGray : Colors.black,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              ),
-              if (!isLast)
-                Divider(height: 1, color: Colors.grey.shade200, indent: 56),
-            ],
-          );
-        }).toList(),
+                if (!isLast)
+                  Divider(height: 1, color: Colors.grey.shade200, indent: 56),
+              ],
+            );
+          }).toList(),
+          ListTile(
+            leading: Icon(Icons.list_alt, color: iosGray),
+            title: const Text(
+              'Quản lý đơn hàng',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OrderListScreen()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

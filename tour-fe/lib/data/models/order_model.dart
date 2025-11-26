@@ -12,6 +12,7 @@ class OrderModel {
   final String userId;
   final int tourId;
   final String? typeName;
+  final String? tourName;
 
   OrderModel({
     required this.id,
@@ -27,24 +28,25 @@ class OrderModel {
     required this.userId,
     required this.tourId,
     this.typeName,
+    this.tourName,
   });
-  
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: json["id"],
-      numberOfChild: json["number_of_child"],
-      numberOfAdult: json["number_of_adult"],
-      nameTourist: json["name_tourist"],
-      phoneTourist: json["phone_tourist"],
-      emailTourist: json["email_tourist"],
+      numberOfChild: json["number_of_child"] ?? 0,
+      numberOfAdult: json["number_of_adult"] ?? 0,
+      nameTourist: json["name_tourist"] ?? "",
+      phoneTourist: json["phone_tourist"] ?? "",
+      emailTourist: json["email_tourist"] ?? "",
       total: double.tryParse(json["total"].toString()) ?? 0,
       orderAt: DateTime.parse(json["order_at"]),
       note: json["note"],
-      typeConfirmId: json["type_confirm_id"],
+      typeConfirmId: json["type_confirm_id"] ?? 1,
       userId: json["user_id"].toString(),
       tourId: json["tour_id"],
       typeName: json["type_name"],
+      tourName: json["tour_name"],
     );
   }
 
@@ -63,6 +65,7 @@ class OrderModel {
       "user_id": userId,
       "tour_id": tourId,
       "type_name": typeName,
+      "tour_name": tourName,
     };
   }
 }

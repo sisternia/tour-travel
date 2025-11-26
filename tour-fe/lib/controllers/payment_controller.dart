@@ -1,26 +1,34 @@
-import 'package:url_launcher/url_launcher.dart';
-import '../services/vnpay_service.dart';
+import 'package:flutter/material.dart';
+import '../services/payment_service.dart';
+import '../presentation/screens/orders/momo_webview_mock.dart';
 
 class PaymentController {
-  static Future<void> payWithVnPay({
-    required int amount,
+  static Future<void> payWithMomo({
+    required BuildContext context,
     required int orderId,
+    required int amount,
   }) async {
-    final paymentUrl = await VnPayService.createPaymentUrl(
-      amount: amount,
-      orderId: orderId,
-      orderInfo: "Thanh toán đơn hàng #$orderId",
-    );
-
-    if (paymentUrl == null) {
-      throw Exception("Không tạo được URL thanh toán");
-    }
-
-    final encodedUrl = Uri.encodeFull(paymentUrl);
-
-    if (!await launchUrl(Uri.parse(encodedUrl),
-        mode: LaunchMode.externalApplication)) {
-      throw Exception("Không thể mở VNPAY");
+    try {
+      final payUrl = await PaymentService.createMomoPayment(
+        orderId: orderId,
+        amount: amount,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MomoWebviewMock(
+            url: payUrl,
+            orderId: orderId,
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lỗi khi tạo thanh toán MoMo: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

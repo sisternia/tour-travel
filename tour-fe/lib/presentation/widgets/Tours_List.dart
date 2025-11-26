@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../core/constants/color.dart';
-import '../screens/tour/details_tour_screen.dart';
+import '../screens/orders/details_tour_screen.dart';
 
 class TourCard extends StatelessWidget {
   final int id;
