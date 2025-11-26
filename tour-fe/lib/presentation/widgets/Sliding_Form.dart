@@ -18,10 +18,10 @@ class SlidingForm extends StatefulWidget {
 
 class _SlidingFormState extends State<SlidingForm> {
   late double _top;
-  late double _collapsed; // chỉ hiển thị icon
-  late double _expanded; // form mở hoàn toàn
+  late double _collapsed;
+  late double _expanded;
 
-  bool _expandedState = false;
+  bool _expandedState = true; // 🔥 mở sẵn khi load
   double _dragStart = 0;
 
   @override
@@ -29,13 +29,12 @@ class _SlidingFormState extends State<SlidingForm> {
     super.didChangeDependencies();
     final h = MediaQuery.of(context).size.height;
 
-    // ================================
-    //  LOGIC CHUẨN
-    // ================================
-    _expanded = h - widget.formHeight; // form mở
-    _collapsed = h - 60; // CHỈ CÒN ICON 42px + margin
+    _expanded = h - widget.formHeight;
+    _collapsed = h - 60;
 
-    _top = _collapsed; // start: only icon visible
+    /// 🔥 FORM TỰ MỞ NGAY BAN ĐẦU
+    _expandedState = true;
+    _top = _expanded;
   }
 
   void _toggle() {
@@ -88,9 +87,7 @@ class _SlidingFormState extends State<SlidingForm> {
           children: [
             const SizedBox(height: 4),
 
-            // ============================
-            // HANDLE TRÒN — LUÔN HIỂN THỊ
-            // ============================
+            /// Handle tròn
             Container(
               width: 42,
               height: 42,
@@ -107,9 +104,6 @@ class _SlidingFormState extends State<SlidingForm> {
               child: const Icon(Icons.reorder, color: Colors.black87),
             ),
 
-            // ============================
-            // FORM CHỈ HIỆN KHI MỞ
-            // ============================
             Expanded(
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),

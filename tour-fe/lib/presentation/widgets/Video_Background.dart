@@ -14,11 +14,12 @@ class _VideoBackgroundState extends State<VideoBackground>
     with WidgetsBindingObserver {
   late VideoPlayerController _videoController;
 
-  final List<String> _videos = [
-    '/video/video1.mp4',
-    '/video/video2.mp4',
-    '/video/video3.mp4',
-    '/video/video4.mp4',
+  final List<String> _cloudinaryVideos = [
+
+    "https://res.cloudinary.com/dygkdxqmq/video/upload/v1764062986/video1_p5u2oc.mp4",
+    "https://res.cloudinary.com/dygkdxqmq/video/upload/v1764063006/video2_kmstrz.mp4",
+    "https://res.cloudinary.com/dygkdxqmq/video/upload/v1764062998/video3_sqybmc.mp4",
+    "https://res.cloudinary.com/dygkdxqmq/video/upload/v1764062997/video4_lhjzgk.mp4",
   ];
 
   @override
@@ -30,9 +31,10 @@ class _VideoBackgroundState extends State<VideoBackground>
 
   Future<void> _initVideo() async {
     final rnd = Random();
-    final path = _videos[rnd.nextInt(_videos.length)];
+    final url = _cloudinaryVideos[rnd.nextInt(_cloudinaryVideos.length)];
 
-    _videoController = VideoPlayerController.asset(path);
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
+
     await _videoController.initialize();
     _videoController.setLooping(true);
     _videoController.setVolume(0);

@@ -155,25 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           ),
           const SizedBox(height: 10),
-          const ImageCarousel(
-            hotelList: [
-              {
-                "image": "assets/images/slider1.jpg",
-                "name": "Lũng Cú",
-                "location": "Hà Giang"
-              },
-              {
-                "image": "assets/images/slider2.jpg",
-                "name": "Cầu Vàng",
-                "location": "Đà Nẵng"
-              },
-              {
-                "image": "assets/images/slider3.jpg",
-                "name": "Hồ Kẻ Gỗ",
-                "location": "Hà Tĩnh"
-              },
-            ],
-          ),
+          const ImageCarousel(),
           const SizedBox(height: 25),
           Text(
             "🗺️ Khám phá tour",
@@ -209,6 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+
   Widget _buildSearchResults() {
     if (filteredTours.isEmpty) {
       return const Padding(
@@ -537,7 +520,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                       ElevatedButton(
+                        ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(

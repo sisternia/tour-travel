@@ -71,7 +71,13 @@ class ApiConstants {
   static String orderById(int id) => '$baseUrl/api/orders/$id';
   static String updateOrderStatus(int id) => '$baseUrl/api/orders/$id/status';
 
-// Payments routes
+  // Tour Schedules routes
+  static String get schedules => '$baseUrl/api/tour-schedules';
+  static String schedulesByTour(int tourId) =>
+      '$baseUrl/api/tour-schedules/tour/$tourId';
+  static String get scheduleTours => '$baseUrl/api/tour-schedules/tours/list';
+
+  // Payments routes
   static String get payments => '$baseUrl/api/payments';
   static String paymentByOrder(int orderId) => '$baseUrl/api/payments/$orderId';
 

@@ -9,12 +9,10 @@ const {
 
 const extractPublicId = (url) => {
   if (!url) return null;
-  const parts = url.split("/");
-  const file = parts.pop();
-  const versionIndex = parts.findIndex((p) => p === "upload");
-  if (versionIndex === -1) return null;
-  const publicPath = parts.slice(versionIndex + 1).join("/") + "/" + file.split(".")[0];
-  return publicPath;
+
+  const match = url.match(/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
+
+  return match ? match[1] : null; 
 };
 
 const TourImagesController = {
@@ -30,7 +28,8 @@ const TourImagesController = {
   async createFolder(req, res) {
     try {
       const { folder_name } = req.body;
-      if (!folder_name) return res.status(400).json({ message: "Thiếu tên thư mục" });
+      if (!folder_name)
+        return res.status(400).json({ message: "Thiếu tên thư mục" });
       await TourImageFolders.create(folder_name);
       res.json({ success: true });
     } catch (err) {
@@ -44,8 +43,10 @@ const TourImagesController = {
       const folder_name = req.query.folder_name;
       const files = req.files;
 
-      if (!folder_id || !folder_name) return res.status(400).json({ message: "Thiếu dữ liệu" });
-      if (!files?.length) return res.status(400).json({ message: "Không có ảnh" });
+      if (!folder_id || !folder_name)
+        return res.status(400).json({ message: "Thiếu dữ liệu" });
+      if (!files?.length)
+        return res.status(400).json({ message: "Không có ảnh" });
 
       const urls = [];
 
@@ -54,7 +55,9 @@ const TourImagesController = {
           folder: `tour-images/${folder_name}`,
         });
         urls.push(uploaded.secure_url);
-        try { fs.unlinkSync(file.path); } catch (e) { /* ignore */ }
+        try {
+          fs.unlinkSync(file.path);
+        } catch (e) {}
       }
 
       await TourImages.addImages(folder_id, urls);
@@ -76,11 +79,14 @@ const TourImagesController = {
   async assignImage(req, res) {
     try {
       const { tour_id, tour_img_id } = req.body;
-      if (!tour_id || !tour_img_id) return res.status(400).json({ message: "Thiếu dữ liệu" });
+      if (!tour_id || !tour_img_id)
+        return res.status(400).json({ message: "Thiếu dữ liệu" });
       await TourImageAssignment.create(tour_id, tour_img_id);
       res.json({ success: true });
     } catch (err) {
-      res.status(500).json({ message: "Không thể gán ảnh (ảnh không tồn tại)" });
+      res
+        .status(500)
+        .json({ message: "Không thể gán ảnh (ảnh không tồn tại)" });
     }
   },
 
@@ -114,10 +120,12 @@ const TourImagesController = {
     try {
       const { folder_id } = req.params;
       const images = await TourImages.getByFolder(folder_id);
+
       for (const img of images) {
         const publicId = extractPublicId(img.tour_img);
         if (publicId) await cloudinary.uploader.destroy(publicId);
       }
+
       await TourImageFolders.delete(folder_id);
       res.json({ success: true });
     } catch (err) {
@@ -128,7 +136,8 @@ const TourImagesController = {
   async getFirstImageByTour(req, res) {
     try {
       const { tour_id } = req.params;
-      if (!tour_id) return res.status(400).json({ message: "Thiếu tour_id" });
+      if (!tour_id)
+        return res.status(400).json({ message: "Thiếu tour_id" });
       const image = await TourImages.getFirstByTourId(tour_id);
       if (!image) return res.status(404).json({ message: "Không có ảnh" });
       res.json(image);
@@ -140,14 +149,56 @@ const TourImagesController = {
   async getAllImagesByTour(req, res) {
     try {
       const { tour_id } = req.params;
-      if (!tour_id) return res.status(400).json({ message: "Thiếu tour_id" });
+      if (!tour_id)
+        return res.status(400).json({ message: "Thiếu tour_id" });
       const list = await TourImages.getAllByTourId(tour_id);
       res.json(list);
     } catch (err) {
-      res.status(500).json({ message: "Không thể tải danh sách ảnh" });
+      res
+        .status(500)
+        .json({ message: "Không thể tải danh sách ảnh" });
+    }
+  },
+
+  async renameFolder(req, res) {
+    try {
+      const { folder_id } = req.params;
+      const { new_folder_name } = req.body;
+
+      if (!folder_id || !new_folder_name) {
+        return res.status(400).json({ message: "Thiếu dữ liệu" });
+      }
+
+      const folder = await TourImageFolders.getById(folder_id);
+      if (!folder) {
+        return res.status(404).json({ message: "Folder không tồn tại" });
+      }
+
+      const images = await TourImages.getByFolder(folder_id);
+
+      for (const img of images) {
+        const publicId = extractPublicId(img.tour_img);
+        if (!publicId) continue;
+
+        const filePart = publicId.split("/").pop();
+        const newPublicId = `tour-images/${new_folder_name}/${filePart}`;
+
+        const result = await cloudinary.uploader.rename(publicId, newPublicId);
+
+        const newUrl = result.secure_url || img.tour_img;
+        await TourImages.updateUrl(img.tour_img_id, newUrl);
+      }
+
+      await TourImageFolders.updateName(folder_id, new_folder_name);
+
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({
+        message: "Lỗi đổi tên folder",
+        error: err.message,
+      });
     }
   },
 };
 
 module.exports = TourImagesController;
-

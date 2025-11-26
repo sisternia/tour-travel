@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import '../../../services/order_service.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../widgets/Button.dart';
+import '../../widgets/TextField.dart';
 import 'booking_detail_screen.dart';
 import '../../../services/token_service.dart';
 
@@ -39,13 +41,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text("Đặt Tour"),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-      ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -58,7 +54,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 "Thông tin số lượng",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 15),
 
               /// Người lớn
               _buildNumberSelector(
@@ -71,6 +67,8 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 },
               ),
 
+              const SizedBox(height: 15),
+
               /// Trẻ em
               _buildNumberSelector(
                 title: "Trẻ em",
@@ -82,7 +80,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 },
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 30),
               const Text(
                 "Thông tin liên hệ",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -118,29 +116,38 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 6,
-              color: Colors.black12,
-              offset: Offset(0, -2),
-            )
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.redAccent, width: 1.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Hủy",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: PrimaryButton(
+                text: "Xác nhận",
+                loading: loading,
+                onPressed: _submitOrder,
+              ),
+            ),
           ],
-        ),
-        child: ElevatedButton(
-          onPressed: loading ? null : _submitOrder,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            backgroundColor: Colors.blueAccent,
-            elevation: 0,
-          ),
-          child: loading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text("Xác nhận đặt tour",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
       ),
     );
@@ -151,26 +158,13 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       String? Function(String?)? validator,
       TextInputType keyboard = TextInputType.text,
       IconData? icon}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        validator: validator,
-        maxLines: maxLines,
-        keyboardType: keyboard,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.blueAccent),
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-      ),
+    return CustomTextField(
+      controller: controller,
+      label: label,
+      validator: validator,
+      keyboardType: keyboard,
+      maxLines: maxLines,
+      icon: icon,
     );
   }
 
@@ -185,7 +179,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(

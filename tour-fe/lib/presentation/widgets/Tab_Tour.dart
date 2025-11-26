@@ -1,15 +1,17 @@
+// lib/presentation/widgets/Tab_Tour.dart
+
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/color.dart';
-import 'package:tour_fe/data/models/tour_prices_model.dart';
 import 'package:tour_fe/services/tour_prices_service.dart';
 import 'package:tour_fe/services/tours_service.dart';
+import 'package:tour_fe/services/tour_schedules_service.dart';
 import 'package:intl/intl.dart';
+import 'package:tour_fe/data/models/tour_prices_model.dart';
+import 'package:tour_fe/data/models/tour_schedules_model.dart';
 
 class TabTourWidget extends StatefulWidget {
   final String description;
   final int tourId;
-
-  /// 👉 Callback gửi giá người lớn + trẻ em lên màn detail
   final Function(double adultPrice, double childPrice)? onPriceLoaded;
 
   const TabTourWidget({
@@ -28,19 +30,20 @@ class _TabTourWidgetState extends State<TabTourWidget> {
 
   final TourPricesService _pricesService = TourPricesService();
   final ToursService _toursService = ToursService();
+  final TourSchedulesService _schedulesService = TourSchedulesService();
 
   late Future<List<TourPriceAssignmentModel>> _futureAssignment;
   late Future<Map<String, dynamic>> _futureTourInfo;
+  late Future<List<TourScheduleModel>> _futureSchedules;
 
   bool _priceSent = false;
-
-  /// 👈 Thêm biến này để tránh gọi lại nhiều lần
 
   @override
   void initState() {
     super.initState();
     _futureAssignment = _pricesService.fetchAssignmentByTour(widget.tourId);
     _futureTourInfo = _loadTourInfo();
+    _futureSchedules = _schedulesService.fetchSchedulesByTour(widget.tourId);
   }
 
   Future<Map<String, dynamic>> _loadTourInfo() async {
@@ -108,9 +111,69 @@ class _TabTourWidgetState extends State<TabTourWidget> {
         ),
         const SizedBox(height: 20),
         if (selectedTab == 0)
-          Text(
-            widget.description,
-            style: const TextStyle(fontSize: 16, color: darkGrey, height: 1.5),
+          FutureBuilder<List<TourScheduleModel>>(
+            future: _futureSchedules,
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snap.hasError) {
+                return Text("Lỗi tải lịch trình: ${snap.error}");
+              }
+
+              final schedules = snap.data ?? [];
+
+              if (schedules.isEmpty) {
+                return const Text(
+                  "Chưa có lịch trình cho tour này.",
+                  style: TextStyle(fontSize: 16, color: darkGrey),
+                );
+              }
+
+              final int totalDays = schedules
+                  .map((e) => e.dayNumber)
+                  .fold(0, (a, b) => a > b ? a : b);
+
+              final int totalNights = totalDays > 0 ? totalDays - 1 : 0;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    schedules.first.description ?? "Không có mô tả",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: darkGrey,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    "$totalDays ngày và $totalNights đêm",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ...schedules.skip(1).map((s) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        s.description ?? "Không có mô tả",
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: darkGrey,
+                          height: 1.5,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              );
+            },
           ),
         if (selectedTab == 1)
           FutureBuilder(
@@ -135,7 +198,6 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                 );
               }
 
-              /// 👉 Chỉ gửi giá 1 lần duy nhất
               if (!_priceSent && widget.onPriceLoaded != null) {
                 _priceSent = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
