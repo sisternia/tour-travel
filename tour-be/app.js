@@ -1,4 +1,5 @@
 // app.js
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -17,7 +18,8 @@ const tourSchedulesRoutes = require("./routes/tour_schedules.routes");
 const mapboxRoutes = require("./services/mapbox.service");
 const postRoutes = require("./routes/posts.routes");
 const orderRoutes = require("./routes/order.routes");
-const vnpayRoute = require("./routes/vnpay.route");
+const momoRoute = require("./routes/momo.routes");
+// const vnpayRoute = require("./routes/vnpay.route");
 
 const pool = require("./config/db");
 
@@ -38,7 +40,6 @@ app.use(
 app.use("/assets", express.static("assets"));
 app.use("/admin", express.static("admin"));
 
-
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
@@ -52,8 +53,9 @@ app.use("/api/tour-guides", tourGuideRoutes);
 app.use("/api/tour-guide-assignment", tourGuideAssignmentRoutes);
 app.use("/api/tour-schedules", tourSchedulesRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/vnpay", vnpayRoute);
+// app.use("/api/vnpay", vnpayRoute);
 app.use("/api/mapbox", mapboxRoutes);
+app.use("/api/momo", momoRoute);
 app.use("/api/posts", postRoutes);
 
 app.get("/", (req, res) => {

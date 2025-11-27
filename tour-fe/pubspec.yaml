@@ -26,6 +26,10 @@ dependencies:
   video_player: ^2.9.2
   url_launcher: ^6.3.2
   chewie: ^1.13.0
+  webview_flutter: ^4.7.0
+  webview_flutter_android: ^3.12.0
+  webview_flutter_wkwebview: ^3.11.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -33,7 +37,6 @@ dev_dependencies:
 
 dependency_overrides:
   win32: 5.5.4
-
 
 flutter:
   uses-material-design: true

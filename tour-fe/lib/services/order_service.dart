@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/api.dart';
 import '../data/models/order_model.dart';
+import '../services/token_service.dart';
 
 class OrderService {
-  // Tạo đơn hàng
   static Future<int?> createOrder(Map<String, dynamic> data) async {
     final url = Uri.parse(ApiConstants.orders);
 
@@ -15,29 +15,42 @@ class OrderService {
         body: jsonEncode(data),
       );
 
-      print("ORDER CREATE RESPONSE: ${response.body}");
+      print("CREATE ORDER RESPONSE: ${response.body}");
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final json = jsonDecode(response.body);
         return json["order_id"];
-      } else {
-        print("CREATE ORDER FAILED: ${response.statusCode}");
-        return null;
       }
+
+      return null;
     } catch (e) {
       print("CREATE ORDER ERROR: $e");
       return null;
     }
   }
 
-  // Lấy danh sách đơn hàng
+  static Future<String> createMomoPayment({
+    required int orderId,
+    required int amount,
+  }) async {
+    final url = Uri.parse(ApiConstants.momoPayment);
+
+    final res = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"orderId": orderId, "amount": amount}),
+    );
+
+    final data = jsonDecode(res.body);
+    return data["payUrl"];
+  }
+
   static Future<List<OrderModel>> getOrders() async {
     try {
       final res = await http.get(Uri.parse(ApiConstants.orders));
-
       if (res.statusCode == 200) {
-        List list = jsonDecode(res.body);
-        return list.map((e) => OrderModel.fromJson(e)).toList();
+        List json = jsonDecode(res.body);
+        return json.map((e) => OrderModel.fromJson(e)).toList();
       }
       return [];
     } catch (e) {
@@ -46,11 +59,9 @@ class OrderService {
     }
   }
 
-  // Lấy đơn theo ID
   static Future<OrderModel?> getOrderById(int id) async {
     try {
       final res = await http.get(Uri.parse(ApiConstants.orderById(id)));
-
       if (res.statusCode == 200) {
         return OrderModel.fromJson(jsonDecode(res.body));
       }
@@ -61,21 +72,47 @@ class OrderService {
     }
   }
 
-  // Cập nhật trạng thái đơn (Admin)
   static Future<bool> updateStatus(int id, int typeConfirmId) async {
     try {
       final res = await http.put(
         Uri.parse(ApiConstants.updateOrderStatus(id)),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "type_confirm_id": typeConfirmId,
-        }),
+        body: jsonEncode({"type_confirm_id": typeConfirmId}),
       );
 
       return res.statusCode == 200;
     } catch (e) {
       print("Error update order status: $e");
       return false;
+    }
+  }
+
+  static Future<List<OrderModel>> getOrdersByUser() async {
+    try {
+      final userId = await TokenService().getUserId();
+
+      if (userId == null) {
+        print("ERROR: userId is NULL in storage!");
+        return [];
+      }
+
+      print("➡ Fetching orders for userId: $userId");
+
+      final url = Uri.parse("${ApiConstants.orders}/user/$userId");
+
+      final res = await http.get(url);
+
+      print("ORDER BY USER RESPONSE: ${res.body}");
+
+      if (res.statusCode == 200) {
+        List list = jsonDecode(res.body);
+        return list.map((e) => OrderModel.fromJson(e)).toList();
+      }
+
+      return [];
+    } catch (e) {
+      print("ERROR get orders by user: $e");
+      return [];
     }
   }
 }
