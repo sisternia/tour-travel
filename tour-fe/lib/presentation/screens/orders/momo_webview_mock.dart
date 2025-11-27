@@ -1,9 +1,16 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:tour_fe/services/order_service.dart';
 import 'payment_success_screen.dart';
+
+// WEB SUPPORT
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:ui' as ui;
+// NEW FOR FLUTTER 3.24+
+import 'dart:ui_web' as ui_web;
 
 class MomoWebviewMock extends StatefulWidget {
   final String url;
@@ -20,34 +27,46 @@ class MomoWebviewMock extends StatefulWidget {
 }
 
 class _MomoWebviewMockState extends State<MomoWebviewMock> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   bool loading = true;
+  late final String _viewId;
 
   @override
   void initState() {
     super.initState();
 
-    late final PlatformWebViewControllerCreationParams params;
+    if (kIsWeb) {
+      _viewId =
+          'momo-webview-${widget.orderId}-${DateTime.now().millisecondsSinceEpoch}';
 
-    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams();
+      // NEW API FOR FLUTTER 3.24+
+      // ignore: undefined_prefixed_name
+      ui_web.platformViewRegistry.registerViewFactory(
+        _viewId,
+        (int id) {
+          final iframe = html.IFrameElement()
+            ..src = widget.url
+            ..style.border = 'none'
+            ..style.width = '100%'
+            ..style.height = '100%';
+
+          return iframe;
+        },
+      );
     } else {
-      params = AndroidWebViewControllerCreationParams();
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageStarted: (_) => setState(() => loading = true),
+            onPageFinished: (_) => setState(() => loading = false),
+          ),
+        )
+        ..loadRequest(Uri.parse(widget.url));
     }
-
-    _controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) => setState(() => loading = true),
-          onPageFinished: (_) => setState(() => loading = false),
-          onWebResourceError: (err) => debugPrint("WEBVIEW ERROR: $err"),
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
   }
 
-  _mockPaymentSuccess() async {
+  Future<void> _mockPaymentSuccess() async {
     await OrderService.updateStatus(widget.orderId, 3);
 
     if (!mounted) return;
@@ -60,23 +79,29 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
     );
   }
 
+  Widget _buildWebview() {
+    if (kIsWeb) {
+      return HtmlElementView(viewType: _viewId);
+    }
+
+    return Stack(
+      children: [
+        if (_controller != null) WebViewWidget(controller: _controller!),
+        if (loading) const Center(child: CircularProgressIndicator()),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thanh toán ví MoMo "),
+        title: const Text("Thanh toán ví MoMo"),
         backgroundColor: Colors.pink,
       ),
       body: Column(
         children: [
-          Expanded(
-            child: Stack(
-              children: [
-                WebViewWidget(controller: _controller),
-                if (loading) const Center(child: CircularProgressIndicator()),
-              ],
-            ),
-          ),
+          Expanded(child: _buildWebview()),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -90,31 +115,22 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
                 ),
                 child: Ink(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFFF4E8A), // Màu MoMo hồng đậm
-                        Color(0xFFEF3A7B), // Màu MoMo hồng sáng
-                      ],
+                      colors: [Color(0xFFFF4E8A), Color(0xFFEF3A7B)],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                   ),
-                  child: Container(
-                    alignment: Alignment.center,
+                  child: const Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.account_balance_wallet_outlined,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                      children: [
+                        Icon(Icons.account_balance_wallet_outlined,
+                            color: Colors.white, size: 22),
                         SizedBox(width: 10),
                         Text(
                           "THANH TOÁN",

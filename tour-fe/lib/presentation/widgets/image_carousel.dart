@@ -1,166 +1,182 @@
+// lib/presentation/widgets/Image_Carousel.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 class ImageCarousel extends StatefulWidget {
-  final List<Map<String, String>> hotelList;
-  const ImageCarousel({super.key, required this.hotelList});
+  const ImageCarousel({super.key});
 
   @override
   State<ImageCarousel> createState() => _ImageCarouselState();
 }
 
 class _ImageCarouselState extends State<ImageCarousel> {
-  int activeIndex = 0;
-  final CarouselSliderController _controller = CarouselSliderController();
+  static const int _virtualPageCount = 999999; // vòng lặp ảo
+  late final PageController _pageController;
+  int currentIndex = 0;
+  Timer? _timer;
+
+  final List<Map<String, String>> sliders = const [
+    {
+      "image": "assets/images/slider1.jpg",
+      "name": "National Park, Canada",
+      "rating": "4.8"
+    },
+    {
+      "image": "assets/images/slider2.jpg",
+      "name": "Sachslen, Switzerland",
+      "rating": "4.6"
+    },
+    {
+      "image": "assets/images/slider3.jpg",
+      "name": "Ha Giang, Vietnam",
+      "rating": "4.7"
+    },
+    {
+      "image": "assets/images/slider4.jpg",
+      "name": "Sa Pa, Vietnam",
+      "rating": "4.9"
+    },
+    {
+      "image": "assets/images/slider5.jpg",
+      "name": "Phu Quoc, Vietnam",
+      "rating": "4.8"
+    },
+    {
+      "image": "assets/images/slider6.jpg",
+      "name": "Ninh Binh, Vietnam",
+      "rating": "4.6"
+    },
+    {
+      "image": "assets/images/slider7.jpg",
+      "name": "Da Nang, Vietnam",
+      "rating": "4.7"
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final middleIndex = _virtualPageCount ~/ 2;
+    _pageController = PageController(
+      viewportFraction: 0.70,
+      initialPage: middleIndex,
+    );
+
+    currentIndex = middleIndex % sliders.length;
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      final nextPage = _pageController.page!.toInt() + 1;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            CarouselSlider.builder(
-              carouselController: _controller,
-              itemCount: widget.hotelList.length,
-              itemBuilder: (context, index, realIndex) {
-                final hotel = widget.hotelList[index];
+        SizedBox(
+          height: 260,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _virtualPageCount,
+            physics: const BouncingScrollPhysics(),
+            onPageChanged: (index) =>
+                setState(() => currentIndex = index % sliders.length),
+            itemBuilder: (context, index) {
+              final item = sliders[index % sliders.length];
 
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.25),
-                        blurRadius: 24,
-                        spreadRadius: 4,
-                        offset: const Offset(0, 12),
-                      ),
-                      BoxShadow(
-                        color: Colors.purpleAccent.withOpacity(0.12),
-                        blurRadius: 40,
-                        spreadRadius: 8,
-                        offset: const Offset(0, 24),
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.10),
-                        blurRadius: 2,
-                        spreadRadius: 1,
-                        offset: const Offset(-4, -4),
-                      ),
-                    ],
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color.fromARGB(255, 186, 220, 219),
-                        Color.fromARGB(255, 94, 192, 212)
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.20),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
                     ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: AspectRatio(
+                    aspectRatio: 3 / 4,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        ColorFiltered(
-                          colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.08),
-                            BlendMode.darken,
-                          ),
-                          child: Image.asset(
-                            hotel["image"]!,
-                            fit: BoxFit.cover,
-                            color: Colors.white.withOpacity(0.92),
-                            colorBlendMode: BlendMode.modulate,
-                          ),
-                        ),
+                        Image.asset(item["image"]!, fit: BoxFit.cover),
                         Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
-                            border: Border.all(
-                              color: Colors.cyanAccent.withOpacity(0.5),
-                              width: 1,
-                            ),
                             gradient: LinearGradient(
                               colors: [
-                                Colors.transparent,
-                                Colors.cyanAccent.withOpacity(0.08),
-                                Colors.transparent,
+                                Colors.black.withOpacity(0.0),
+                                Colors.black.withOpacity(0.35)
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                             ),
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
+                        Positioned(
+                          top: 10,
+                          left: 10,
+                          child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                                horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 186, 236, 244)
-                                  .withOpacity(0.9),
+                              color: Colors.white.withOpacity(0.90),
                               borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color.fromARGB(255, 80, 181, 221)
-                                      .withOpacity(0.15),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
                             ),
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.location_on,
-                                    size: 18, color: Colors.orange),
-                                const SizedBox(width: 6),
+                                const Icon(Icons.star,
+                                    size: 16, color: Colors.amber),
+                                const SizedBox(width: 4),
                                 Text(
-                                  hotel["name"] ?? "",
+                                  item["rating"]!,
                                   style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14),
+                                )
                               ],
                             ),
                           ),
                         ),
                         Positioned(
-                          top: 12,
+                          bottom: 12,
+                          left: 12,
                           right: 12,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
+                                horizontal: 14, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.amber.shade300,
-                              borderRadius: BorderRadius.circular(50),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.25),
-                                  blurRadius: 6,
-                                  offset: const Offset(2, 3),
-                                ),
-                              ],
+                              color: Colors.white.withOpacity(0.85),
+                              borderRadius: BorderRadius.circular(22),
                             ),
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.star,
-                                    size: 16, color: Colors.orange),
-                                const SizedBox(width: 4),
-                                Text(
-                                  hotel["rating"] ?? "4.8",
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                const Icon(Icons.location_on,
+                                    color: Colors.redAccent, size: 18),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    item["name"]!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -170,56 +186,31 @@ class _ImageCarouselState extends State<ImageCarousel> {
                       ],
                     ),
                   ),
-                );
-              },
-              options: CarouselOptions(
-                height: 220,
-                autoPlay: true,
-                autoPlayInterval: const Duration(seconds: 3),
-                enlargeCenterPage: true,
-                viewportFraction: 0.8,
-                onPageChanged: (index, reason) =>
-                    setState(() => activeIndex = index),
-              ),
-            ),
-
-            // Nút Previous
-            Positioned(
-              left: 10,
-              child: GestureDetector(
-                onTap: () => _controller.previousPage(),
-                child: _buildArrowButton(Icons.arrow_back),
-              ),
-            ),
-
-            // Nút Next
-            Positioned(
-              right: 10,
-              child: GestureDetector(
-                onTap: () => _controller.nextPage(),
-                child: _buildArrowButton(Icons.arrow_forward),
-              ),
-            ),
-          ],
+                ),
+              );
+            },
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            sliders.length,
+            (i) => AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              height: 8,
+              width: currentIndex == i ? 22 : 8,
+              decoration: BoxDecoration(
+                color: currentIndex == i
+                    ? Colors.blueAccent
+                    : Colors.grey.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
       ],
-    );
-  }
-
-  Widget _buildArrowButton(IconData icon) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          colors: [Colors.black54, Colors.black26],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: Colors.white, width: 1.5),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: Icon(icon, color: Colors.white, size: 18),
     );
   }
 }

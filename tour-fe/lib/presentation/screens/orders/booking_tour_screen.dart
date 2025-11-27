@@ -1,6 +1,9 @@
+// lib\presentation\screens\tour\booking_tour_screen.dart
 import 'package:flutter/material.dart';
 import '../../../services/order_service.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../widgets/Button.dart';
+import '../../widgets/TextField.dart';
 import 'booking_detail_screen.dart';
 import '../../../services/token_service.dart';
 
@@ -38,37 +41,36 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text(
-          "Đặt Tour",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-      ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _titleSection("Thông tin số lượng"),
-              _buildModernSelector(
+              /// --- TITLE ---
+              const Text(
+                "Thông tin số lượng",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+
+              /// Người lớn
+              _buildNumberSelector(
                 title: "Người lớn",
                 value: adult,
-                icon: Ionicons.person_outline,
+                icon: Ionicons.person,
                 onAdd: () => setState(() => adult++),
                 onMinus: () {
                   if (adult > 1) setState(() => adult--);
                 },
               ),
-              _buildModernSelector(
+
+              const SizedBox(height: 15),
+
+              /// Trẻ em
+              _buildNumberSelector(
                 title: "Trẻ em",
                 value: child,
                 icon: Ionicons.happy_outline,
@@ -77,150 +79,96 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                   if (child > 0) setState(() => child--);
                 },
               ),
-              const SizedBox(height: 28),
-              _titleSection("Thông tin liên hệ"),
-              _buildModernInput("Tên người đặt", nameCtrl,
+
+              const SizedBox(height: 30),
+              const Text(
+                "Thông tin liên hệ",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+
+              _buildInput("Tên người đặt", nameCtrl,
                   validator: (v) => v!.isEmpty ? "Vui lòng nhập tên" : null,
                   icon: Ionicons.person_circle_outline),
-              _buildModernInput("Số điện thoại", phoneCtrl,
+
+              _buildInput("Số điện thoại", phoneCtrl,
                   validator: (v) =>
                       v!.isEmpty ? "Vui lòng nhập số điện thoại" : null,
                   keyboard: TextInputType.phone,
                   icon: Ionicons.call_outline),
-              _buildModernInput("Email", emailCtrl,
+
+              _buildInput("Email", emailCtrl,
                   keyboard: TextInputType.emailAddress,
                   icon: Ionicons.mail_outline),
-              _buildModernInput("Ghi chú (không bắt buộc)", noteCtrl,
+
+              _buildInput("Ghi chú (không bắt buộc)", noteCtrl,
                   maxLines: 3, icon: Ionicons.document_text_outline),
+
               const SizedBox(height: 20),
-              _buildPriceCard(),
+
+              /// PRICE BOX
+              _buildPriceBox(),
+
               const SizedBox(height: 100),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
+        padding: const EdgeInsets.all(16),
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.redAccent, width: 1.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Hủy",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: PrimaryButton(
+                text: "Xác nhận",
+                loading: loading,
+                onPressed: _submitOrder,
+              ),
             ),
           ],
         ),
-        child: SizedBox(
-          height: 55,
-          child: ElevatedButton(
-            onPressed: loading ? null : _submitOrder,
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              padding: EdgeInsets.zero,
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-            ),
-            child: Ink(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                gradient: const LinearGradient(
-                  colors: [Color(0xff1A73E8), Color(0xff0077FF)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: loading
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.check_circle_outline,
-                              color: Colors.white, size: 22),
-                          SizedBox(width: 8),
-                          Text(
-                            "Xác nhận đặt tour",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
 
-  Widget _titleSection(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          color: Color(0xff0A3D62),
-        ),
-      ),
+  Widget _buildInput(String label, TextEditingController controller,
+      {int maxLines = 1,
+      String? Function(String?)? validator,
+      TextInputType keyboard = TextInputType.text,
+      IconData? icon}) {
+    return CustomTextField(
+      controller: controller,
+      label: label,
+      validator: validator,
+      keyboardType: keyboard,
+      maxLines: maxLines,
+      icon: icon,
     );
   }
 
-  Widget _buildModernInput(
-    String label,
-    TextEditingController controller, {
-    int maxLines = 1,
-    String? Function(String?)? validator,
-    TextInputType keyboard = TextInputType.text,
-    IconData? icon,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 8,
-            color: Colors.black12.withOpacity(0.05),
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        validator: validator,
-        maxLines: maxLines,
-        keyboardType: keyboard,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Color(0xff0077FF)),
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernSelector({
+  Widget _buildNumberSelector({
     required String title,
     required int value,
     required IconData icon,
@@ -228,94 +176,75 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     required Function onMinus,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white,
-            Colors.blue.shade50,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            blurRadius: 8,
+            blurRadius: 4,
             spreadRadius: 1,
-            color: Colors.black12.withOpacity(0.07),
-            offset: const Offset(0, 3),
-          ),
+            offset: const Offset(0, 1),
+            color: Colors.black12,
+          )
         ],
       ),
       child: Row(
         children: [
-          Icon(icon, size: 30, color: Color(0xff0077FF)),
-          const SizedBox(width: 16),
+          Icon(icon, size: 26, color: Colors.blueAccent),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(title,
-                style:
-                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            child: Text(title, style: const TextStyle(fontSize: 16)),
           ),
           Row(
             children: [
-              _circleActionBtn(Icons.remove, onMinus),
-              const SizedBox(width: 16),
-              Text(
-                "$value",
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 16),
-              _circleActionBtn(Icons.add, onAdd),
+              _circleBtn(Icons.remove, onMinus),
+              const SizedBox(width: 12),
+              Text("$value",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              _circleBtn(Icons.add, onAdd),
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _circleActionBtn(IconData icon, Function onTap) {
+  Widget _circleBtn(IconData icon, Function onTap) {
     return GestureDetector(
       onTap: () => onTap(),
       child: Container(
-        width: 38,
-        height: 38,
+        width: 34,
+        height: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent],
-          ),
+          color: Colors.blueAccent.withOpacity(0.1),
         ),
-        child: Icon(icon, color: Colors.white, size: 22),
+        child: Icon(icon, color: Colors.blueAccent),
       ),
     );
   }
 
-  Widget _buildPriceCard() {
+  Widget _buildPriceBox() {
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.orange.shade200),
-        boxShadow: [
-          BoxShadow(
-              blurRadius: 6,
-              color: Colors.black12.withOpacity(0.1),
-              offset: const Offset(0, 3))
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Tổng tiền:",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
+          const Text("Tổng tiền:",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           Text(
             "${total.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')} VNĐ",
             style: const TextStyle(
-                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
+                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red),
           ),
         ],
       ),

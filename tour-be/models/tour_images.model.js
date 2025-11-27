@@ -46,6 +46,23 @@ const TourImageFolders = {
       folder_id,
     ]);
   },
+
+  // ✅ LẤY 1 FOLDER THEO ID (THÊM MỚI)
+  async getById(folder_id) {
+    const [rows] = await db.query(
+      "SELECT * FROM tour_image_folders WHERE folder_id = ?",
+      [folder_id]
+    );
+    return rows[0] || null;
+  },
+
+  // ✅ CẬP NHẬT TÊN FOLDER (THÊM MỚI)
+  async updateName(folder_id, newName) {
+    await db.query(
+      "UPDATE tour_image_folders SET folder_name = ? WHERE folder_id = ?",
+      [newName, folder_id]
+    );
+  },
 };
 
 const TourImages = {
@@ -108,6 +125,14 @@ const TourImages = {
     );
     return rows;
   },
+
+  // ✅ CẬP NHẬT URL ẢNH SAU KHI ĐỔI TÊN FOLDER (THÊM MỚI)
+  async updateUrl(tour_img_id, newUrl) {
+    await db.query(
+      "UPDATE tour_images SET tour_img = ? WHERE tour_img_id = ?",
+      [newUrl, tour_img_id]
+    );
+  },
 };
 
 const TourImageAssignment = {
@@ -136,4 +161,3 @@ const TourImageAssignment = {
 };
 
 module.exports = { TourImageFolders, TourImages, TourImageAssignment };
-

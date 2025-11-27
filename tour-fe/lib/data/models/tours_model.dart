@@ -1,5 +1,4 @@
 // lib/data/models/tours_model.dart
-
 class ToursModel {
   final int id;
   final String name;
@@ -37,16 +36,11 @@ class ToursModel {
     this.rating = 4.7,
   });
 
-  // ===========================
-  // 🔥 SAFE PRICE PARSING
-  // ===========================
   static double parsePrice(dynamic value) {
     if (value == null) return 0;
 
-    // Nếu backend trả về số -> ok
     if (value is num) return value.toDouble();
 
-    // Nếu backend trả string, loại bỏ ký tự không phải số (.,₫,…)
     final cleaned = value.toString().replaceAll(RegExp(r'[^0-9]'), '');
 
     if (cleaned.isEmpty) return 0;

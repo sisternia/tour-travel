@@ -3,7 +3,7 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Quản lý Địa điểm Tour</title>
+    <title>Quản lý Địa điểm & Lịch trình Tour</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -11,54 +11,93 @@
     />
     <link rel="stylesheet" href="../css/sidebar.css" />
     <link rel="stylesheet" href="../css/tour_locations.css" />
+    <link rel="stylesheet" href="../css/tour_schedules.css" />
 
+    <!-- MAPBOX -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
     <link
       href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css"
       rel="stylesheet"
     />
+
+    <script
+      id="search-js"
+      defer
+      src="https://api.mapbox.com/search-js/v1.5.0/web.js"
+    ></script>
   </head>
 
   <body>
     <div id="sidebar-container"></div>
 
     <div class="main-content">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Quản lý địa điểm Tour</h3>
-        <button id="btnAdd" class="btn btn-primary">+ Thêm địa điểm</button>
-      </div>
+      <div class="row">
 
-      <table class="table table-bordered table-hover align-middle">
-        <thead class="table-primary">
-          <tr>
-            <th>ID</th>
-            <th>Tour</th>
-            <th>Tên địa điểm</th>
-            <th>Mô tả</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody id="locationTableBody">
-          <tr>
-            <td colspan="7" class="text-center">Đang tải...</td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="col-lg-7 col-md-12">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Quản lý địa điểm Tour</h3>
+            <button id="btnAdd" class="btn btn-primary">+ Thêm địa điểm</button>
+          </div>
+
+          <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary">
+              <tr>
+                <th>ID</th>
+                <th>Tour</th>
+                <th>Tên địa điểm</th>
+                <th>Mô tả</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th class="location-action-col">Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="locationTableBody">
+              <tr>
+                <td colspan="7" class="text-center">Đang tải...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-lg-5 col-md-12">
+          <div id="scheduleTableWrapper">
+            <div
+              class="d-flex justify-content-between align-items-center mb-3"
+            >
+              <h3>Lịch trình Tour</h3>
+              <button id="btnAddSchedule" class="btn btn-success">
+                + Thêm lịch trình
+              </button>
+            </div>
+
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-success">
+                <tr>
+                  <th>ID</th>
+                  <th>Tour</th>
+                  <th>Ngày</th>
+                  <th>Mô tả</th>
+                  <th class="schedule-action-col">Hành động</th>
+
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody">
+                <tr>
+                  <td colspan="6" class="text-center">Đang tải...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- MODAL -->
     <div class="modal fade" id="locationModal" tabindex="-1">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="formTitle">Thêm địa điểm</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
           <form id="locationForm">
@@ -69,20 +108,13 @@
                 <!-- LEFT FORM -->
                 <div class="col-md-6">
                   <label class="fw-bold">Chọn Tour</label>
-                  <select
-                    id="tourSelect"
-                    class="form-select mb-3"
-                    required
-                  ></select>
+                  <select id="tourSelect" class="form-select mb-3" required></select>
 
                   <label class="fw-bold">Tên địa điểm</label>
                   <input id="locationName" class="form-control mb-2" required />
 
                   <label class="fw-bold">Mô tả</label>
-                  <textarea
-                    id="description"
-                    class="form-control mb-2"
-                  ></textarea>
+                  <textarea id="description" class="form-control mb-2"></textarea>
 
                   <label class="fw-bold">Latitude</label>
                   <input id="latitude" class="form-control mb-2" required />
@@ -90,22 +122,24 @@
                   <label class="fw-bold">Longitude</label>
                   <input id="longitude" class="form-control mb-2" required />
 
-                  <small class="text-muted">
-                    Nhấp vào bản đồ → tự động cập nhật Tên + Lat + Lng
-                  </small>
+                  <small class="text-muted"
+                    >Nhấp bản đồ hoặc tìm kiếm → tự động cập nhật Tên + Lat +
+                    Lng</small
+                  >
                 </div>
 
                 <!-- MAP -->
                 <div class="col-md-6">
-                  <div id="mapModal"></div>
+                  <div id="mapContainer">
+                    <div id="mapSearchBox"></div>
+                    <div id="mapModal"></div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="modal-footer">
-              <button id="saveBtn" class="btn btn-success" type="submit">
-                Lưu
-              </button>
+              <button id="saveBtn" class="btn btn-success" type="submit">Lưu</button>
               <button
                 class="btn btn-secondary"
                 data-bs-dismiss="modal"
@@ -118,9 +152,59 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+      <div class="modal-dialog">
+        <form id="scheduleForm" class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="scheduleFormTitle">Thêm lịch trình</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" id="scheduleEditId" />
+
+            <label class="fw-bold">Tour</label>
+            <select
+              id="scheduleTourSelect"
+              class="form-select mb-3"
+              required
+            ></select>
+
+            <label class="fw-bold">Ngày thứ</label>
+            <input
+              id="dayNumber"
+              type="number"
+              class="form-control mb-3"
+              required
+            />
+
+            <label class="fw-bold">Mô tả</label>
+            <textarea
+              id="scheduleDescription"
+              class="form-control mb-3"
+            ></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-success" type="submit">Lưu</button>
+            <button
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              type="button"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SCRIPTS -->
     <script src="../js/sidebar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/tour_locations.js"></script>
+    <script src="../js/tour_schedules.js"></script>
   </body>
 </html>

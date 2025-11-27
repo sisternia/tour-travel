@@ -2,7 +2,6 @@ const fs = require("fs");
 const cloudinary = require("../services/cloudinary.service");
 const TourGuide = require("../models/tour_guides.model");
 
-// ======================== FIX extractPublicId ========================
 const extractPublicId = (url) => {
   if (!url) return null;
 
@@ -15,7 +14,6 @@ const extractPublicId = (url) => {
   return publicPath.replace(/\.[^/.]+$/, "");
 };
 
-// ======================== GET ALL ========================
 const getAllTourGuides = async (req, res) => {
   try {
     const guides = await TourGuide.getAll();
@@ -25,7 +23,6 @@ const getAllTourGuides = async (req, res) => {
   }
 };
 
-// ======================== CREATE ========================
 const createTourGuide = async (req, res) => {
   try {
     let { guide_name, email, phone, birthday, gender, address, language_job } =
@@ -35,7 +32,6 @@ const createTourGuide = async (req, res) => {
       return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
     }
 
-    // Upload avatar nếu có
     let avatarUrl = null;
     if (req.files?.avatar?.[0]) {
       const file = req.files.avatar[0];
@@ -46,7 +42,6 @@ const createTourGuide = async (req, res) => {
       fs.unlinkSync(file.path);
     }
 
-    // Upload certification nếu có
     let certificationUrl = null;
     if (req.files?.certificates?.[0]) {
       const file = req.files.certificates[0];
@@ -64,7 +59,7 @@ const createTourGuide = async (req, res) => {
       birthday: birthday || null,
       gender: gender || null,
       address: address || null,
-      language_job: language_job || null, // <-- ADD HERE
+      language_job: language_job || null, 
       certification: certificationUrl,
       avatar_image: avatarUrl,
     });
@@ -79,7 +74,6 @@ const createTourGuide = async (req, res) => {
   }
 };
 
-// ======================== UPDATE ========================
 const updateTourGuide = async (req, res) => {
   try {
     const { guide_id } = req.params;
@@ -93,16 +87,14 @@ const updateTourGuide = async (req, res) => {
     let { guide_name, email, phone, birthday, gender, address, language_job } =
       req.body;
 
-    // Giữ dữ liệu cũ nếu FE không gửi
     guide_name = guide_name || oldData.guide_name;
     email = email || oldData.email;
     phone = phone || oldData.phone;
     birthday = birthday || oldData.birthday;
     gender = gender || oldData.gender;
     address = address || oldData.address;
-    language_job = language_job || oldData.language_job; // <-- ADD HERE
+    language_job = language_job || oldData.language_job; 
 
-    // Upload avatar nếu có
     let avatarUrl = oldData.avatar_image;
     if (req.files?.avatar?.[0]) {
       const file = req.files.avatar[0];
@@ -116,7 +108,6 @@ const updateTourGuide = async (req, res) => {
       if (oldId) await cloudinary.uploader.destroy(oldId);
     }
 
-    // Upload certification nếu có
     let certificationUrl = oldData.certification;
     if (req.files?.certificates?.[0]) {
       const file = req.files.certificates[0];
@@ -137,7 +128,7 @@ const updateTourGuide = async (req, res) => {
       birthday,
       gender,
       address,
-      language_job, // <-- ADD HERE
+      language_job,
       avatar_image: avatarUrl,
       certification: certificationUrl,
     });
@@ -148,7 +139,6 @@ const updateTourGuide = async (req, res) => {
   }
 };
 
-// ======================== DELETE ========================
 const deleteTourGuide = async (req, res) => {
   try {
     const { guide_id } = req.params;
@@ -177,7 +167,6 @@ const deleteTourGuide = async (req, res) => {
   }
 };
 
-// ======================== UPLOAD AVATAR ========================
 const uploadGuideImage = async (req, res) => {
   try {
     const { guide_id } = req.params;
@@ -216,7 +205,6 @@ const uploadGuideImage = async (req, res) => {
   }
 };
 
-// ======================== DELETE AVATAR ========================
 const deleteGuideImage = async (req, res) => {
   try {
     const { guide_id } = req.params;
@@ -238,7 +226,6 @@ const deleteGuideImage = async (req, res) => {
   }
 };
 
-// ======================== UPLOAD CERTIFICATION ========================
 const uploadCertification = async (req, res) => {
   try {
     const { guide_id } = req.params;

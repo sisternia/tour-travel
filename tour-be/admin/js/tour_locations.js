@@ -11,6 +11,7 @@ async function loadMapboxToken() {
 let mapModal = null;
 let marker = null;
 let editingId = null;
+let searchBox = null;
 
 const modalEl = document.getElementById("locationModal");
 const bootstrapModal = new bootstrap.Modal(modalEl);
@@ -30,37 +31,39 @@ async function loadTours() {
 }
 
 async function loadLocations() {
-    const res = await fetch(API.TOUR_LOCATIONS);
-    const json = await res.json();
-    const tbody = document.getElementById("locationTableBody");
-  
-    tbody.innerHTML = "";
-  
-    (json.data || []).forEach((loc) => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${loc.location_id}</td>
-          <td>${loc.tour_name}</td>
-          <td>${loc.location_name}</td>
-          <td>${loc.description || ""}</td>
-          <td>${loc.latitude}</td>
-          <td>${loc.longitude}</td>
-          <td>
-            <button class="btn btn-warning btn-sm me-2"
-              onclick='editLocation(${loc.location_id}, ${loc.tour_id}, ${JSON.stringify(
-        loc.location_name
-      )}, ${JSON.stringify(loc.description)}, ${loc.latitude}, ${loc.longitude})'>
+  const res = await fetch(API.TOUR_LOCATIONS);
+  const json = await res.json();
+  const tbody = document.getElementById("locationTableBody");
+
+  tbody.innerHTML = "";
+
+  (json.data || []).forEach((loc) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${loc.location_id}</td>
+        <td>${loc.tour_name}</td>
+        <td>${loc.location_name}</td>
+        <td>${loc.description || ""}</td>
+        <td>${loc.latitude}</td>
+        <td>${loc.longitude}</td>
+        <td class="text-nowrap">
+          <button class="btn btn-warning btn-sm me-2"
+              onclick="editLocation(${loc.location_id}, ${loc.tour_id}, '${loc.location_name.replace(/'/g, "\\'")}', '${(loc.description || '').replace(/'/g, "\\'")}', ${loc.latitude}, ${loc.longitude})">
               Sửa
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="deleteLocation(${loc.location_id})">Xóa</button>
-          </td>
-        </tr>
-      `;
-    });
-  }
-  
+          </button>
+          <button class="btn btn-danger btn-sm"
+              onclick="deleteLocation(${loc.location_id})">
+              Xóa
+          </button>
+        </td>
+      
+      </tr>
+    `;
+  });
+}
+
 async function fetchPlaceName(lat, lng) {
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`;
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}`;
   const r = await fetch(url);
   const j = await r.json();
   return j.features?.[0]?.place_name || "";
@@ -71,14 +74,13 @@ function initMap() {
 
   mapModal = new mapboxgl.Map({
     container: "mapModal",
-    style: "mapbox://styles/mapbox/streets-v11",
+    style: "mapbox://styles/mapbox/streets-v12",
     center: [108.206, 16.047],
     zoom: 12,
   });
 
   mapModal.on("click", async (e) => {
     const { lng, lat } = e.lngLat;
-
     setMarker(lat, lng);
 
     document.getElementById("latitude").value = lat;
@@ -87,7 +89,53 @@ function initMap() {
     const place = await fetchPlaceName(lat, lng);
     if (place) document.getElementById("locationName").value = place;
   });
+
+  initSearchBox();
 }
+
+function initSearchBox() {
+  if (searchBox) return;
+
+  searchBox = new MapboxSearchBox();
+  searchBox.accessToken = MAPBOX_TOKEN;
+
+  searchBox.options = {
+    types: "place,address,poi",
+    proximity: null,
+    country: null,
+    limit: 10,
+    language: "vi,en"
+  };
+
+  searchBox.mapboxgl = mapboxgl;
+  searchBox.marker = false;
+
+  const box = document.getElementById("mapSearchBox");
+  box.appendChild(searchBox);
+
+  searchBox.sessionToken = null;
+
+  searchBox.addEventListener("retrieve", (e) => {
+
+    searchBox.sessionToken = null;
+
+    const f = e.detail.features?.[0];
+    if (!f) return;
+
+    const [lng, lat] = f.geometry.coordinates;
+
+    setMarker(lat, lng);
+    mapModal.flyTo({ center: [lng, lat], zoom: 14 });
+
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lng;
+
+    const placeName =
+      f.place_name || f.text || f.properties?.name || `${lat}, ${lng}`;
+    document.getElementById("locationName").value = placeName;
+  });
+}
+
 
 function setMapPosition(lat, lng) {
   mapModal.setCenter([lng, lat]);
@@ -141,9 +189,7 @@ window.editLocation = function (id, tour_id, name, desc, lat, lng) {
     "shown.bs.modal",
     () => {
       initMap();
-
       setMapPosition(lat, lng);
-
       setMarker(lat, lng);
     },
     { once: true }
@@ -183,7 +229,6 @@ formEl.addEventListener("submit", async (e) => {
 
 window.deleteLocation = async function (id) {
   if (!confirm("Bạn có chắc chắn muốn xóa?")) return;
-
   await fetch(`${API.TOUR_LOCATIONS}/${id}`, { method: "DELETE" });
   loadLocations();
 };

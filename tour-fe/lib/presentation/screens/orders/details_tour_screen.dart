@@ -1,15 +1,16 @@
+// lib/presentation/screens/tour/details_tour_screen.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../core/constants/color.dart';
 import '../../../data/models/tour_images_model.dart';
 import '../../../services/tour_images_service.dart';
-// import '../../widgets/Image_List.dart';
-// import '../../widgets/NavigationBar.dart';
 import '../../widgets/Tab_Tour.dart';
 import '../../widgets/Button.dart';
-// import 'tour_locations_screen.dart';
+import '../../widgets/Image_List.dart';
 import 'booking_tour_screen.dart';
+import '../../screens/tour/tour_locations_screen.dart';
 
 class DetailsCardScreen extends StatefulWidget {
   final int tourId;
@@ -37,7 +38,6 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
 
   int selectedIndex = 0;
   List<String> images = [];
-  bool isLoved = false;
 
   double? priceAdult;
   double? priceChild;
@@ -58,7 +58,7 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
 
   void startAutoSlide() {
     slideTimer?.cancel();
-    slideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    slideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted || images.length <= 1) return;
       setState(() {
         selectedIndex = (selectedIndex + 1) % images.length;
@@ -81,8 +81,10 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
 
             if (snap.hasError) {
               return Center(
-                child: Text("Lỗi tải ảnh: ${snap.error}",
-                    style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  "Lỗi tải ảnh: ${snap.error}",
+                  style: const TextStyle(color: Colors.red),
+                ),
               );
             }
 
@@ -148,38 +150,50 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
   }
 
   Widget buildImageSection() {
-    return Stack(
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: 450,
-          child: ClipRRect(
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 450,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
             child: Image.network(
               images[selectedIndex],
               fit: BoxFit.cover,
             ),
           ),
-        ),
-        Positioned(
-          top: 16,
-          left: 16,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Ionicons.arrow_back,
-                color: Colors.white,
-                size: 28,
+          Positioned(
+            top: 20,
+            left: 16,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Ionicons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: ImageListWidget(
+              images: images,
+              selectedIndex: selectedIndex,
+              onSelect: (i) {
+                setState(() => selectedIndex = i);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -187,14 +201,47 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title,
-            style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: primaryColor)),
-        const SizedBox(height: 16),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TourLocationsScreen(tourId: widget.tourId),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Ionicons.location_outline,
+                  color: primaryColor,
+                  size: 22,
+                ),
+              ),
+            ),
+
+            /// TITLE
+            Expanded(
+              child: Text(
+                widget.title,
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
         TabTourWidget(
-          description: "Lorem ipsum dolor sit amet...",
+          description: "",
           tourId: widget.tourId,
           onPriceLoaded: (adult, child) {
             WidgetsBinding.instance.addPostFrameCallback((_) {

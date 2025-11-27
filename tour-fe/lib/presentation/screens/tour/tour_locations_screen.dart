@@ -1,3 +1,5 @@
+// lib\presentation\screens\tour\tour_locations_screen.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -45,8 +47,6 @@ class _TourLocationsScreenState extends State<TourLocationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // ❌ KHÔNG APPBAR — tự build nút X
       body: SafeArea(
         child: FutureBuilder<List<TourLocationModel>>(
           future: futureLocations,
@@ -96,7 +96,6 @@ class _TourLocationsScreenState extends State<TourLocationsScreen> {
                   ],
                 ),
 
-                // ❌ NÚT X ĐÓNG
                 Positioned(
                   top: 10,
                   right: 10,

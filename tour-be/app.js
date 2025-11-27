@@ -1,3 +1,5 @@
+// app.js
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -12,6 +14,7 @@ const tourImagesRoutes = require("./routes/tour_images.routes");
 const tourLocationsRoutes = require("./routes/tour_locations.routes");
 const tourGuideRoutes = require("./routes/tour_guides.routes");
 const tourGuideAssignmentRoutes = require("./routes/tour_guide_assignment.routes");
+const tourSchedulesRoutes = require("./routes/tour_schedules.routes");
 const mapboxRoutes = require("./services/mapbox.service");
 const postRoutes = require("./routes/posts.routes");
 const orderRoutes = require("./routes/order.routes");
@@ -48,6 +51,7 @@ app.use("/api/tour-prices", tourPricesRoutes);
 app.use("/api/tour-locations", tourLocationsRoutes);
 app.use("/api/tour-guides", tourGuideRoutes);
 app.use("/api/tour-guide-assignment", tourGuideAssignmentRoutes);
+app.use("/api/tour-schedules", tourSchedulesRoutes);
 app.use("/api/orders", orderRoutes);
 // app.use("/api/vnpay", vnpayRoute);
 app.use("/api/mapbox", mapboxRoutes);

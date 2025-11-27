@@ -25,4 +25,10 @@ router.delete("/folder/:folder_id", TourImagesController.deleteFolder);
 router.get("/first/:tour_id", TourImagesController.getFirstImageByTour);
 router.get("/all/:tour_id", TourImagesController.getAllImagesByTour);
 
+// ✅ ROUTE ĐỔI TÊN FOLDER (THÊM MỚI)
+router.put(
+  "/folder/:folder_id/rename",
+  TourImagesController.renameFolder
+);
+
 module.exports = router;

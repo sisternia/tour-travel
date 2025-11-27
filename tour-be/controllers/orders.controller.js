@@ -1,3 +1,5 @@
+// controllers/orders.controller.js
+
 const Order = require("../models/orders.model");
 
 const OrderController = {
@@ -13,6 +15,7 @@ const OrderController = {
       });
     }
   },
+
   getById: async (req, res) => {
     try {
       const { id } = req.params;
@@ -34,6 +37,7 @@ const OrderController = {
       });
     }
   },
+
   getByUser: async (req, res) => {
     try {
       const { userId } = req.params;
@@ -49,6 +53,7 @@ const OrderController = {
       });
     }
   },
+
   create: async (req, res) => {
     try {
       const {

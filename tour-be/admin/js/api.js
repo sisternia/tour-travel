@@ -12,6 +12,7 @@ const API = {
   TOUR_LOCATIONS: `${BASE_API}/tour-locations`,
   TOUR_GUIDES: `${BASE_API}/tour-guides`,
   TOUR_GUIDE_ASSIGNMENT: `${BASE_API}/tour-guide-assignment`,
+  TOUR_SCHEDULES: `${BASE_API}/tour-schedules`,
   ORDERS: `${BASE_API}/orders`,
   PAYMENTS: `${BASE_API}/payments`,
 };
