@@ -1,6 +1,9 @@
 // import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../profile/profile_screen.dart';
+import 'package:tour_fe/services/notification_service.dart';
+
+import '../home_screen.dart';
+import '../../widgets/NavigationBar.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   final int orderId;
@@ -19,6 +22,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
   @override
   void initState() {
     super.initState();
+
+    NotificationService.fetchUnreadCount();
 
     _controller = AnimationController(
       vsync: this,
@@ -97,15 +102,16 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       ),
                     ),
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ProfileScreen(),
+                          builder: (_) => const NavigationBarWidget(),
                         ),
+                        (route) => false,
                       );
                     },
                     child: const Text(
-                      "VỀ TRANG CÁ NHÂN",
+                      "VỀ TRANG CHỦ",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,

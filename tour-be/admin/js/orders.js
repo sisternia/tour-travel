@@ -31,13 +31,13 @@ async function loadOrders() {
                 onchange="changeStatus(this)">
           <option value="1" ${
             o.type_confirm_id == 1 ? "selected" : ""
-          }>Chờ xác nhận</option>
-          <option value="2" ${
-            o.type_confirm_id == 2 ? "selected" : ""
-          }>Đã xác nhận</option>
+          }>Chưa thanh toán</option>
           <option value="3" ${
             o.type_confirm_id == 3 ? "selected" : ""
           }>Đã thanh toán</option>
+          <option value="2" ${
+            o.type_confirm_id == 2 ? "selected" : ""
+          }>Đã xác nhận</option>
         </select>
       </td>
 

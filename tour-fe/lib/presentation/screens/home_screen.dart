@@ -4,10 +4,16 @@ import 'package:ionicons/ionicons.dart';
 import 'package:intl/intl.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
+import 'package:tour_fe/data/models/tours_model.dart';
+import 'package:tour_fe/presentation/screens/notification/notification_screen.dart';
+import 'package:tour_fe/presentation/screens/orders/order_list_screen.dart';
+import 'package:tour_fe/services/notification_service.dart';
+import 'package:tour_fe/services/order_service.dart';
+import 'package:tour_fe/core/utils/order_center.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 import 'package:tour_fe/services/tours_service.dart';
-import 'package:tour_fe/data/models/tours_model.dart';
+import 'package:tour_fe/core/utils/notification_center.dart';
 // import '../widgets/Icon_Button.dart';
 import '../widgets/Image_Carousel.dart';
 import '../widgets/Search_Bar.dart';
@@ -25,6 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController searchController = TextEditingController();
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
+  final NotificationCenter _notificationCenter = NotificationCenter.instance;
+  final OrderCenter _orderCenter = OrderCenter.instance;
   final NumberFormat currencyFormat = NumberFormat.currency(
     locale: 'vi_VN',
     symbol: '₫',
@@ -57,6 +65,23 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _profileFuture = _loadProfile();
     _loadAllTours();
+    OrderService.fetchPendingCount();
+  }
+
+  Future<void> _refreshNotificationCount() async {
+    await NotificationService.fetchUnreadCount();
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NotificationScreen(
+          onStateChanged: _refreshNotificationCount,
+        ),
+      ),
+    );
+    _refreshNotificationCount();
   }
 
   Future<void> _loadAllTours() async {
@@ -337,26 +362,129 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
-                  ),
-                  child: const Icon(
-                    Ionicons.notifications_outline,
-                    color: Colors.white,
-                    size: 26,
-                  ),
-                )
+                Row(
+                  children: [
+                    // Order management icon
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OrderListScreen(),
+                          ),
+                        );
+                        OrderService.fetchPendingCount();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: ValueListenableBuilder<int>(
+                          valueListenable: _orderCenter.pendingCount,
+                          builder: (context, count, _) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Icon(
+                                  Ionicons.receipt_outline,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                                if (count > 0)
+                                  Positioned(
+                                    right: -4,
+                                    top: -6,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        count > 99 ? '99+' : '$count',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Notification icon
+                    GestureDetector(
+                      onTap: _openNotifications,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: ValueListenableBuilder<int>(
+                          valueListenable: _notificationCenter.unreadCount,
+                          builder: (context, count, _) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Icon(
+                                  Ionicons.notifications_outline,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                                if (count > 0)
+                                  Positioned(
+                                    right: -4,
+                                    top: -6,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: Colors.redAccent,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        count > 99 ? '99+' : '$count',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

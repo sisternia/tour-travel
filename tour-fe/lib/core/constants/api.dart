@@ -86,4 +86,15 @@ class ApiConstants {
   static String momoRedirect(String orderId) =>
       '$baseUrl/api/momo/redirect?orderId=$orderId';
   static String get momoIpn => '$baseUrl/api/momo/ipn';
+
+  // Notifications routes
+  static String get notifications => '$baseUrl/api/notifications';
+  static String notificationsByUser(String userId) =>
+      '$notifications/user/$userId';
+  static String unreadNotifications(String userId) =>
+      '$notifications/user/$userId/unread-count';
+  static String markAllNotifications(String userId) =>
+      '$notifications/user/$userId/read-all';
+  static String markNotification(int id) => '$notifications/$id/read';
+  static String deleteNotification(int id) => '$notifications/$id';
 }

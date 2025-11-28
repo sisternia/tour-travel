@@ -2,7 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:tour_fe/core/utils/notification_center.dart';
+import 'package:tour_fe/services/notification_service.dart';
+
 import '../screens/home_screen.dart';
+import '../screens/notification/notification_screen.dart';
 import '../screens/post/post_header_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
 
@@ -24,6 +28,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   late int _selectedIndex;
 
   late final List<Widget> _screens;
+  final NotificationCenter _notificationCenter = NotificationCenter.instance;
 
   @override
   void initState() {
@@ -34,9 +39,15 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),
       const Center(child: Text('Messages')),
-      const Center(child: Text('Notifications')),
+      NotificationScreen(onStateChanged: _loadUnreadCount),
       const PostHeaderScreen(),
     ];
+
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    await NotificationService.fetchUnreadCount();
   }
 
   @override
@@ -71,16 +82,76 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
             onTabChange: (index) {
               setState(() => _selectedIndex = index);
             },
-            tabs: const [
-              GButton(icon: Icons.home, iconSize: 30),
-              GButton(icon: Icons.calendar_today, iconSize: 30),
-              GButton(icon: Icons.message, iconSize: 30),
-              GButton(icon: Icons.notifications, iconSize: 30),
-              GButton(icon: Icons.edit, iconSize: 30), // icon viết bài
+            tabs: [
+              const GButton(icon: Icons.home, iconSize: 30),
+              const GButton(icon: Icons.calendar_today, iconSize: 30),
+              const GButton(icon: Icons.message, iconSize: 30),
+              GButton(
+                icon: Icons.notifications_none,
+                iconSize: 30,
+                leading: ValueListenableBuilder<int>(
+                  valueListenable: _notificationCenter.unreadCount,
+                  builder: (context, count, _) {
+                    final isActive = _selectedIndex == 3;
+                    return _NotificationBellIcon(
+                      count: count,
+                      isActive: isActive,
+                    );
+                  },
+                ),
+              ),
+              const GButton(icon: Icons.edit, iconSize: 30),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NotificationBellIcon extends StatelessWidget {
+  final int count;
+  final bool isActive;
+
+  const _NotificationBellIcon({
+    required this.count,
+    required this.isActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isActive ? Colors.blueAccent : Colors.white;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(
+          Icons.notifications_none,
+          size: 26,
+          color: color,
+        ),
+        if (count > 0)
+          Positioned(
+            right: -6,
+            top: -4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              child: Text(
+                count > 99 ? '99+' : '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
