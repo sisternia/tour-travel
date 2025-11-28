@@ -1,5 +1,6 @@
 const MomoService = require("../services/momo.service");
 const Order = require("../models/orders.model");
+const NotificationService = require('../services/notification.service');
 
 class MomoController {
   static async createPayment(req, res) {
@@ -32,6 +33,7 @@ class MomoController {
 
       if (data.errorCode === 0) {
         await Order.updateStatus(data.orderId, 2);
+        await NotificationService.notifyPaymentSuccess(data.orderId);
       } else {
         await Order.updateStatus(data.orderId, 3);
       }

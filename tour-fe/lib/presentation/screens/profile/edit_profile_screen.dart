@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
+import 'package:tour_fe/services/notification_service.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 import 'package:tour_fe/presentation/widgets/TextField.dart';
@@ -125,6 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       };
 
       await _profileService.updateProfile(token!, data, _avatar, _coverImage);
+      await NotificationService.fetchUnreadCount();
 
       if (!mounted) return;
 

@@ -1,16 +1,13 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:tour_fe/services/order_service.dart';
-import 'payment_success_screen.dart';
 
-// WEB SUPPORT
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:ui' as ui;
-// NEW FOR FLUTTER 3.24+
-import 'dart:ui_web' as ui_web;
+import 'payment_success_screen.dart';
+import 'web_payment_view_stub.dart'
+    if (dart.library.html) 'web_payment_view_web.dart' as web_payment;
 
 class MomoWebviewMock extends StatefulWidget {
   final String url;
@@ -29,44 +26,46 @@ class MomoWebviewMock extends StatefulWidget {
 class _MomoWebviewMockState extends State<MomoWebviewMock> {
   WebViewController? _controller;
   bool loading = true;
-  late final String _viewId;
+  String? _webViewType;
 
   @override
   void initState() {
     super.initState();
 
     if (kIsWeb) {
-      _viewId =
+      _webViewType =
           'momo-webview-${widget.orderId}-${DateTime.now().millisecondsSinceEpoch}';
-
-      // NEW API FOR FLUTTER 3.24+
-      // ignore: undefined_prefixed_name
-      ui_web.platformViewRegistry.registerViewFactory(
-        _viewId,
-        (int id) {
-          final iframe = html.IFrameElement()
-            ..src = widget.url
-            ..style.border = 'none'
-            ..style.width = '100%'
-            ..style.height = '100%';
-
-          return iframe;
-        },
-      );
+      web_payment.registerMomoIframe(_webViewType!, widget.url);
+      setState(() => loading = false);
     } else {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageStarted: (_) => setState(() => loading = true),
-            onPageFinished: (_) => setState(() => loading = false),
-          ),
-        )
-        ..loadRequest(Uri.parse(widget.url));
+      _initMobileWebView();
     }
   }
 
-  Future<void> _mockPaymentSuccess() async {
+  void _initMobileWebView() {
+    late final PlatformWebViewControllerCreationParams params;
+
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams();
+    } else {
+      params = AndroidWebViewControllerCreationParams();
+    }
+
+    final controller = WebViewController.fromPlatformCreationParams(params)
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) => setState(() => loading = true),
+          onPageFinished: (_) => setState(() => loading = false),
+          onWebResourceError: (err) => debugPrint("WEBVIEW ERROR: $err"),
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
+
+    _controller = controller;
+  }
+
+  _mockPaymentSuccess() async {
     await OrderService.updateStatus(widget.orderId, 3);
 
     if (!mounted) return;
@@ -79,29 +78,29 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
     );
   }
 
-  Widget _buildWebview() {
-    if (kIsWeb) {
-      return HtmlElementView(viewType: _viewId);
-    }
-
-    return Stack(
-      children: [
-        if (_controller != null) WebViewWidget(controller: _controller!),
-        if (loading) const Center(child: CircularProgressIndicator()),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thanh toán ví MoMo"),
+        title: const Text("Thanh toán ví MoMo "),
         backgroundColor: Colors.pink,
       ),
       body: Column(
         children: [
-          Expanded(child: _buildWebview()),
+          Expanded(
+            child: Stack(
+              children: [
+                if (kIsWeb && _webViewType != null)
+                  web_payment.buildMomoIframe(_webViewType!)
+                else if (!kIsWeb && _controller != null)
+                  WebViewWidget(controller: _controller!),
+                if (loading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            ),
+          ),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -115,22 +114,31 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
                 ),
                 child: Ink(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFF4E8A), Color(0xFFEF3A7B)],
+                      colors: [
+                        Color(0xFFFF4E8A), // Màu MoMo hồng đậm
+                        Color(0xFFEF3A7B), // Màu MoMo hồng sáng
+                      ],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                   ),
-                  child: const Center(
+                  child: Container(
+                    alignment: Alignment.center,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.account_balance_wallet_outlined,
-                            color: Colors.white, size: 22),
+                      children: const [
+                        Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                         SizedBox(width: 10),
                         Text(
                           "THANH TOÁN",

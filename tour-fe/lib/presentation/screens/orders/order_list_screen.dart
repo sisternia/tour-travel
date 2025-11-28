@@ -45,12 +45,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
         break;
 
       case 2:
-        text = "Admin xác nhận thành công";
+        text = "Admin đã xác nhận thành công";
         color = Colors.green;
         break;
 
       case 3:
-        text = "Đã thanh toán – chờ duyệt";
+        text = "Đã thanh toán - chờ duyệt";
         color = Colors.blue;
         break;
 

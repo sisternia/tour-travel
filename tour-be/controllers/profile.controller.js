@@ -8,6 +8,7 @@ const {
 const cloudinary = require("../services/cloudinary.service");
 const fs = require("fs");
 const jwt = require('jsonwebtoken');
+const NotificationService = require('../services/notification.service');
 
 const getUserFromHeader = (req) => {
   const authHeader = req.headers.authorization;
@@ -74,7 +75,14 @@ const updateProfile = async (req, res) => {
 
     if (userInfo.dob === "") userInfo.dob = null;
 
+    const infoFields = ['phone', 'dob', 'citizen_id', 'address', 'bio'];
+    const updatedInfoFields = infoFields.filter((field) => userInfo[field] !== undefined);
+
     await updateUserProfile(userId, userInfo);
+
+    if (updatedInfoFields.length) {
+      await NotificationService.notifyProfileUpdated(userId, updatedInfoFields);
+    }
 
     const refreshed = await getUserProfile(userId);
 

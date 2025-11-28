@@ -47,11 +47,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         color = Colors.orange;
         break;
       case 2:
-        text = "Admin đã xác nhận";
+        text = "Admin đã xác nhận thành công";
         color = Colors.green;
         break;
       case 3:
-        text = "Đã thanh toán – chờ duyệt";
+        text = "Đã thanh toán - chờ duyệt";
         color = Colors.blue;
         break;
       default:

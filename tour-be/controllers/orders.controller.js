@@ -1,6 +1,7 @@
 // controllers/orders.controller.js
 
 const Order = require("../models/orders.model");
+const NotificationService = require('../services/notification.service');
 
 const OrderController = {
   getAll: async (req, res) => {
@@ -109,6 +110,14 @@ const OrderController = {
       const { type_confirm_id } = req.body;
 
       await Order.updateStatus(id, type_confirm_id);
+
+      if (Number(type_confirm_id) === 3) {
+        // User paid - waiting for admin approval
+        await NotificationService.notifyPaymentSuccess(id);
+      } else if (Number(type_confirm_id) === 2) {
+        // Admin confirmed
+        await NotificationService.notifyAdminConfirmed(id);
+      }
 
       return res.status(200).json({
         success: true,

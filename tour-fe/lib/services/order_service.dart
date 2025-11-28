@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/api.dart';
+import '../core/utils/order_center.dart';
 import '../data/models/order_model.dart';
 import '../services/token_service.dart';
 
@@ -106,13 +107,27 @@ class OrderService {
 
       if (res.statusCode == 200) {
         List list = jsonDecode(res.body);
-        return list.map((e) => OrderModel.fromJson(e)).toList();
+        final orders = list.map((e) => OrderModel.fromJson(e)).toList();
+        // Update pending count (status 1 = chưa thanh toán)
+        final pendingCount = orders.where((o) => o.typeConfirmId == 1).length;
+        OrderCenter.instance.setCount(pendingCount);
+        return orders;
       }
 
       return [];
     } catch (e) {
       print("ERROR get orders by user: $e");
       return [];
+    }
+  }
+
+  static Future<void> fetchPendingCount() async {
+    try {
+      final orders = await getOrdersByUser();
+      final pendingCount = orders.where((o) => o.typeConfirmId == 1).length;
+      OrderCenter.instance.setCount(pendingCount);
+    } catch (e) {
+      print("ERROR fetch pending count: $e");
     }
   }
 }

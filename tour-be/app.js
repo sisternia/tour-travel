@@ -19,6 +19,7 @@ const mapboxRoutes = require("./services/mapbox.service");
 const postRoutes = require("./routes/posts.routes");
 const orderRoutes = require("./routes/order.routes");
 const momoRoute = require("./routes/momo.routes");
+const notificationRoutes = require("./routes/notification.routes");
 // const vnpayRoute = require("./routes/vnpay.route");
 
 const pool = require("./config/db");
@@ -31,7 +32,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(
   cors({
     origin: "*",
-    methods: "GET,POST,PUT,DELETE",
+    methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
     allowedHeaders: "Content-Type,Authorization",
   })
 );
@@ -57,6 +58,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/mapbox", mapboxRoutes);
 app.use("/api/momo", momoRoute);
 app.use("/api/posts", postRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server đang chạy!");
