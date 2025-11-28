@@ -8,7 +8,7 @@ const ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
 
 class MomoService {
   static async createPayment(orderId, amount) {
-    const momoOrderId = `${orderId}_${Date.now()}`; // UNIQUE!!!
+    const momoOrderId = `${orderId}_${Date.now()}`; 
 
     const requestId = PARTNER_CODE + Date.now();
     const orderInfo = `Thanh toán đơn hàng #${orderId}`;
@@ -22,7 +22,7 @@ class MomoService {
       `&amount=${amount}` +
       `&extraData=${extraData}` +
       `&ipnUrl=${ipnUrl}` +
-      `&orderId=${momoOrderId}` + // FIX
+      `&orderId=${momoOrderId}` + 
       `&orderInfo=${orderInfo}` +
       `&partnerCode=${PARTNER_CODE}` +
       `&redirectUrl=${redirectUrl}` +

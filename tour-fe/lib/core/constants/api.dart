@@ -97,4 +97,9 @@ class ApiConstants {
       '$notifications/user/$userId/read-all';
   static String markNotification(int id) => '$notifications/$id/read';
   static String deleteNotification(int id) => '$notifications/$id';
+
+  // Tour Guide routes
+  static String get tourGuides => '$baseUrl/api/tour-guides';
+  static String tourGuidesByTour(int tourId) =>
+      '$baseUrl/api/tour-guide-assignment/$tourId';
 }

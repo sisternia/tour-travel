@@ -1,3 +1,5 @@
+// lib\presentation\screens\orders\order_detail_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../services/order_service.dart';
@@ -67,11 +69,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: color,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        style:
+            TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -94,10 +93,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           ...children,
         ],
@@ -114,18 +112,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           Icon(icon, color: Colors.teal, size: 22),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
-            ),
+            child: Text(label,
+                style: const TextStyle(fontSize: 16, color: Colors.black54)),
           ),
           Text(
             value,
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-              color: valueColor,
-            ),
+                fontSize: 16,
+                fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+                color: valueColor),
           ),
         ],
       ),
@@ -136,70 +131,92 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff4f6ff),
-      appBar: AppBar(
-        title: Text("Đơn hàng #${widget.orderId}"),
-        foregroundColor: Colors.black87,
-        backgroundColor: Colors.white,
-        elevation: 2,
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : order == null
-              ? const Center(child: Text("Không tìm thấy đơn hàng"))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          _statusTag(order!.typeConfirmId),
-                        ],
-                      ),
-                      _sectionCard("Thông tin Tour", [
-                        _infoRow(
-                          Ionicons.location_outline,
-                          "Tên tour",
-                          order!.tourName ?? "—",
+      body: SafeArea(
+        child: loading
+            ? const Center(child: CircularProgressIndicator())
+            : order == null
+                ? const Center(child: Text("Không tìm thấy đơn hàng"))
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      children: [
+                        // ⭐ HEADER — TIÊU ĐỀ + EXIT
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 16, bottom: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const SizedBox(width: 28),
+                              Text(
+                                "Đơn hàng #${widget.orderId}",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: const Icon(Icons.close,
+                                    size: 28, color: Colors.black87),
+                              ),
+                            ],
+                          ),
                         ),
-                      ]),
-                      _sectionCard("Thông tin khách hàng", [
-                        _infoRow(Ionicons.person_outline, "Tên khách",
-                            order!.nameTourist),
-                        _infoRow(Ionicons.call_outline, "Điện thoại",
-                            order!.phoneTourist),
-                        _infoRow(Ionicons.mail_outline, "Email",
-                            order!.emailTourist),
-                        _infoRow(Ionicons.document_text_outline, "Ghi chú",
-                            order!.note ?? "—"),
-                      ]),
-                      _sectionCard("Số lượng", [
-                        _infoRow(Ionicons.body_outline, "Người lớn",
-                            "${order!.numberOfAdult}"),
-                        _infoRow(Ionicons.happy_outline, "Trẻ em",
-                            "${order!.numberOfChild}"),
-                      ]),
-                      _sectionCard("Thanh toán", [
-                        _infoRow(
-                          Ionicons.pricetag_outline,
-                          "Tổng tiền",
-                          "${order!.total.toString().replaceAllMapped(
-                                RegExp(r'\B(?=(\d{3})+(?!\d))'),
-                                (m) => '.',
-                              )} VNĐ",
-                          valueColor: Colors.red,
-                          bold: true,
+
+                        Row(
+                          children: [_statusTag(order!.typeConfirmId)],
                         ),
-                        _infoRow(
-                          Ionicons.calendar_outline,
-                          "Ngày đặt",
-                          _formatDate(order!.orderAt),
-                        ),
-                      ]),
-                      const SizedBox(height: 40),
-                    ],
+
+                        _sectionCard("Thông tin Tour", [
+                          _infoRow(
+                            Ionicons.location_outline,
+                            "Tên tour",
+                            order!.tourName ?? "—",
+                          ),
+                        ]),
+
+                        _sectionCard("Thông tin khách hàng", [
+                          _infoRow(Ionicons.person_outline, "Tên khách",
+                              order!.nameTourist),
+                          _infoRow(Ionicons.call_outline, "Điện thoại",
+                              order!.phoneTourist),
+                          _infoRow(Ionicons.mail_outline, "Email",
+                              order!.emailTourist),
+                          _infoRow(Ionicons.document_text_outline, "Ghi chú",
+                              order!.note ?? "—"),
+                        ]),
+
+                        _sectionCard("Số lượng", [
+                          _infoRow(Ionicons.body_outline, "Người lớn",
+                              "${order!.numberOfAdult}"),
+                          _infoRow(Ionicons.happy_outline, "Trẻ em",
+                              "${order!.numberOfChild}"),
+                        ]),
+
+                        _sectionCard("Thanh toán", [
+                          _infoRow(
+                            Ionicons.pricetag_outline,
+                            "Tổng tiền",
+                            "${order!.total.toString().replaceAllMapped(
+                                  RegExp(r'\B(?=(\d{3})+(?!\d))'),
+                                  (m) => '.',
+                                )} VNĐ",
+                            valueColor: Colors.red,
+                            bold: true,
+                          ),
+                          _infoRow(
+                            Ionicons.calendar_outline,
+                            "Ngày đặt",
+                            _formatDate(order!.orderAt),
+                          ),
+                        ]),
+
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
-                ),
+      ),
       bottomNavigationBar: order != null && order!.typeConfirmId == 1
           ? Container(
               padding: const EdgeInsets.all(16),
@@ -211,16 +228,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     orderId: widget.orderId,
                     amount: order!.total.toInt(),
                   );
-
-                  Future.delayed(const Duration(seconds: 1), () {
-                    loadOrder();
-                  });
+                  Future.delayed(const Duration(seconds: 1), () => loadOrder());
                 },
                 icon: const Icon(Ionicons.card_outline, color: Colors.white),
-                label: const Text(
-                  "Thanh toán MOMO",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                label: const Text("Thanh toán MOMO",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,
                   padding: const EdgeInsets.symmetric(vertical: 16),

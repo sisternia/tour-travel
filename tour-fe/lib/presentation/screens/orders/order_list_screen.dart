@@ -1,3 +1,5 @@
+// lib\presentation\screens\orders\order_list_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../services/order_service.dart';
@@ -43,17 +45,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
         text = "Chưa thanh toán";
         color = Colors.orange;
         break;
-
       case 2:
         text = "Admin đã xác nhận thành công";
         color = Colors.green;
         break;
-
       case 3:
         text = "Đã thanh toán - chờ duyệt";
         color = Colors.blue;
         break;
-
       default:
         text = "Không xác định";
         color = Colors.black45;
@@ -65,11 +64,9 @@ class _OrderListScreenState extends State<OrderListScreen> {
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        text,
-        style:
-            TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color),
-      ),
+      child: Text(text,
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w600, color: color)),
     );
   }
 
@@ -79,8 +76,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => OrderDetailScreen(orderId: order.id),
-          ),
+              builder: (_) => OrderDetailScreen(orderId: order.id)),
         );
       },
       child: Container(
@@ -103,11 +99,9 @@ class _OrderListScreenState extends State<OrderListScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Đơn hàng #${order.id}",
-                  style: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.bold),
-                ),
+                Text("Đơn hàng #${order.id}",
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.bold)),
                 _buildStatus(order.typeConfirmId),
               ],
             ),
@@ -166,36 +160,53 @@ class _OrderListScreenState extends State<OrderListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff4f6ff),
-      appBar: AppBar(
-        title: const Text("Quản lý đơn hàng"),
-        backgroundColor: Colors.white,
-        elevation: 2,
-        shadowColor: Colors.black12,
-        foregroundColor: Colors.black87,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ⭐ HEADER TỰ CUSTOM – TIÊU ĐỀ + NÚT THOÁT
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 28), // để tiêu đề ở giữa
+                  const Text(
+                    "Quản lý đơn hàng",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.close,
+                        size: 28, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : orders.isEmpty
+                      ? const Center(
+                          child: Text(
+                            "Bạn chưa có đơn hàng nào",
+                            style:
+                                TextStyle(fontSize: 18, color: Colors.black54),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: loadOrders,
+                          child: ListView.builder(
+                            itemCount: orders.length,
+                            padding: const EdgeInsets.only(top: 10),
+                            itemBuilder: (context, index) =>
+                                _orderCard(orders[index]),
+                          ),
+                        ),
+            )
+          ],
         ),
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : orders.isEmpty
-              ? const Center(
-                  child: Text(
-                    "Bạn chưa có đơn hàng nào",
-                    style: TextStyle(fontSize: 18, color: Colors.black54),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: loadOrders,
-                  child: ListView.builder(
-                    itemCount: orders.length,
-                    padding: const EdgeInsets.only(top: 10),
-                    itemBuilder: (context, index) => _orderCard(orders[index]),
-                  ),
-                ),
     );
   }
 }

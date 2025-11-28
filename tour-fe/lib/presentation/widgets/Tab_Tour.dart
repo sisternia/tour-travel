@@ -8,6 +8,8 @@ import 'package:tour_fe/services/tour_schedules_service.dart';
 import 'package:intl/intl.dart';
 import 'package:tour_fe/data/models/tour_prices_model.dart';
 import 'package:tour_fe/data/models/tour_schedules_model.dart';
+import 'package:tour_fe/services/tours_guide_service.dart';
+import 'package:tour_fe/data/models/tours_guide_model.dart';
 
 class TabTourWidget extends StatefulWidget {
   final String description;
@@ -31,10 +33,12 @@ class _TabTourWidgetState extends State<TabTourWidget> {
   final TourPricesService _pricesService = TourPricesService();
   final ToursService _toursService = ToursService();
   final TourSchedulesService _schedulesService = TourSchedulesService();
+  final TourGuideService _guideService = TourGuideService();
 
   late Future<List<TourPriceAssignmentModel>> _futureAssignment;
   late Future<Map<String, dynamic>> _futureTourInfo;
   late Future<List<TourScheduleModel>> _futureSchedules;
+  late Future<List<TourGuideModel>> _futureGuides;
 
   bool _priceSent = false;
 
@@ -44,6 +48,7 @@ class _TabTourWidgetState extends State<TabTourWidget> {
     _futureAssignment = _pricesService.fetchAssignmentByTour(widget.tourId);
     _futureTourInfo = _loadTourInfo();
     _futureSchedules = _schedulesService.fetchSchedulesByTour(widget.tourId);
+    _futureGuides = _guideService.getGuidesByTour(widget.tourId);
   }
 
   Future<Map<String, dynamic>> _loadTourInfo() async {
@@ -125,9 +130,113 @@ class _TabTourWidgetState extends State<TabTourWidget> {
               final schedules = snap.data ?? [];
 
               if (schedules.isEmpty) {
-                return const Text(
-                  "Chưa có lịch trình cho tour này.",
-                  style: TextStyle(fontSize: 16, color: darkGrey),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Chưa có lịch trình cho tour này.",
+                      style: TextStyle(fontSize: 16, color: darkGrey),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Hướng dẫn viên",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FutureBuilder<List<TourGuideModel>>(
+                      future: _futureGuides,
+                      builder: (context, guideSnap) {
+                        if (guideSnap.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        if (guideSnap.hasError) {
+                          return Text(
+                              "Lỗi tải hướng dẫn viên: ${guideSnap.error}");
+                        }
+
+                        final guides = guideSnap.data ?? [];
+                        if (guides.isEmpty) {
+                          return const Text(
+                            "Chưa có hướng dẫn viên cho tour này.",
+                            style: TextStyle(fontSize: 16, color: darkGrey),
+                          );
+                        }
+
+                        final g = guides.first;
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: g.avatarImage != null &&
+                                      g.avatarImage!.isNotEmpty
+                                  ? Image.network(
+                                      g.avatarImage!,
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          width: 70,
+                                          height: 70,
+                                          color: Colors.grey.shade300,
+                                          child: const Icon(
+                                            Icons.person,
+                                            size: 40,
+                                            color: Colors.white,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Container(
+                                      width: 70,
+                                      height: 70,
+                                      color: Colors.grey.shade300,
+                                      child: const Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(width: 14),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  g.guideName ?? "—",
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  g.email ?? "—",
+                                  style: const TextStyle(
+                                      fontSize: 14, color: darkGrey),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  g.phone?.toString() ?? "—",
+                                  style: const TextStyle(
+                                      fontSize: 14, color: darkGrey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 );
               }
 
@@ -158,6 +267,102 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                     ),
                   ),
                   const SizedBox(height: 14),
+                  const Text(
+                    "Hướng dẫn viên",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FutureBuilder<List<TourGuideModel>>(
+                    future: _futureGuides,
+                    builder: (context, guideSnap) {
+                      if (guideSnap.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (guideSnap.hasError) {
+                        return Text(
+                            "Lỗi tải hướng dẫn viên: ${guideSnap.error}");
+                      }
+
+                      final guides = guideSnap.data ?? [];
+                      if (guides.isEmpty) {
+                        return const Text(
+                          "Chưa có hướng dẫn viên cho tour này.",
+                          style: TextStyle(fontSize: 16, color: darkGrey),
+                        );
+                      }
+
+                      final g = guides.first;
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: g.avatarImage != null &&
+                                    g.avatarImage!.isNotEmpty
+                                ? Image.network(
+                                    g.avatarImage!,
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 70,
+                                        height: 70,
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.person,
+                                          size: 40,
+                                          color: Colors.white,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    width: 70,
+                                    height: 70,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(width: 14),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                g.guideName ?? "—",
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                g.email ?? "—",
+                                style: const TextStyle(
+                                    fontSize: 14, color: darkGrey),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                g.phone?.toString() ?? "—",
+                                style: const TextStyle(
+                                    fontSize: 14, color: darkGrey),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
                   ...schedules.skip(1).map((s) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
