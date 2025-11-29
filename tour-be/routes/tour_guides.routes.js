@@ -5,7 +5,6 @@ const multer = require("multer");
 
 const TourGuideController = require("../controllers/tour_guides.controller");
 
-// Multer xử lý FormData
 const upload = multer({ dest: "temp/tour_guides/" });
 
 router.get("/", TourGuideController.getAllTourGuides);
@@ -28,23 +27,14 @@ router.put(
   TourGuideController.updateTourGuide
 );
 
-// ==========================
-// DELETE
-// ==========================
 router.delete("/:guide_id", TourGuideController.deleteTourGuide);
 
-// ==========================
-// Upload Avatar
-// ==========================
 router.post(
   "/:guide_id/image/upload",
   upload.single("guide_image"),
   TourGuideController.uploadGuideImage
 );
 
-// ==========================
-// Delete Avatar
-// ==========================
 router.delete("/:guide_id/image", TourGuideController.deleteGuideImage);
 
 module.exports = router;

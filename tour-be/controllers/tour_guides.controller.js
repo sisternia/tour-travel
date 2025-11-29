@@ -1,3 +1,5 @@
+// controllers\tour_guides.controller.js
+
 const fs = require("fs");
 const cloudinary = require("../services/cloudinary.service");
 const TourGuide = require("../models/tour_guides.model");

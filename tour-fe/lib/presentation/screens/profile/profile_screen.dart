@@ -1,4 +1,5 @@
-// lib\presentation\screens\profile\profile_screen.dart
+// lib/presentation/screens/profile/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
@@ -111,14 +112,8 @@ class ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<ProfileModel> _getProfile() async {
-    try {
-      final token = await _tokenService.getToken();
-      if (token == null) throw Exception('Token not found');
-      return await _profileService.getProfile(token);
-    } catch (e) {
-      debugPrint('Failed to load profile: $e');
-      rethrow;
-    }
+    final token = await _tokenService.getToken();
+    return await _profileService.getProfile(token!);
   }
 
   void refreshProfile() {
@@ -253,11 +248,7 @@ class ProfileScreenState extends State<ProfileScreen>
           Text('Failed to load profile: $message'),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _profileFuture = _getProfile();
-              });
-            },
+            onPressed: () => setState(() => _profileFuture = _getProfile()),
             child: const Text('Retry'),
           ),
         ],
@@ -277,49 +268,20 @@ class ProfileScreenState extends State<ProfileScreen>
           height: 180,
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: backgroundImage == null
-                ? LinearGradient(
-                    colors: [
-                      iosBlue.withOpacity(0.8),
-                      iosBlue.withOpacity(0.6)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+            color: Colors.grey.shade300,
+            image: (backgroundImage != null && backgroundImage.isNotEmpty)
+                ? DecorationImage(
+                    image: NetworkImage(backgroundImage),
+                    fit: BoxFit.cover,
                   )
                 : null,
-            image: backgroundImage != null
-                ? DecorationImage(
-                    image: NetworkImage(backgroundImage), fit: BoxFit.cover)
-                : const DecorationImage(
-                    image: AssetImage('assets/anhbia.jpg'), fit: BoxFit.cover),
           ),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: GestureDetector(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const EditProfileScreen()),
-                  );
-
-                  if (result == true || mounted) {
-                    _refreshProfile();
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.edit, color: iosBlue, size: 20),
-                ),
-              ),
-            ),
-          ),
+          child: (backgroundImage == null || backgroundImage.isEmpty)
+              ? const Center(
+                  child:
+                      Icon(Icons.image_outlined, size: 60, color: Colors.white),
+                )
+              : null,
         ),
         Positioned(
           top: 120,
@@ -337,13 +299,12 @@ class ProfileScreenState extends State<ProfileScreen>
             child: CircleAvatar(
               radius: 50,
               backgroundColor: iosPink,
-              backgroundImage:
-                  avatarImage != null ? NetworkImage(avatarImage) : null,
-              child: avatarImage == null
-                  ? ClipOval(
-                      child: Image.asset('assets/illustration.png',
-                          fit: BoxFit.cover, width: 100, height: 100),
-                    )
+              backgroundImage: (avatarImage != null && avatarImage.isNotEmpty)
+                  ? NetworkImage(avatarImage)
+                  : null,
+              child: (avatarImage == null || avatarImage.isEmpty)
+                  ? const Icon(Icons.person_outline,
+                      size: 60, color: Colors.white)
                   : null,
             ),
           ),
@@ -361,6 +322,27 @@ class ProfileScreenState extends State<ProfileScreen>
               Text(profile.email ?? 'example@example.com',
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
             ],
+          ),
+        ),
+        Positioned(
+          top: 16,
+          right: 16,
+          child: GestureDetector(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              );
+              if (result == true) _refreshProfile();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.edit, color: iosBlue, size: 20),
+            ),
           ),
         ),
       ],
@@ -500,7 +482,6 @@ class ProfileScreenState extends State<ProfileScreen>
           ...infoItems.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
-            final isLast = index == infoItems.length - 1;
 
             return Column(
               children: [
@@ -512,7 +493,7 @@ class ProfileScreenState extends State<ProfileScreen>
                           color: iosGray,
                           fontWeight: FontWeight.w500)),
                   subtitle: Text(
-                    item.value.isNotEmpty ? item.value : 'Not set',
+                    item.value,
                     style: TextStyle(
                         fontSize: 14,
                         color: item.value == 'Not set' ? iosGray : Colors.black,
@@ -521,11 +502,11 @@ class ProfileScreenState extends State<ProfileScreen>
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                 ),
-                if (!isLast)
+                if (index != infoItems.length - 1)
                   Divider(height: 1, color: Colors.grey.shade200, indent: 56),
               ],
             );
-          }).toList(),
+          }),
           ListTile(
             leading: Icon(Icons.list_alt, color: iosGray),
             title: const Text(

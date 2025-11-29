@@ -1,9 +1,8 @@
+// controllers\tour_guide_assignment.controller.js
+
 const Assignment = require("../models/tour_guide_assignment.model");
 const TourGuide = require("../models/tour_guides.model");
 
-// ===========================
-// Gán hướng dẫn viên vào tour
-// ===========================
 const assignGuide = async (req, res) => {
   try {
     const { tour_id, tour_guide_id } = req.body;
@@ -26,9 +25,6 @@ const assignGuide = async (req, res) => {
   }
 };
 
-// ===========================
-// Lấy danh sách HDV theo tour
-// ===========================
 const getGuidesByTour = async (req, res) => {
   try {
     const { tour_id } = req.params;
@@ -41,9 +37,6 @@ const getGuidesByTour = async (req, res) => {
   }
 };
 
-// ===========================
-// Xóa gán hướng dẫn viên
-// ===========================
 const deleteAssignment = async (req, res) => {
   try {
     const { id } = req.params;

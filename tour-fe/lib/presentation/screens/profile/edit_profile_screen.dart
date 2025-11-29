@@ -103,12 +103,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   ImageProvider<Object>? _getAvatarImageProvider() {
     if (_avatarBytes != null) return MemoryImage(_avatarBytes!);
-    if (_avatarUrl != null) return NetworkImage(_avatarUrl!);
+    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
+      return NetworkImage(_avatarUrl!);
+    }
     return null;
   }
 
   Future<void> _saveProfile() async {
-    // Chỉ validate khi bấm SAVE
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -134,7 +135,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const SnackBar(content: Text('Profile updated successfully')),
       );
 
-      // Return true để báo cho ProfileScreen biết cần refresh
       Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
@@ -234,17 +234,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
+              color: Colors.grey.shade300,
               image: _coverImageBytes != null
                   ? DecorationImage(
                       image: MemoryImage(_coverImageBytes!), fit: BoxFit.cover)
-                  : _coverImageUrl != null
+                  : (_coverImageUrl != null && _coverImageUrl!.isNotEmpty)
                       ? DecorationImage(
                           image: NetworkImage(_coverImageUrl!),
-                          fit: BoxFit.cover)
-                      : const DecorationImage(
-                          image: AssetImage('assets/anhbia.jpg'),
-                          fit: BoxFit.cover),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
             ),
+            child: (_coverImageUrl == null ||
+                    _coverImageUrl!.isEmpty && _coverImageBytes == null)
+                ? const Center(
+                    child: Icon(Icons.image_outlined,
+                        color: Colors.white, size: 50),
+                  )
+                : null,
           ),
           Positioned(
             bottom: 66,
@@ -265,9 +272,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     radius: 50,
                     backgroundColor: iosPink,
                     backgroundImage: _getAvatarImageProvider(),
-                    child: (_avatarBytes == null && _avatarUrl == null)
-                        ? Image.asset('assets/illustration.png',
-                            width: 100, height: 100)
+                    child: (_avatarBytes == null &&
+                            (_avatarUrl == null || _avatarUrl!.isEmpty))
+                        ? const Icon(Icons.person_outline,
+                            size: 60, color: Colors.white)
                         : null,
                   ),
                   Positioned(

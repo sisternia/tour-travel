@@ -1,5 +1,4 @@
-// models\orders.model.js
-
+// models/orders.model.js
 const db = require("../config/db");
 
 module.exports = {
@@ -31,6 +30,7 @@ module.exports = {
       [orderId]
     );
   },
+
   getOrdersByUser: (userId) => {
     return db.execute(
       `
@@ -65,8 +65,8 @@ module.exports = {
       `
       INSERT INTO orders (
         number_of_child, number_of_adult, name_tourist, phone_tourist,
-        email_tourist, total, note, user_id, tour_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        email_tourist, total, note, user_id, tour_id, type_confirm_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `,
       [
         number_of_child,

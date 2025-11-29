@@ -1,3 +1,4 @@
+// models\tour_guide_assignment.model.js
 const db = require("../config/db");
 
 const Assignment = {

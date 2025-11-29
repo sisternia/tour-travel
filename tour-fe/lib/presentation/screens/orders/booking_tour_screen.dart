@@ -1,4 +1,4 @@
-// lib\presentation\screens\tour\booking_tour_screen.dart
+// lib\presentation\screens\orders\booking_tour_screen.dart
 import 'package:flutter/material.dart';
 import '../../../services/order_service.dart';
 import 'package:ionicons/ionicons.dart';
@@ -7,6 +7,7 @@ import '../../widgets/TextField.dart';
 import 'booking_detail_screen.dart';
 import '../../../services/token_service.dart';
 import '../../widgets/NavigationBar.dart';
+import '../../../services/profile_service.dart';
 
 class BookingTourScreen extends StatefulWidget {
   final int tourId;
@@ -35,9 +36,26 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   TextEditingController emailCtrl = TextEditingController();
   TextEditingController noteCtrl = TextEditingController();
 
+  bool loading = false;
+
   int get total => adult * widget.priceAdult + child * widget.priceChild;
 
-  bool loading = false;
+  @override
+  void initState() {
+    super.initState();
+    _loadUserEmail();
+  }
+
+  Future<void> _loadUserEmail() async {
+    final tokenService = TokenService();
+    final profileService = ProfileService();
+
+    final token = await tokenService.getToken();
+    if (token == null) return;
+
+    final profile = await profileService.getProfile(token);
+    emailCtrl.text = profile.email ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,64 +68,72 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// --- TITLE ---
               const Text(
                 "Thông tin số lượng",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
 
-              /// Người lớn
               _buildNumberSelector(
                 title: "Người lớn",
                 value: adult,
                 icon: Ionicons.person,
                 onAdd: () => setState(() => adult++),
-                onMinus: () {
-                  if (adult > 1) setState(() => adult--);
-                },
+                onMinus: () => setState(() {
+                  if (adult > 1) adult--;
+                }),
               ),
 
-              const SizedBox(height: 15),
-
-              /// Trẻ em
               _buildNumberSelector(
                 title: "Trẻ em",
                 value: child,
                 icon: Ionicons.happy_outline,
                 onAdd: () => setState(() => child++),
-                onMinus: () {
-                  if (child > 0) setState(() => child--);
-                },
+                onMinus: () => setState(() {
+                  if (child > 0) child--;
+                }),
               ),
 
               const SizedBox(height: 30),
+
               const Text(
                 "Thông tin liên hệ",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
 
-              _buildInput("Tên người đặt", nameCtrl,
-                  validator: (v) => v!.isEmpty ? "Vui lòng nhập tên" : null,
-                  icon: Ionicons.person_circle_outline),
+              _buildInput(
+                "Tên người đặt",
+                nameCtrl,
+                validator: (v) => v!.isEmpty ? "Vui lòng nhập tên" : null,
+                icon: Ionicons.person_circle_outline,
+              ),
 
-              _buildInput("Số điện thoại", phoneCtrl,
-                  validator: (v) =>
-                      v!.isEmpty ? "Vui lòng nhập số điện thoại" : null,
-                  keyboard: TextInputType.phone,
-                  icon: Ionicons.call_outline),
+              _buildInput(
+                "Số điện thoại",
+                phoneCtrl,
+                validator: (v) =>
+                    v!.isEmpty ? "Vui lòng nhập số điện thoại" : null,
+                keyboard: TextInputType.phone,
+                icon: Ionicons.call_outline,
+              ),
 
-              _buildInput("Email", emailCtrl,
-                  keyboard: TextInputType.emailAddress,
-                  icon: Ionicons.mail_outline),
+              CustomTextField(
+                controller: emailCtrl,
+                label: "Email",
+                icon: Ionicons.mail_outline,
+                readOnly: true,
+                keyboardType: TextInputType.emailAddress,
+              ),
 
-              _buildInput("Ghi chú (không bắt buộc)", noteCtrl,
-                  maxLines: 3, icon: Ionicons.document_text_outline),
+              _buildInput(
+                "Ghi chú (không bắt buộc)",
+                noteCtrl,
+                maxLines: 3,
+                icon: Ionicons.document_text_outline,
+              ),
 
               const SizedBox(height: 20),
 
-              /// PRICE BOX
               _buildPriceBox(),
 
               const SizedBox(height: 100),
@@ -130,26 +156,26 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  "Hủy",
-                  style: TextStyle(
-                    color: Colors.redAccent,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              child: const Text(
+                "Hủy",
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: PrimaryButton(
-                text: "Xác nhận",
-                loading: loading,
-                onPressed: _submitOrder,
-              ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: PrimaryButton(
+              text: "Xác nhận",
+              loading: loading,
+              onPressed: _submitOrder,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -182,22 +208,12 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 4,
-            spreadRadius: 1,
-            offset: const Offset(0, 1),
-            color: Colors.black12,
-          )
-        ],
       ),
       child: Row(
         children: [
           Icon(icon, size: 26, color: Colors.blueAccent),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(title, style: const TextStyle(fontSize: 16)),
-          ),
+          Expanded(child: Text(title)),
           Row(
             children: [
               _circleBtn(Icons.remove, onMinus),
@@ -235,7 +251,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.orange.shade200),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -245,7 +260,10 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
           Text(
             "${total.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')} VNĐ",
             style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red),
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
           ),
         ],
       ),
@@ -351,6 +369,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => loading = true);
+
     final tokenService = TokenService();
     final userId = await tokenService.getUserId();
 
@@ -385,8 +404,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
-      );
+          const SnackBar(content: Text("Tạo đơn hàng thất bại!")));
     }
   }
 }

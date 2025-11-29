@@ -46,7 +46,7 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           autovalidateMode: AutovalidateMode.disabled,
           validator: validator,
-          mouseCursor: SystemMouseCursors.basic, // NO HOVER EFFECT
+          mouseCursor: SystemMouseCursors.basic,
           decoration: InputDecoration(
             prefixIcon:
                 icon != null ? Icon(icon, color: Colors.blueAccent) : null,
@@ -63,7 +63,6 @@ class CustomTextField extends StatelessWidget {
             ),
             errorStyle: const TextStyle(
               fontSize: 12,
-              height: 0.8,
               color: Colors.red,
             ),
             suffixIcon: toggleObscure != null

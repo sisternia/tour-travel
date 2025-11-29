@@ -1,7 +1,13 @@
 // controllers/orders.controller.js
-
 const Order = require("../models/orders.model");
 const NotificationService = require('../services/notification.service');
+const { sendOrderStatusMail } = require("../services/verify.service");
+
+const STATUS_TEXT = {
+  1: "Đang chờ xác nhận",
+  2: "Đã xác nhận",
+  3: "Đã thanh toán",
+};
 
 const OrderController = {
   getAll: async (req, res) => {
@@ -90,6 +96,8 @@ const OrderController = {
 
       const orderId = result.insertId;
 
+      await sendOrderStatusMail(email_tourist, STATUS_TEXT[1], orderId);
+
       return res.status(201).json({
         success: true,
         message: "Tạo đơn hàng thành công",
@@ -111,11 +119,13 @@ const OrderController = {
 
       await Order.updateStatus(id, type_confirm_id);
 
+      const [[order]] = await Order.getOrderById(id);
+
+      await sendOrderStatusMail(order.email_tourist, STATUS_TEXT[type_confirm_id], id);
+
       if (Number(type_confirm_id) === 3) {
-        // User paid - waiting for admin approval
         await NotificationService.notifyPaymentSuccess(id);
       } else if (Number(type_confirm_id) === 2) {
-        // Admin confirmed
         await NotificationService.notifyAdminConfirmed(id);
       }
 

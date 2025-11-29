@@ -1,4 +1,4 @@
-// lib\presentation\screens\auth\forgot_password_screen.dart
+// lib/presentation/screens/auth/forgot_password_screen.dart
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../../../data/repositories/verify_repository.dart';
@@ -51,48 +51,52 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ Bỏ AppBar để giống LoginScreen
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Quên mật khẩu",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+      backgroundColor: Colors.white,
+      body: Container(
+        color: Colors.white,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Quên mật khẩu",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  CustomTextField(
-                    controller: _emailCtrl,
-                    label: "Email",
-                    keyboardType: TextInputType.emailAddress,
-                    validator: Validators.email,
-                  ),
-                  const SizedBox(height: 20),
-                  PrimaryButton(
-                    text: "Xác nhận",
-                    loading: _loading,
-                    onPressed: _submit,
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text("Trở về"),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    CustomTextField(
+                      controller: _emailCtrl,
+                      label: "Email",
+                      keyboardType: TextInputType.emailAddress,
+                      validator: Validators.email,
+                    ),
+                    const SizedBox(height: 20),
+                    PrimaryButton(
+                      text: "Xác nhận",
+                      loading: _loading,
+                      onPressed: _submit,
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      child: const Text("Trở về"),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

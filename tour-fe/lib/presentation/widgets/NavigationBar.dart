@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:tour_fe/core/utils/notification_center.dart';
+import 'package:tour_fe/core/utils/Notification_Center.dart';
 import 'package:tour_fe/services/notification_service.dart';
 
 import '../screens/home_screen.dart';
