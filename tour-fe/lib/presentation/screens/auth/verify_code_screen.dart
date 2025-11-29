@@ -9,7 +9,7 @@ import '../../widgets/Button.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;
-  final String from; // "register", "login" hoặc "forgot"
+  final String from;
 
   const VerifyCodeScreen({
     super.key,
@@ -85,8 +85,10 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     final res = await _repository.sendCode(widget.email);
     setState(() => _loading = false);
     if (!mounted) return;
+
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(res['message'] ?? '')));
+
     for (final c in _controllers) {
       c.clear();
     }
@@ -146,44 +148,48 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ Bỏ AppBar để đồng bộ style
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Mã sẽ được gửi tới: ${widget.email}',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (i) => _buildOtpField(i)),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: PrimaryButton(
-                    text: "Xác nhận",
-                    loading: _loading,
-                    onPressed: _submit,
+      backgroundColor: Colors.white,
+      body: Container(
+        color: Colors.white,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Mã sẽ được gửi tới: ${widget.email}',
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(onPressed: _goBack, child: const Text("Trở về")),
-                    TextButton(
-                        onPressed: _loading ? null : _resend,
-                        child: const Text("Gửi lại mã")),
-                  ],
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(6, (i) => _buildOtpField(i)),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: "Xác nhận",
+                      loading: _loading,
+                      onPressed: _submit,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                          onPressed: _goBack, child: const Text("Trở về")),
+                      TextButton(
+                          onPressed: _loading ? null : _resend,
+                          child: const Text("Gửi lại mã")),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,3 +1,4 @@
+// lib\presentation\screens\notification\notification_screen.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -65,9 +66,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (!mounted) return;
     if (success) {
       setState(() {
-        _notifications = _notifications
-            .map((item) => item.copyWith(isRead: true))
-            .toList();
+        _notifications =
+            _notifications.map((item) => item.copyWith(isRead: true)).toList();
       });
       widget.onStateChanged?.call();
     }
@@ -494,5 +494,3 @@ class _NotificationColors {
     required this.background,
   });
 }
-
-

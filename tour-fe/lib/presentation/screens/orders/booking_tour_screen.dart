@@ -116,7 +116,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 icon: Ionicons.call_outline,
               ),
 
-              /// EMAIL TỰ LẤY – KHÔNG CHO SỬA
               CustomTextField(
                 controller: emailCtrl,
                 label: "Email",

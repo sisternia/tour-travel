@@ -34,6 +34,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Future<void> _submit() async {
     final err = Validators.password(_passCtrl.text) ??
         Validators.confirmPassword(_confirmCtrl.text, _passCtrl.text);
+
     if (err != null) {
       SnackbarUtils.show(context, err);
       return;
@@ -65,47 +66,53 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ Bỏ AppBar để đồng bộ với các màn khác
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Đặt mật khẩu mới cho: ${widget.email}',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                CustomTextField(
-                  controller: _passCtrl,
-                  label: "Mật khẩu",
-                  obscure: _obscurePass,
-                  toggleObscure: () =>
-                      setState(() => _obscurePass = !_obscurePass),
-                  validator: Validators.password,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _confirmCtrl,
-                  label: "Xác nhận mật khẩu",
-                  obscure: _obscureConfirm,
-                  toggleObscure: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
-                  validator: (v) =>
-                      Validators.confirmPassword(v, _passCtrl.text),
-                ),
-                const SizedBox(height: 20),
-                PrimaryButton(
-                  text: "Xác nhận",
-                  loading: _loading,
-                  onPressed: _submit,
-                ),
-                const SizedBox(height: 12),
-                TextButton(onPressed: _goBack, child: const Text('Trở về')),
-              ],
+      backgroundColor: Colors.white,
+      body: Container(
+        color: Colors.white,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Đặt mật khẩu mới cho: ${widget.email}',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  CustomTextField(
+                    controller: _passCtrl,
+                    label: "Mật khẩu",
+                    obscure: _obscurePass,
+                    toggleObscure: () =>
+                        setState(() => _obscurePass = !_obscurePass),
+                    validator: Validators.password,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomTextField(
+                    controller: _confirmCtrl,
+                    label: "Xác nhận mật khẩu",
+                    obscure: _obscureConfirm,
+                    toggleObscure: () =>
+                        setState(() => _obscureConfirm = !_obscureConfirm),
+                    validator: (v) =>
+                        Validators.confirmPassword(v, _passCtrl.text),
+                  ),
+                  const SizedBox(height: 20),
+                  PrimaryButton(
+                    text: "Xác nhận",
+                    loading: _loading,
+                    onPressed: _submit,
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: _goBack,
+                    child: const Text('Trở về'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
