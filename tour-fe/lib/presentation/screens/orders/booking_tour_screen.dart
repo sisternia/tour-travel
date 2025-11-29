@@ -6,6 +6,7 @@ import '../../widgets/Button.dart';
 import '../../widgets/TextField.dart';
 import 'booking_detail_screen.dart';
 import '../../../services/token_service.dart';
+import '../../widgets/NavigationBar.dart';
 import '../../../services/profile_service.dart';
 
 class BookingTourScreen extends StatefulWidget {
@@ -140,23 +141,20 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _bottomBar(),
-    );
-  }
-
-  Widget _bottomBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: const BorderSide(color: Colors.redAccent, width: 1.4),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _handleCancel,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.redAccent, width: 1.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               child: const Text(
@@ -270,6 +268,101 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleCancel() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Xác nhận"),
+        content: const Text(
+          "Bạn chưa thanh toán, đơn hàng sẽ được lưu với trạng thái Chưa Thanh Toán ?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("NO"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("YES", style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && mounted) {
+      // User chose YES - create order with unpaid status and go to home
+      await _createUnpaidOrder();
+    }
+  }
+
+  Future<void> _createUnpaidOrder() async {
+    setState(() => loading = true);
+    final tokenService = TokenService();
+    final userId = await tokenService.getUserId();
+
+    if (userId == null) {
+      setState(() => loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Không tìm thấy tài khoản người dùng!")),
+        );
+      }
+      return;
+    }
+
+    // Validate required fields
+    if (nameCtrl.text.trim().isEmpty || phoneCtrl.text.trim().isEmpty) {
+      setState(() => loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Vui lòng nhập đầy đủ thông tin bắt buộc!")),
+        );
+      }
+      return;
+    }
+
+    final orderId = await OrderService.createOrder({
+      "number_of_child": child,
+      "number_of_adult": adult,
+      "name_tourist": nameCtrl.text.trim(),
+      "phone_tourist": phoneCtrl.text.trim(),
+      "email_tourist": emailCtrl.text.trim(),
+      "total": total,
+      "note": noteCtrl.text.trim(),
+      "user_id": userId,
+      "tour_id": widget.tourId,
+    });
+
+    setState(() => loading = false);
+
+    if (orderId != null) {
+      // Update pending order count
+      await OrderService.fetchPendingCount();
+      
+      if (mounted) {
+        // Navigate to home screen
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const NavigationBarWidget()),
+          (route) => false,
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Đơn hàng đã được lưu với trạng thái Chưa Thanh Toán"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
+        );
+      }
+    }
   }
 
   Future<void> _submitOrder() async {

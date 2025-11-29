@@ -65,6 +65,24 @@ class ApiConstants {
   static String get posts => '$baseUrl/api/posts';
   static String updatePost(String id) => '$baseUrl/api/posts/$id';
   static String deletePost(String id) => '$baseUrl/api/posts/$id';
+  static String postsByUser(String userId) => '$baseUrl/api/posts/user/$userId';
+
+  // Post Reactions routes
+  static String get postReactions => '$baseUrl/api/post-reactions';
+  static String postReactionsByPost(String postId) => '$postReactions/post/$postId';
+  static String userReaction(String userId, String postId) => '$postReactions/user/$userId/post/$postId';
+
+  // Post Comments routes
+  static String get postComments => '$baseUrl/api/post-comments';
+  static String postCommentsByPost(String postId) => '$postComments/post/$postId';
+  static String postCommentCount(String postId) => '$postComments/post/$postId/count';
+  static String updateComment(String commentId) => '$postComments/$commentId';
+  static String deleteComment(String commentId) => '$postComments/$commentId';
+
+  // Post Shares routes
+  static String get postShares => '$baseUrl/api/post-shares';
+  static String postSharesByPost(String postId) => '$postShares/post/$postId';
+  static String postShareCount(String postId) => '$postShares/post/$postId/count';
 
   // Orders routes
   static String get orders => '$baseUrl/api/orders';

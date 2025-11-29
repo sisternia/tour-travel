@@ -86,4 +86,15 @@ class PostService {
 
     return res.statusCode == 200;
   }
+
+  /// Get Posts by User ID
+  Future<List<dynamic>> getPostsByUserId(String userId) async {
+    final res = await http.get(Uri.parse(ApiConstants.postsByUser(userId)));
+
+    if (res.statusCode == 200) {
+      return json.decode(res.body);
+    }
+
+    throw Exception("Failed to load posts");
+  }
 }

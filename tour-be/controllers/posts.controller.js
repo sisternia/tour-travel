@@ -164,10 +164,40 @@ const getAllPosts = async (req, res) => {
   }
 };
 
+const getPostsByUserId = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const posts = await Post.getByUserId(user_id);
+
+    const fullPosts = [];
+
+    for (const post of posts) {
+      const images = await PostImages.getByPostId(post.post_id);
+
+      fullPosts.push({
+        ...post,
+        images: images.map(img => ({
+          image_id: img.image_id,
+          image_url: img.image_url
+        }))
+      });
+    }
+
+    res.status(200).json(fullPosts);
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Lỗi server",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   upload,
   createPost,
   updatePost,
   deletePost,
-  getAllPosts
+  getAllPosts,
+  getPostsByUserId
 };
