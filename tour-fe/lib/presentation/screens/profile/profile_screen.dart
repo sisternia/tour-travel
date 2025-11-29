@@ -5,7 +5,13 @@ import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
+import 'package:tour_fe/services/post_service.dart';
+import 'package:tour_fe/services/post_reaction_service.dart';
+import 'package:tour_fe/services/post_comment_service.dart';
+import 'package:tour_fe/services/post_share_service.dart';
+import 'package:tour_fe/presentation/widgets/Post_Shows.dart';
 import '../orders/order_list_screen.dart';
+import '../auth/login_screen.dart';
 
 String _formatDate(String? dateString) {
   if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
@@ -34,13 +40,61 @@ class ProfileScreenState extends State<ProfileScreen>
     with WidgetsBindingObserver {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
+  final PostService _postService = PostService();
+  final PostReactionService _reactionService = PostReactionService();
+  final PostCommentService _commentService = PostCommentService();
+  final PostShareService _shareService = PostShareService();
+  
   late Future<ProfileModel> _profileFuture;
+  List<Map<String, dynamic>> posts = [];
+  bool isLoadingPosts = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _profileFuture = _getProfile();
+    _loadPosts();
+  }
+
+  Future<void> _loadPosts() async {
+    if (!mounted) return;
+    setState(() => isLoadingPosts = true);
+    try {
+      final profile = await _profileFuture;
+      final list = await _postService.getPostsByUserId(profile.userId ?? "");
+      
+      if (!mounted) return;
+      setState(() {
+        posts = list.map<Map<String, dynamic>>((item) {
+          return {
+            "postId": item["post_id"],
+            "userId": item["user_id"],
+            "userName": item["user_name"] ?? "Người dùng",
+            "userAvatar": item["avatar"],
+            "content": item["content"],
+            "privacy": item["privacy"],
+            "createdAt": DateTime.parse(item["created_at"]),
+            "sharedFromPostId": item["shared_from_post_id"],
+            "sharedFromUserId": item["shared_from_user_id"],
+            "sharedFromUserName": item["shared_from_user_name"],
+            "sharedFromUserAvatar": item["shared_from_user_avatar"],
+            "sharedNote": item["shared_note"],
+            "images": (item["images"] ?? []).map<Map<String, dynamic>>((img) {
+              return {
+                "url": img["image_url"],
+                "bytes": null,
+                "isVertical": false,
+              };
+            }).toList(),
+          };
+        }).toList();
+        isLoadingPosts = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoadingPosts = false);
+    }
   }
 
   @override
@@ -137,7 +191,53 @@ class ProfileScreenState extends State<ProfileScreen>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
-          const SizedBox(width: 48),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onSelected: (value) async {
+              if (value == "logout") {
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Đăng xuất"),
+                    content: const Text("Bạn có chắc chắn muốn đăng xuất?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text("Hủy"),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+                
+                if (shouldLogout == true && mounted) {
+                  await _tokenService.deleteToken();
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  }
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: "logout",
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text("Đăng xuất", style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -263,6 +363,115 @@ class ProfileScreenState extends State<ProfileScreen>
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildPostsSection(ProfileModel profile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            "Bài đăng",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ),
+        if (isLoadingPosts)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: CircularProgressIndicator(),
+          ))
+        else if (posts.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+              child: Text(
+                "Chưa có bài đăng nào",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+          )
+        else
+          ...posts.map((post) {
+            return PostShows(
+              postId: post["postId"],
+              userId: post["userId"],
+              userName: post["userName"],
+              userAvatar: post["userAvatar"],
+              currentUserId: profile.userId ?? "",
+              content: post["content"],
+              images: post["images"],
+              createdAt: post["createdAt"],
+              privacy: post["privacy"],
+              sharedNote: post["sharedNote"],
+              sharedFromUserName: post["sharedFromUserName"],
+              sharedFromUserAvatar: post["sharedFromUserAvatar"],
+              sharedFromUserId: post["sharedFromUserId"],
+              onDelete: () async {
+                await _postService.deletePost(
+                  postId: post["postId"],
+                  userName: profile.userName ?? "",
+                );
+                _loadPosts();
+              },
+              onEdit: () {
+                // Edit functionality can be added here
+              },
+              onReaction: (reactionType) async {
+                final existing = await _reactionService.getUserReaction(
+                  profile.userId ?? "",
+                  post["postId"],
+                );
+                if (existing != null) {
+                  if (existing["reaction_type"] == reactionType) {
+                    await _reactionService.removeReaction(
+                      postId: post["postId"],
+                      userId: profile.userId ?? "",
+                    );
+                  } else {
+                    await _reactionService.addReaction(
+                      postId: post["postId"],
+                      userId: profile.userId ?? "",
+                      reactionType: reactionType,
+                    );
+                  }
+                } else {
+                  await _reactionService.addReaction(
+                    postId: post["postId"],
+                    userId: profile.userId ?? "",
+                    reactionType: reactionType,
+                  );
+                }
+                _loadPosts();
+              },
+              onComment: (content) async {
+                await _commentService.addComment(
+                  postId: post["postId"],
+                  userId: profile.userId ?? "",
+                  content: content,
+                );
+                _loadPosts();
+              },
+              onShare: () async {
+                if (profile.userId == null) return;
+                // If this post is already a share, use the original user ID
+                final originalUserId = post["sharedFromUserId"] ?? post["userId"];
+                await _shareService.sharePost(
+                  postId: post["postId"],
+                  userId: profile.userId!,
+                  sharedFromUserId: originalUserId,
+                );
+                _loadPosts();
+              },
+            );
+          }),
+        const SizedBox(height: 30),
       ],
     );
   }

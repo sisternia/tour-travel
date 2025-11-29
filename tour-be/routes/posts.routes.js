@@ -19,5 +19,6 @@ router.put(
 );
 
 router.delete("/:post_id", controller.deletePost);
+router.get("/user/:user_id", controller.getPostsByUserId);
 
 module.exports = router;

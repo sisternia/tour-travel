@@ -8,6 +8,7 @@ import 'package:tour_fe/services/notification_service.dart';
 import '../screens/home_screen.dart';
 import '../screens/notification/notification_screen.dart';
 import '../screens/post/post_header_screen.dart';
+import '../screens/post/social_feed_screen.dart';
 import '../screens/tour/tourist_spot_screen.dart';
 
 class NavigationBarWidget extends StatefulWidget {
@@ -38,7 +39,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     _screens = [
       widget.body ?? const HomeScreen(),
       const TouristSpotScreen(),
-      const Center(child: Text('Messages')),
+      const SocialFeedScreen(),
       NotificationScreen(onStateChanged: _loadUnreadCount),
       const PostHeaderScreen(),
     ];
@@ -85,7 +86,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
             tabs: [
               const GButton(icon: Icons.home, iconSize: 30),
               const GButton(icon: Icons.calendar_today, iconSize: 30),
-              const GButton(icon: Icons.message, iconSize: 30),
+              const GButton(icon: Icons.people, iconSize: 30),
               GButton(
                 icon: Icons.notifications_none,
                 iconSize: 30,

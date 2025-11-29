@@ -6,6 +6,9 @@ import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 import 'package:tour_fe/services/post_service.dart';
+import 'package:tour_fe/services/post_reaction_service.dart';
+import 'package:tour_fe/services/post_comment_service.dart';
+import 'package:tour_fe/services/post_share_service.dart';
 import 'post_modal_screen.dart';
 import '../../widgets/Post_Shows.dart';
 import '../profile/profile_screen.dart';
@@ -23,11 +26,16 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
   final PostService _postService = PostService();
+  final PostReactionService _reactionService = PostReactionService();
+  final PostCommentService _commentService = PostCommentService();
+  final PostShareService _shareService = PostShareService();
 
   late Future<ProfileModel> _profileFuture;
+  String? currentUserId;
 
   List<Map<String, dynamic>> posts = [];
   int? editingIndex;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -37,17 +45,29 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
   }
 
   Future<void> _loadPosts() async {
-    final list = await _postService.getPosts();
+    if (!mounted) return;
+    setState(() => isLoading = true);
+    try {
+      final profile = await _profileFuture;
+      currentUserId = profile.userId;
+      final list = await _postService.getPostsByUserId(profile.userId ?? "");
 
+      if (!mounted) return;
     setState(() {
       posts = list.map<Map<String, dynamic>>((item) {
         return {
           "postId": item["post_id"],
           "userId": item["user_id"],
-          "userName": item["user_name"],
+            "userName": item["user_name"] ?? "Người dùng",
+            "userAvatar": item["avatar"],
           "content": item["content"],
           "privacy": item["privacy"],
           "createdAt": DateTime.parse(item["created_at"]),
+            "sharedFromPostId": item["shared_from_post_id"],
+            "sharedFromUserId": item["shared_from_user_id"],
+            "sharedFromUserName": item["shared_from_user_name"],
+            "sharedFromUserAvatar": item["shared_from_user_avatar"],
+            "sharedNote": item["shared_note"],
           "images": (item["images"] ?? []).map<Map<String, dynamic>>((img) {
             return {
               "url": img["image_url"],
@@ -57,7 +77,12 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
           }).toList(),
         };
       }).toList();
+        isLoading = false;
     });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+    }
   }
 
   Future<ProfileModel> _getProfile() async {
@@ -92,13 +117,27 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                   const SizedBox(height: 10),
                   _buildFloatingCard(profile),
                   const SizedBox(height: 20),
+                  if (isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: CircularProgressIndicator(),
+                    )
+                  else
                   ...posts.asMap().entries.map((p) {
                     return PostShows(
-                      profile: profile,
+                        postId: p.value["postId"],
+                        userId: p.value["userId"],
+                        userName: p.value["userName"],
+                        userAvatar: p.value["userAvatar"],
+                        currentUserId: currentUserId ?? "",
                       content: p.value["content"],
                       images: p.value["images"],
                       createdAt: p.value["createdAt"],
                       privacy: p.value["privacy"],
+                        sharedNote: p.value["sharedNote"],
+                        sharedFromUserName: p.value["sharedFromUserName"],
+                        sharedFromUserAvatar: p.value["sharedFromUserAvatar"],
+                        sharedFromUserId: p.value["sharedFromUserId"],
                       onDelete: () async {
                         await _postService.deletePost(
                           postId: p.value["postId"],
@@ -110,8 +149,54 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                         editingIndex = p.key;
                         _openEditPostModal(profile, posts[p.key]);
                       },
-                      onPin: () {},
-                      onTarget: () {},
+                        onReaction: (reactionType) async {
+                          if (currentUserId == null) return;
+                          final existing = await _reactionService.getUserReaction(
+                            currentUserId!,
+                            p.value["postId"],
+                          );
+                          if (existing != null) {
+                            if (existing["reaction_type"] == reactionType) {
+                              await _reactionService.removeReaction(
+                                postId: p.value["postId"],
+                                userId: currentUserId!,
+                              );
+                            } else {
+                              await _reactionService.addReaction(
+                                postId: p.value["postId"],
+                                userId: currentUserId!,
+                                reactionType: reactionType,
+                              );
+                            }
+                          } else {
+                            await _reactionService.addReaction(
+                              postId: p.value["postId"],
+                              userId: currentUserId!,
+                              reactionType: reactionType,
+                            );
+                          }
+                          _loadPosts();
+                        },
+                        onComment: (content) async {
+                          if (currentUserId == null) return;
+                          await _commentService.addComment(
+                            postId: p.value["postId"],
+                            userId: currentUserId!,
+                            content: content,
+                          );
+                          _loadPosts();
+                        },
+                        onShare: () async {
+                          if (currentUserId == null) return;
+                          // If this post is already a share, use the original user ID
+                          final originalUserId = p.value["sharedFromUserId"] ?? p.value["userId"];
+                          await _shareService.sharePost(
+                            postId: p.value["postId"],
+                            userId: currentUserId!,
+                            sharedFromUserId: originalUserId,
+                          );
+                          _loadPosts();
+                        },
                     );
                   }),
                   const SizedBox(height: 30),
@@ -123,7 +208,6 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
       ),
     );
   }
-
   Widget _buildHeader(
       String? background, String? avatar, ProfileModel profile) {
     return Stack(

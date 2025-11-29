@@ -4,6 +4,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:tour_fe/services/order_service.dart';
+import 'package:tour_fe/core/utils/order_center.dart';
+import 'package:tour_fe/presentation/widgets/NavigationBar.dart';
 
 import 'payment_success_screen.dart';
 import 'web_payment_view_stub.dart'
@@ -78,14 +80,117 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
     );
   }
 
+  Future<void> _handleBackButton() async {
+    // Check if order is paid (status 3 = đã thanh toán)
+    final currentOrder = await OrderService.getOrderById(widget.orderId);
+    if (currentOrder != null && currentOrder.typeConfirmId != 3) {
+      // Order is not paid yet, show confirmation dialog
+      if (!mounted) return;
+      
+      debugPrint("Showing confirmation dialog");
+      
+      // Sử dụng showGeneralDialog để có nhiều control hơn
+      final result = await showGeneralDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        barrierLabel: 'Exit Payment',
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const SizedBox.shrink();
+        },
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOut),
+              ),
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: const Text(
+                  "Xác nhận",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: const Text(
+                  "Bạn chưa thanh toán đơn hàng này, bạn có muốn thoát ra và đơn hàng sẽ lưu vào danh sách đơn hàng của bạn hay không?",
+                  style: TextStyle(fontSize: 16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      debugPrint("NO button pressed");
+                      Navigator.of(context).pop(false);
+                    },
+                    child: const Text(
+                      "NO",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      debugPrint("YES button pressed");
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text(
+                      "YES",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      debugPrint("Dialog result: $result");
+      if (result == true && mounted) {
+        // User chose YES - update order count and go back to home
+        debugPrint("User chose YES, updating order count and navigating home");
+        await OrderService.fetchPendingCount();
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const NavigationBarWidget()),
+            (route) => false,
+          );
+        }
+      }
+      // If NO or result is null, do nothing - user stays on payment screen
+    } else {
+      // Order is paid or doesn't exist, allow normal back navigation
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Thanh toán ví MoMo "),
-        backgroundColor: Colors.pink,
-      ),
-      body: Column(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          await _handleBackButton();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Thanh toán ví MoMo "),
+          backgroundColor: Colors.pink,
+        ),
+        body: Column(
         children: [
           Expanded(
             child: Stack(
@@ -156,6 +261,7 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

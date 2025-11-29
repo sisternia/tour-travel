@@ -58,6 +58,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/mapbox", mapboxRoutes);
 app.use("/api/momo", momoRoute);
 app.use("/api/posts", postRoutes);
+app.use("/api/post-reactions", require("./routes/post_reactions.routes"));
+app.use("/api/post-comments", require("./routes/post_comments.routes"));
+app.use("/api/post-shares", require("./routes/post_shares.routes"));
 app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
