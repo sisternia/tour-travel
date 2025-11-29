@@ -73,7 +73,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
-
               _buildNumberSelector(
                 title: "Người lớn",
                 value: adult,
@@ -83,7 +82,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                   if (adult > 1) adult--;
                 }),
               ),
-
               _buildNumberSelector(
                 title: "Trẻ em",
                 value: child,
@@ -93,21 +91,17 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                   if (child > 0) child--;
                 }),
               ),
-
               const SizedBox(height: 30),
-
               const Text(
                 "Thông tin liên hệ",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-
               _buildInput(
                 "Tên người đặt",
                 nameCtrl,
                 validator: (v) => v!.isEmpty ? "Vui lòng nhập tên" : null,
                 icon: Ionicons.person_circle_outline,
               ),
-
               _buildInput(
                 "Số điện thoại",
                 phoneCtrl,
@@ -116,7 +110,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 keyboard: TextInputType.phone,
                 icon: Ionicons.call_outline,
               ),
-
               CustomTextField(
                 controller: emailCtrl,
                 label: "Email",
@@ -124,18 +117,14 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                 readOnly: true,
                 keyboardType: TextInputType.emailAddress,
               ),
-
               _buildInput(
                 "Ghi chú (không bắt buộc)",
                 noteCtrl,
                 maxLines: 3,
                 icon: Ionicons.document_text_outline,
               ),
-
               const SizedBox(height: 20),
-
               _buildPriceBox(),
-
               const SizedBox(height: 100),
             ],
           ),
@@ -156,26 +145,26 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-              ),
-              child: const Text(
-                "Hủy",
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                child: const Text(
+                  "Hủy",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: PrimaryButton(
-              text: "Xác nhận",
-              loading: loading,
-              onPressed: _submitOrder,
+            const SizedBox(width: 14),
+            Expanded(
+              child: PrimaryButton(
+                text: "Xác nhận",
+                loading: loading,
+                onPressed: _submitOrder,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -218,9 +207,11 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
             children: [
               _circleBtn(Icons.remove, onMinus),
               const SizedBox(width: 12),
-              Text("$value",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                "$value",
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(width: 12),
               _circleBtn(Icons.add, onAdd),
             ],
@@ -255,8 +246,10 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text("Tổng tiền:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const Text(
+            "Tổng tiền:",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
           Text(
             "${total.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')} VNĐ",
             style: const TextStyle(
@@ -276,8 +269,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       builder: (context) => AlertDialog(
         title: const Text("Xác nhận"),
         content: const Text(
-          "Bạn chưa thanh toán, đơn hàng sẽ được lưu với trạng thái Chưa Thanh Toán ?",
-        ),
+            "Bạn chưa thanh toán, đơn hàng sẽ được lưu với trạng thái Chưa Thanh Toán ?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -292,7 +284,6 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     );
 
     if (result == true && mounted) {
-      // User chose YES - create order with unpaid status and go to home
       await _createUnpaidOrder();
     }
   }
@@ -317,7 +308,8 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       setState(() => loading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Vui lòng nhập đầy đủ thông tin bắt buộc!")),
+          const SnackBar(
+              content: Text("Vui lòng nhập đầy đủ thông tin bắt buộc!")),
         );
       }
       return;
@@ -338,20 +330,18 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     setState(() => loading = false);
 
     if (orderId != null) {
-      // Update pending order count
       await OrderService.fetchPendingCount();
-      
+
       if (mounted) {
-        // Navigate to home screen
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const NavigationBarWidget()),
           (route) => false,
         );
-        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Đơn hàng đã được lưu với trạng thái Chưa Thanh Toán"),
+            content:
+                Text("Đơn hàng đã được lưu với trạng thái Chưa Thanh Toán"),
             backgroundColor: Colors.green,
           ),
         );
@@ -404,7 +394,8 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Tạo đơn hàng thất bại!")));
+        const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
+      );
     }
   }
 }
