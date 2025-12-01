@@ -152,7 +152,7 @@ class _DetailsCardScreenState extends State<DetailsCardScreen> {
   Widget buildImageSection() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: 450,
+      height: 350,
       child: Stack(
         clipBehavior: Clip.none,
         children: [

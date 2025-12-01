@@ -53,6 +53,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
         text = "Đã thanh toán - chờ duyệt";
         color = Colors.blue;
         break;
+      case 4:
+        text = "Đã hoàn thành";
+        color = Colors.purple;
+        break;
       default:
         text = "Không xác định";
         color = Colors.black45;
@@ -163,13 +167,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ⭐ HEADER TỰ CUSTOM – TIÊU ĐỀ + NÚT THOÁT
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width: 28), // để tiêu đề ở giữa
+                  const SizedBox(width: 28),
                   const Text(
                     "Quản lý đơn hàng",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -182,7 +185,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 ],
               ),
             ),
-
             Expanded(
               child: loading
                   ? const Center(child: CircularProgressIndicator())

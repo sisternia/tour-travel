@@ -69,25 +69,32 @@ class ApiConstants {
 
   // Post Reactions routes
   static String get postReactions => '$baseUrl/api/post-reactions';
-  static String postReactionsByPost(String postId) => '$postReactions/post/$postId';
-  static String userReaction(String userId, String postId) => '$postReactions/user/$userId/post/$postId';
+  static String postReactionsByPost(String postId) =>
+      '$postReactions/post/$postId';
+  static String userReaction(String userId, String postId) =>
+      '$postReactions/user/$userId/post/$postId';
 
   // Post Comments routes
   static String get postComments => '$baseUrl/api/post-comments';
-  static String postCommentsByPost(String postId) => '$postComments/post/$postId';
-  static String postCommentCount(String postId) => '$postComments/post/$postId/count';
+  static String postCommentsByPost(String postId) =>
+      '$postComments/post/$postId';
+  static String postCommentCount(String postId) =>
+      '$postComments/post/$postId/count';
   static String updateComment(String commentId) => '$postComments/$commentId';
   static String deleteComment(String commentId) => '$postComments/$commentId';
 
   // Post Shares routes
   static String get postShares => '$baseUrl/api/post-shares';
   static String postSharesByPost(String postId) => '$postShares/post/$postId';
-  static String postShareCount(String postId) => '$postShares/post/$postId/count';
+  static String postShareCount(String postId) =>
+      '$postShares/post/$postId/count';
 
   // Orders routes
   static String get orders => '$baseUrl/api/orders';
   static String orderById(int id) => '$baseUrl/api/orders/$id';
   static String updateOrderStatus(int id) => '$baseUrl/api/orders/$id/status';
+  static String userCompleted(int id) =>
+      '$baseUrl/api/orders/$id/user-completed';
 
   // Tour Schedules routes
   static String get schedules => '$baseUrl/api/tour-schedules';
@@ -120,4 +127,9 @@ class ApiConstants {
   static String get tourGuides => '$baseUrl/api/tour-guides';
   static String tourGuidesByTour(int tourId) =>
       '$baseUrl/api/tour-guide-assignment/$tourId';
+
+  // Tour Ratings routes
+  static String submitRating(int tourId) => '$baseUrl/api/tours/$tourId/rating';
+
+  static String getRating(int tourId) => '$baseUrl/api/tours/$tourId/rating';
 }

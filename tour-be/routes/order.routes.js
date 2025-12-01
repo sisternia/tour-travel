@@ -15,6 +15,8 @@ router.post("/", OrderController.create);
 
 router.put("/:id/status", OrderController.updateStatus);
 
+router.post("/:id/user-completed", OrderController.userCompleted);
+
 router.delete("/:id", OrderController.delete);
 
 module.exports = router;
