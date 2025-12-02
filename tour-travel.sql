@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Nov 29, 2025 at 04:21 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th12 02, 2025 lúc 05:01 AM
+-- Phiên bản máy phục vụ: 10.4.28-MariaDB
+-- Phiên bản PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `tour-travel`
+-- Cơ sở dữ liệu: `tour-travel`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Cấu trúc bảng cho bảng `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -40,7 +40,7 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `notifications`
+-- Đang đổ dữ liệu cho bảng `notifications`
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `body`, `type`, `reference_id`, `is_read`, `created_at`, `updated_at`) VALUES
@@ -71,12 +71,13 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `body`, `type`, `referenc
 (41, 'f49004', 'Cảm xúc mới', 'cuong7 đã cười bài viết của bạn', '', 'POST_0f1db', 1, '2025-11-29 13:36:58', '2025-11-29 13:37:04'),
 (42, 'f49004', 'Cảm xúc mới', 'cuong7 đã cười bài viết của bạn', '', 'POST_2107f', 0, '2025-11-29 13:37:29', '2025-11-29 13:37:29'),
 (43, 'f49004', 'Thanh toán thành công', 'Đơn hàng #59 - Khám Phá Hà Giang - Lũng Cú đã được thanh toán thành công.', 'payment', '59', 0, '2025-11-29 13:48:46', '2025-11-29 13:48:46'),
-(44, 'f49004', 'Thanh toán thành công', 'Đơn hàng #61 - Du lịch Phú Quốc đã được thanh toán thành công.', 'payment', '61', 0, '2025-11-29 14:26:57', '2025-11-29 14:26:57');
+(44, 'f49004', 'Thanh toán thành công', 'Đơn hàng #61 - Du lịch Phú Quốc đã được thanh toán thành công.', 'payment', '61', 0, '2025-11-29 14:26:57', '2025-11-29 14:26:57'),
+(45, 'f0afeb', 'Cập nhật hồ sơ thành công', 'Thông tin cá nhân của bạn đã được cập nhật.', 'profile', NULL, 1, '2025-11-29 15:23:23', '2025-11-29 15:28:23');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Cấu trúc bảng cho bảng `orders`
 --
 
 CREATE TABLE `orders` (
@@ -95,7 +96,7 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `orders`
+-- Đang đổ dữ liệu cho bảng `orders`
 --
 
 INSERT INTO `orders` (`id`, `number_of_child`, `number_of_adult`, `name_tourist`, `phone_tourist`, `email_tourist`, `total`, `order_at`, `note`, `type_confirm_id`, `user_id`, `tour_id`) VALUES
@@ -133,7 +134,7 @@ INSERT INTO `orders` (`id`, `number_of_child`, `number_of_adult`, `name_tourist`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `posts`
+-- Cấu trúc bảng cho bảng `posts`
 --
 
 CREATE TABLE `posts` (
@@ -141,58 +142,40 @@ CREATE TABLE `posts` (
   `user_id` varchar(6) NOT NULL,
   `content` text DEFAULT NULL,
   `privacy` enum('public','friends','private') DEFAULT 'public',
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `shared_from_post_id` varchar(50) DEFAULT NULL,
+  `shared_from_post_id` varchar(10) DEFAULT NULL,
   `shared_from_user_id` varchar(6) DEFAULT NULL,
-  `shared_note` text DEFAULT NULL
+  `shared_note` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `posts`
+-- Đang đổ dữ liệu cho bảng `posts`
 --
 
-INSERT INTO `posts` (`post_id`, `user_id`, `content`, `privacy`, `created_at`, `updated_at`, `shared_from_post_id`, `shared_from_user_id`, `shared_note`) VALUES
-('POST_0f1db', 'f49004', 'tao là cường 3', 'public', '2025-11-29 13:36:30', '2025-11-29 13:36:30', 'POST_4710d', 'a811e0', 'Bạn đã chia sẻ bài viết của cuong3'),
-('POST_2107f', 'f49004', 'hahaha', 'public', '2025-11-29 07:09:50', '2025-11-29 07:09:50', NULL, NULL, NULL),
-('POST_28ccd', 'a811e0', 'ảnh đẹp không??', 'public', '2025-11-29 13:30:02', '2025-11-29 13:30:02', 'POST_a0dfc', 'f49004', 'Bạn đã chia sẻ bài viết của CuongNguyen'),
-('POST_4710d', 'a811e0', 'tao là cường 3', 'public', '2025-11-29 12:01:57', '2025-11-29 12:01:57', NULL, NULL, NULL),
-('POST_9b484', 'f49004', 'alo', 'public', '2025-11-29 11:07:44', '2025-11-29 11:07:44', NULL, NULL, NULL),
-('POST_9d8bc', '764674', 'tao là cường 7', 'public', '2025-11-29 12:01:15', '2025-11-29 12:01:15', NULL, NULL, NULL),
-('POST_a0dfc', 'f49004', 'ảnh đẹp không??', 'public', '2025-11-29 12:11:12', '2025-11-29 12:11:12', NULL, NULL, NULL),
-('POST_a4782', 'ab7743', 'test bài nha', 'public', '2025-11-29 08:29:33', '2025-11-29 08:29:33', NULL, NULL, NULL),
-('POST_b20ee', '1a02f1', 'tao là cường 2', 'public', '2025-11-29 12:01:47', '2025-11-29 12:01:47', NULL, NULL, NULL);
+INSERT INTO `posts` (`post_id`, `user_id`, `content`, `privacy`, `shared_from_post_id`, `shared_from_user_id`, `shared_note`, `created_at`, `updated_at`) VALUES
+('POST_04277', 'f0afeb', 'Đẹp ko', 'public', NULL, NULL, NULL, '2025-11-30 11:35:57', '2025-11-30 11:35:57'),
+('POST_517fc', 'f0afeb', 'Đẹp ko', 'public', 'POST_04277', 'f0afeb', 'Bạn đã chia sẻ bài viết của chính mình', '2025-11-30 11:36:22', '2025-11-30 11:36:22');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_comments`
+-- Cấu trúc bảng cho bảng `post_comments`
 --
 
 CREATE TABLE `post_comments` (
   `comment_id` varchar(50) NOT NULL,
-  `post_id` varchar(50) NOT NULL,
+  `post_id` varchar(10) NOT NULL,
   `user_id` varchar(6) NOT NULL,
   `content` text NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `post_comments`
---
-
-INSERT INTO `post_comments` (`comment_id`, `post_id`, `user_id`, `content`, `created_at`, `updated_at`) VALUES
-('COMMENT_0c3df5b7-b7ca-4e00-9b52-82d043e32c87', 'POST_a0dfc', '764674', 'xấu vc', '2025-11-29 12:12:30', '2025-11-29 12:12:30'),
-('COMMENT_183f6abc-813c-4bc8-bb71-e8c97c8c123a', 'POST_a0dfc', 'a811e0', 'đẹp quá hen', '2025-11-29 12:12:08', '2025-11-29 12:12:08'),
-('COMMENT_6aaa84d9-e54c-460c-8ce5-33bc84e05dcd', 'POST_a4782', 'f49004', 'cmt', '2025-11-29 08:43:11', '2025-11-29 08:43:11'),
-('COMMENT_779f100f-b3fe-4654-b9e3-5e929bba0877', 'POST_47fec', 'f49004', 'okoe', '2025-11-29 08:16:45', '2025-11-29 08:16:45'),
-('COMMENT_929016e2-f931-463a-8232-c0edaf6558e2', 'POST_a4782', 'f49004', 'tao là cươnfg nè', '2025-11-29 08:30:23', '2025-11-29 08:30:23');
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_images`
+-- Cấu trúc bảng cho bảng `post_images`
 --
 
 CREATE TABLE `post_images` (
@@ -203,76 +186,66 @@ CREATE TABLE `post_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `post_images`
+-- Đang đổ dữ liệu cho bảng `post_images`
 --
 
 INSERT INTO `post_images` (`image_id`, `post_id`, `image_url`, `created_at`) VALUES
-('IMG_14e466fe', 'POST_28ccd', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764418275/posts/CuongNguyen/ub4yb3wt6xlpryfj7lai.jpg', '2025-11-29 13:30:02'),
-('IMG_5dc7eba8', 'POST_2107f', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764400193/posts/CuongNguyen2/taqvlkpao4wlqifrgbe9.jpg', '2025-11-29 07:09:53'),
-('IMG_ab349713', 'POST_a0dfc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764418275/posts/CuongNguyen/ub4yb3wt6xlpryfj7lai.jpg', '2025-11-29 12:11:15'),
-('IMG_b979a3cb', 'POST_a4782', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764404977/posts/Cuong2/x4faouaokp1ki6xmtong.png', '2025-11-29 08:29:37');
+('IMG_0381aa9a', 'POST_517fc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502631/posts/vu/yceufnrmrvkybcqscpjo.jpg', '2025-11-30 11:36:22'),
+('IMG_074af6d5', 'POST_517fc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502630/posts/vu/lz2oqcelei9z5wliaoqg.jpg', '2025-11-30 11:36:22'),
+('IMG_07a4637c', 'POST_517fc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502637/posts/vu/qsyur9rebigqyzplyr48.jpg', '2025-11-30 11:36:22'),
+('IMG_9a3e2f0a', 'POST_04277', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502637/posts/vu/qsyur9rebigqyzplyr48.jpg', '2025-11-30 11:36:16'),
+('IMG_a76a4466', 'POST_517fc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502635/posts/vu/q3e0hmu4ukrzvcqs2jh4.png', '2025-11-30 11:36:22'),
+('IMG_c599fc67', 'POST_04277', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502633/posts/vu/lhypx85g8cl2bquxeaxx.jpg', '2025-11-30 11:36:11'),
+('IMG_ce47756f', 'POST_517fc', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502633/posts/vu/lhypx85g8cl2bquxeaxx.jpg', '2025-11-30 11:36:22'),
+('IMG_d5b3346d', 'POST_04277', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502630/posts/vu/lz2oqcelei9z5wliaoqg.jpg', '2025-11-30 11:36:09'),
+('IMG_de2123e0', 'POST_04277', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502631/posts/vu/yceufnrmrvkybcqscpjo.jpg', '2025-11-30 11:36:10'),
+('IMG_f3abf5e2', 'POST_04277', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764502635/posts/vu/q3e0hmu4ukrzvcqs2jh4.png', '2025-11-30 11:36:13');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_reactions`
+-- Cấu trúc bảng cho bảng `post_reactions`
 --
 
 CREATE TABLE `post_reactions` (
   `reaction_id` varchar(50) NOT NULL,
-  `post_id` varchar(50) NOT NULL,
+  `post_id` varchar(10) NOT NULL,
   `user_id` varchar(6) NOT NULL,
   `reaction_type` enum('like','love','haha','wow','sad','angry') DEFAULT 'like',
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `post_reactions`
+-- Đang đổ dữ liệu cho bảng `post_reactions`
 --
 
 INSERT INTO `post_reactions` (`reaction_id`, `post_id`, `user_id`, `reaction_type`, `created_at`) VALUES
-('REACT_06130595-2621-4367-89e5-709f9e464710', 'POST_9d8bc', '1a02f1', 'sad', '2025-11-29 12:02:47'),
-('REACT_11c5f821-6998-4abe-a8de-c42d7039e1a1', 'POST_d7305', 'f49004', 'like', '2025-11-29 08:17:21'),
-('REACT_2e5f6daa-2371-4ee5-a8cc-ffb60238b9e1', 'POST_47fec', 'f49004', 'like', '2025-11-29 08:16:38'),
-('REACT_372bc6ff-95ab-44d9-b4c0-b9a3be492f54', 'POST_2107f', '764674', 'haha', '2025-11-29 13:37:29'),
-('REACT_473166ba-e103-42d9-bcfe-e316493a8c7b', 'POST_9d8bc', 'a811e0', 'love', '2025-11-29 12:02:27'),
-('REACT_4dc81c86-5452-4782-9edf-465aeadff1d0', 'POST_9d8bc', 'f49004', 'sad', '2025-11-29 12:03:15'),
-('REACT_5afcc93a-328e-43cf-ba27-18f5e40acfe0', 'POST_0f1db', '764674', 'haha', '2025-11-29 13:36:46'),
-('REACT_6e982af5-e9ed-45a2-b08b-cf807f1c6cf1', 'POST_a0dfc', '764674', 'wow', '2025-11-29 12:11:54'),
-('REACT_d96f62bc-671e-4afe-907e-fabb3e6e7449', 'POST_f4241', 'f49004', 'wow', '2025-11-29 11:06:52'),
-('REACT_dbde0a81-b22b-421d-866d-2e12ed5b6760', 'POST_a4782', 'f49004', 'like', '2025-11-29 09:15:11'),
-('REACT_e1cd4c87-8109-4ac8-8219-8e38abcf8524', 'POST_a0dfc', 'a811e0', 'love', '2025-11-29 12:11:40');
+('REACT_050e93ec-ffb5-41a6-97c6-b553d119388f', 'POST_517fc', 'f0afeb', 'love', '2025-11-30 11:36:43');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_shares`
+-- Cấu trúc bảng cho bảng `post_shares`
 --
 
 CREATE TABLE `post_shares` (
   `share_id` varchar(50) NOT NULL,
-  `post_id` varchar(50) NOT NULL,
+  `post_id` varchar(10) NOT NULL,
   `user_id` varchar(6) NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `post_shares`
+-- Đang đổ dữ liệu cho bảng `post_shares`
 --
 
 INSERT INTO `post_shares` (`share_id`, `post_id`, `user_id`, `created_at`) VALUES
-('SHARE_04521395-3a29-49d7-a48b-41df8bf22990', 'POST_1255b', 'f49004', '2025-11-29 08:39:26'),
-('SHARE_7458149d-4581-4aee-b401-5f85b7c2e1ca', 'POST_92d2b', 'f49004', '2025-11-29 08:16:52'),
-('SHARE_7942e985-b6ba-4d98-a2f7-616904decd13', 'POST_a0dfc', 'a811e0', '2025-11-29 12:12:48'),
-('SHARE_80dcde2d-8d35-4c95-9f62-92e9b9712e17', 'POST_a0dfc', 'a811e0', '2025-11-29 13:30:02'),
-('SHARE_c426ecc7-23ec-4556-a565-078aa74a78e0', 'POST_a4782', 'f49004', '2025-11-29 08:30:47'),
-('SHARE_fa9f45bc-0985-4645-96cb-e3ad672865cf', 'POST_a4782', 'f49004', '2025-11-29 09:15:31'),
-('SHARE_fb8b4554-35d4-45b1-bc6f-f57e69918c14', 'POST_4710d', 'f49004', '2025-11-29 13:36:30');
+('SHARE_704afb39-5454-45fc-96d2-e33612373d23', 'POST_04277', 'f0afeb', '2025-11-30 11:36:22');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tours`
+-- Cấu trúc bảng cho bảng `tours`
 --
 
 CREATE TABLE `tours` (
@@ -291,7 +264,7 @@ CREATE TABLE `tours` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tours`
+-- Đang đổ dữ liệu cho bảng `tours`
 --
 
 INSERT INTO `tours` (`id`, `name`, `number_of_people`, `start_date`, `end_date`, `departure_address`, `destination_address`, `created_at`, `status`, `tour_category_id`, `tour_type_id`, `guide_id`) VALUES
@@ -302,7 +275,7 @@ INSERT INTO `tours` (`id`, `name`, `number_of_people`, `start_date`, `end_date`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_categories`
+-- Cấu trúc bảng cho bảng `tour_categories`
 --
 
 CREATE TABLE `tour_categories` (
@@ -313,7 +286,7 @@ CREATE TABLE `tour_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_categories`
+-- Đang đổ dữ liệu cho bảng `tour_categories`
 --
 
 INSERT INTO `tour_categories` (`category_id`, `categories_name`, `image`, `created_at`) VALUES
@@ -323,7 +296,7 @@ INSERT INTO `tour_categories` (`category_id`, `categories_name`, `image`, `creat
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_guides`
+-- Cấu trúc bảng cho bảng `tour_guides`
 --
 
 CREATE TABLE `tour_guides` (
@@ -340,7 +313,7 @@ CREATE TABLE `tour_guides` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_guides`
+-- Đang đổ dữ liệu cho bảng `tour_guides`
 --
 
 INSERT INTO `tour_guides` (`guide_id`, `guide_name`, `email`, `phone`, `birthday`, `gender`, `language_job`, `certification`, `address`, `avatar_image`) VALUES
@@ -351,7 +324,7 @@ INSERT INTO `tour_guides` (`guide_id`, `guide_name`, `email`, `phone`, `birthday
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_guide_assignment`
+-- Cấu trúc bảng cho bảng `tour_guide_assignment`
 --
 
 CREATE TABLE `tour_guide_assignment` (
@@ -362,7 +335,7 @@ CREATE TABLE `tour_guide_assignment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_guide_assignment`
+-- Đang đổ dữ liệu cho bảng `tour_guide_assignment`
 --
 
 INSERT INTO `tour_guide_assignment` (`id`, `created_at`, `tour_id`, `tour_guide_id`) VALUES
@@ -373,7 +346,7 @@ INSERT INTO `tour_guide_assignment` (`id`, `created_at`, `tour_id`, `tour_guide_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_images`
+-- Cấu trúc bảng cho bảng `tour_images`
 --
 
 CREATE TABLE `tour_images` (
@@ -384,7 +357,7 @@ CREATE TABLE `tour_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_images`
+-- Đang đổ dữ liệu cho bảng `tour_images`
 --
 
 INSERT INTO `tour_images` (`tour_img_id`, `folder_id`, `tour_img`, `created_at`) VALUES
@@ -396,7 +369,7 @@ INSERT INTO `tour_images` (`tour_img_id`, `folder_id`, `tour_img`, `created_at`)
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_image_assignment`
+-- Cấu trúc bảng cho bảng `tour_image_assignment`
 --
 
 CREATE TABLE `tour_image_assignment` (
@@ -406,7 +379,7 @@ CREATE TABLE `tour_image_assignment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_image_assignment`
+-- Đang đổ dữ liệu cho bảng `tour_image_assignment`
 --
 
 INSERT INTO `tour_image_assignment` (`id`, `tour_img_id`, `tour_id`) VALUES
@@ -417,7 +390,7 @@ INSERT INTO `tour_image_assignment` (`id`, `tour_img_id`, `tour_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_image_folders`
+-- Cấu trúc bảng cho bảng `tour_image_folders`
 --
 
 CREATE TABLE `tour_image_folders` (
@@ -427,7 +400,7 @@ CREATE TABLE `tour_image_folders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_image_folders`
+-- Đang đổ dữ liệu cho bảng `tour_image_folders`
 --
 
 INSERT INTO `tour_image_folders` (`folder_id`, `folder_name`, `created_at`) VALUES
@@ -437,7 +410,7 @@ INSERT INTO `tour_image_folders` (`folder_id`, `folder_name`, `created_at`) VALU
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_locations`
+-- Cấu trúc bảng cho bảng `tour_locations`
 --
 
 CREATE TABLE `tour_locations` (
@@ -452,7 +425,7 @@ CREATE TABLE `tour_locations` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_prices`
+-- Cấu trúc bảng cho bảng `tour_prices`
 --
 
 CREATE TABLE `tour_prices` (
@@ -464,7 +437,7 @@ CREATE TABLE `tour_prices` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_prices`
+-- Đang đổ dữ liệu cho bảng `tour_prices`
 --
 
 INSERT INTO `tour_prices` (`price_id`, `price_adult`, `price_child`, `valid_from`, `valid_to`) VALUES
@@ -474,7 +447,7 @@ INSERT INTO `tour_prices` (`price_id`, `price_adult`, `price_child`, `valid_from
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_price_assignments`
+-- Cấu trúc bảng cho bảng `tour_price_assignments`
 --
 
 CREATE TABLE `tour_price_assignments` (
@@ -484,7 +457,7 @@ CREATE TABLE `tour_price_assignments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_price_assignments`
+-- Đang đổ dữ liệu cho bảng `tour_price_assignments`
 --
 
 INSERT INTO `tour_price_assignments` (`id`, `tour_id`, `price_id`) VALUES
@@ -495,7 +468,7 @@ INSERT INTO `tour_price_assignments` (`id`, `tour_id`, `price_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_ratings`
+-- Cấu trúc bảng cho bảng `tour_ratings`
 --
 
 CREATE TABLE `tour_ratings` (
@@ -510,7 +483,7 @@ CREATE TABLE `tour_ratings` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_schedules`
+-- Cấu trúc bảng cho bảng `tour_schedules`
 --
 
 CREATE TABLE `tour_schedules` (
@@ -523,7 +496,7 @@ CREATE TABLE `tour_schedules` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tour_type`
+-- Cấu trúc bảng cho bảng `tour_type`
 --
 
 CREATE TABLE `tour_type` (
@@ -535,7 +508,7 @@ CREATE TABLE `tour_type` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tour_type`
+-- Đang đổ dữ liệu cho bảng `tour_type`
 --
 
 INSERT INTO `tour_type` (`type_id`, `type_name`, `image`, `description`, `created_at`) VALUES
@@ -546,7 +519,7 @@ INSERT INTO `tour_type` (`type_id`, `type_name`, `image`, `description`, `create
 -- --------------------------------------------------------
 
 --
--- Table structure for table `type_confirms`
+-- Cấu trúc bảng cho bảng `type_confirms`
 --
 
 CREATE TABLE `type_confirms` (
@@ -555,7 +528,7 @@ CREATE TABLE `type_confirms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `type_confirms`
+-- Đang đổ dữ liệu cho bảng `type_confirms`
 --
 
 INSERT INTO `type_confirms` (`id`, `type_name`) VALUES
@@ -566,7 +539,7 @@ INSERT INTO `type_confirms` (`id`, `type_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
 CREATE TABLE `users` (
@@ -579,7 +552,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Đang đổ dữ liệu cho bảng `users`
 --
 
 INSERT INTO `users` (`user_id`, `user_name`, `email`, `password`, `created_at`, `updated_at`) VALUES
@@ -588,13 +561,13 @@ INSERT INTO `users` (`user_id`, `user_name`, `email`, `password`, `created_at`, 
 ('869366', 'Kim Oanh', 'lethikimoanh2k4@gmail.com', '$2b$10$yooYL11H93BP.rtMIUl1OuxEBvU1zuCDBeQuFFoDhuPngB10K16AC', '2025-11-19 03:30:42', '2025-11-21 10:30:56'),
 ('890ec1', 'vua', 'michaelmuku15946@gmail.com', '$2b$10$OQ5RTBYjEgfgecHLFtaQt.RqwPfUZdhtL9vLWG4TX7fzst.tojY5a', '2025-09-07 09:22:04', '2025-09-07 09:22:04'),
 ('a811e0', 'cuong3', 'cuongkk59@gmail.com', '$2b$10$8PmPULml/jFDJHPRucbfweGYrB87pMCKG1EygrFHLKijQ3qvuh.n6', '2025-11-29 11:56:05', '2025-11-29 11:57:26'),
-('f0afeb', 'vu', 'vu784512000@gmail.com', '$2b$10$GHq/DEpMAyXEC3sbka/i1eS/DcGMdFCUv54fRhEjvvO8C5TmOQDlq', '2025-09-05 16:45:07', '2025-11-18 15:20:49'),
+('f0afeb', 'vu', 'vu784512000@gmail.com', '$2b$10$GHq/DEpMAyXEC3sbka/i1eS/DcGMdFCUv54fRhEjvvO8C5TmOQDlq', '2025-09-05 16:45:07', '2025-11-29 15:23:23'),
 ('f49004', 'CuongNguyen', 'cuongnq.jit@gmail.com', '$2b$10$z7OiFCKsiYJZpiQlShNcp.6n.6ODzsGjPwoCA3KhKGUkMhoXAV84G', '2025-11-24 16:09:52', '2025-11-29 11:23:55');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_infor`
+-- Cấu trúc bảng cho bảng `user_infor`
 --
 
 CREATE TABLE `user_infor` (
@@ -612,7 +585,7 @@ CREATE TABLE `user_infor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user_infor`
+-- Đang đổ dữ liệu cho bảng `user_infor`
 --
 
 INSERT INTO `user_infor` (`user_infor_id`, `phone`, `dob`, `citizen_id`, `address`, `bio`, `avatar`, `background`, `user_id`, `created_at`, `updated_at`) VALUES
@@ -622,12 +595,12 @@ INSERT INTO `user_infor` (`user_infor_id`, `phone`, `dob`, `citizen_id`, `addres
 ('b4f1f2c8d7', '1234567882', '2004-11-10', '123456789455', 'da nang 123', 'tui ten la cuong23', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764415434/avatar/rkrqnlxsovfrjbf5ckyq.jpg', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764404816/background/slrtl9ssfkawb71skrma.jpg', 'f49004', '2025-11-24 16:09:52', '2025-11-29 11:23:55'),
 ('cd114ad807', '0011225544', '2007-11-13', '012345678912', 'okokokok', 'okokoko taio la cuong 2', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764417322/avatar/o9oq1c5luhunxj17k1ar.png', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764417324/background/xrbm5s18x096vkuoxsar.png', '1a02f1', '2025-11-29 11:50:59', '2025-11-29 11:55:24'),
 ('dd37a81e6a', '0123456789', '2002-11-29', '123456789123', 'cuong 3 ne', 'tai la cuog 3', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764417443/avatar/nr9y5yxozyfcqafjyjtf.jpg', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764417445/background/l5rooavrgoz61dsurj9g.png', 'a811e0', '2025-11-29 11:56:05', '2025-11-29 11:57:26'),
-('eab00e57d9', '123456789', '2025-10-12', '123456789012', '121221', '2121212213123', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1763460981/avatar/vjmiwxd2rxrv9r4iwl49.jpg', NULL, 'f0afeb', '2025-09-05 16:45:07', '2025-11-18 15:20:49');
+('eab00e57d9', '123456789', '2025-10-11', '123456789012', '121221', '2121212213123', 'https://res.cloudinary.com/dygkdxqmq/image/upload/v1764429863/avatar/xk7qgajg5wbhsftd8qv5.png', NULL, 'f0afeb', '2025-09-05 16:45:07', '2025-11-29 15:23:23');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `verify`
+-- Cấu trúc bảng cho bảng `verify`
 --
 
 CREATE TABLE `verify` (
@@ -640,7 +613,7 @@ CREATE TABLE `verify` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `verify`
+-- Đang đổ dữ liệu cho bảng `verify`
 --
 
 INSERT INTO `verify` (`verify_id`, `user_id`, `verify_code`, `verify_status`, `created_at`, `updated_at`) VALUES
@@ -653,18 +626,18 @@ INSERT INTO `verify` (`verify_id`, `user_id`, `verify_code`, `verify_status`, `c
 ('e4cffa', 'f0afeb', '516363', 1, '2025-09-05 16:45:07', '2025-09-11 12:19:39');
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `notifications`
+-- Chỉ mục cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_notifications_user` (`user_id`);
 
 --
--- Indexes for table `orders`
+-- Chỉ mục cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -673,44 +646,48 @@ ALTER TABLE `orders`
   ADD KEY `tour_id` (`tour_id`);
 
 --
--- Indexes for table `posts`
+-- Chỉ mục cho bảng `posts`
 --
 ALTER TABLE `posts`
-  ADD PRIMARY KEY (`post_id`);
+  ADD PRIMARY KEY (`post_id`),
+  ADD KEY `idx_posts_user` (`user_id`),
+  ADD KEY `idx_posts_shared_post` (`shared_from_post_id`),
+  ADD KEY `idx_posts_shared_user` (`shared_from_user_id`);
 
 --
--- Indexes for table `post_comments`
+-- Chỉ mục cho bảng `post_comments`
 --
 ALTER TABLE `post_comments`
   ADD PRIMARY KEY (`comment_id`),
-  ADD KEY `post_id` (`post_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `idx_post_comments_post` (`post_id`),
+  ADD KEY `idx_post_comments_user` (`user_id`);
 
 --
--- Indexes for table `post_images`
+-- Chỉ mục cho bảng `post_images`
 --
 ALTER TABLE `post_images`
-  ADD PRIMARY KEY (`image_id`);
+  ADD PRIMARY KEY (`image_id`),
+  ADD KEY `idx_post_images_post` (`post_id`);
 
 --
--- Indexes for table `post_reactions`
+-- Chỉ mục cho bảng `post_reactions`
 --
 ALTER TABLE `post_reactions`
   ADD PRIMARY KEY (`reaction_id`),
   ADD UNIQUE KEY `uq_user_post_reaction` (`user_id`,`post_id`),
-  ADD KEY `post_id` (`post_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `idx_post_reactions_post` (`post_id`),
+  ADD KEY `idx_post_reactions_user` (`user_id`);
 
 --
--- Indexes for table `post_shares`
+-- Chỉ mục cho bảng `post_shares`
 --
 ALTER TABLE `post_shares`
   ADD PRIMARY KEY (`share_id`),
-  ADD KEY `post_id` (`post_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `idx_post_shares_post` (`post_id`),
+  ADD KEY `idx_post_shares_user` (`user_id`);
 
 --
--- Indexes for table `tours`
+-- Chỉ mục cho bảng `tours`
 --
 ALTER TABLE `tours`
   ADD PRIMARY KEY (`id`),
@@ -719,20 +696,20 @@ ALTER TABLE `tours`
   ADD KEY `fk_tour_guide` (`guide_id`);
 
 --
--- Indexes for table `tour_categories`
+-- Chỉ mục cho bảng `tour_categories`
 --
 ALTER TABLE `tour_categories`
   ADD PRIMARY KEY (`category_id`);
 
 --
--- Indexes for table `tour_guides`
+-- Chỉ mục cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
   ADD PRIMARY KEY (`guide_id`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `tour_guide_assignment`
+-- Chỉ mục cho bảng `tour_guide_assignment`
 --
 ALTER TABLE `tour_guide_assignment`
   ADD PRIMARY KEY (`id`),
@@ -740,14 +717,14 @@ ALTER TABLE `tour_guide_assignment`
   ADD KEY `tour_guide_id` (`tour_guide_id`);
 
 --
--- Indexes for table `tour_images`
+-- Chỉ mục cho bảng `tour_images`
 --
 ALTER TABLE `tour_images`
   ADD PRIMARY KEY (`tour_img_id`),
   ADD KEY `folder_id` (`folder_id`);
 
 --
--- Indexes for table `tour_image_assignment`
+-- Chỉ mục cho bảng `tour_image_assignment`
 --
 ALTER TABLE `tour_image_assignment`
   ADD PRIMARY KEY (`id`),
@@ -755,27 +732,27 @@ ALTER TABLE `tour_image_assignment`
   ADD KEY `tour_id` (`tour_id`);
 
 --
--- Indexes for table `tour_image_folders`
+-- Chỉ mục cho bảng `tour_image_folders`
 --
 ALTER TABLE `tour_image_folders`
   ADD PRIMARY KEY (`folder_id`),
   ADD UNIQUE KEY `folder_name` (`folder_name`);
 
 --
--- Indexes for table `tour_locations`
+-- Chỉ mục cho bảng `tour_locations`
 --
 ALTER TABLE `tour_locations`
   ADD PRIMARY KEY (`location_id`),
   ADD KEY `tour_id` (`tour_id`);
 
 --
--- Indexes for table `tour_prices`
+-- Chỉ mục cho bảng `tour_prices`
 --
 ALTER TABLE `tour_prices`
   ADD PRIMARY KEY (`price_id`);
 
 --
--- Indexes for table `tour_price_assignments`
+-- Chỉ mục cho bảng `tour_price_assignments`
 --
 ALTER TABLE `tour_price_assignments`
   ADD PRIMARY KEY (`id`),
@@ -783,7 +760,7 @@ ALTER TABLE `tour_price_assignments`
   ADD KEY `price_id` (`price_id`);
 
 --
--- Indexes for table `tour_ratings`
+-- Chỉ mục cho bảng `tour_ratings`
 --
 ALTER TABLE `tour_ratings`
   ADD PRIMARY KEY (`rating_id`),
@@ -791,157 +768,157 @@ ALTER TABLE `tour_ratings`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `tour_schedules`
+-- Chỉ mục cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
   ADD PRIMARY KEY (`schedule_id`),
   ADD KEY `tour_id` (`tour_id`);
 
 --
--- Indexes for table `tour_type`
+-- Chỉ mục cho bảng `tour_type`
 --
 ALTER TABLE `tour_type`
   ADD PRIMARY KEY (`type_id`);
 
 --
--- Indexes for table `type_confirms`
+-- Chỉ mục cho bảng `type_confirms`
 --
 ALTER TABLE `type_confirms`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `users`
+-- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `user_infor`
+-- Chỉ mục cho bảng `user_infor`
 --
 ALTER TABLE `user_infor`
   ADD PRIMARY KEY (`user_infor_id`),
   ADD KEY `fk_user_infor_user` (`user_id`);
 
 --
--- Indexes for table `verify`
+-- Chỉ mục cho bảng `verify`
 --
 ALTER TABLE `verify`
   ADD PRIMARY KEY (`verify_id`),
   ADD KEY `user_id` (`user_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
--- AUTO_INCREMENT for table `orders`
+-- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
--- AUTO_INCREMENT for table `tours`
+-- AUTO_INCREMENT cho bảng `tours`
 --
 ALTER TABLE `tours`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `tour_categories`
+-- AUTO_INCREMENT cho bảng `tour_categories`
 --
 ALTER TABLE `tour_categories`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `tour_guides`
+-- AUTO_INCREMENT cho bảng `tour_guides`
 --
 ALTER TABLE `tour_guides`
   MODIFY `guide_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `tour_guide_assignment`
+-- AUTO_INCREMENT cho bảng `tour_guide_assignment`
 --
 ALTER TABLE `tour_guide_assignment`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `tour_images`
+-- AUTO_INCREMENT cho bảng `tour_images`
 --
 ALTER TABLE `tour_images`
   MODIFY `tour_img_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `tour_image_assignment`
+-- AUTO_INCREMENT cho bảng `tour_image_assignment`
 --
 ALTER TABLE `tour_image_assignment`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `tour_image_folders`
+-- AUTO_INCREMENT cho bảng `tour_image_folders`
 --
 ALTER TABLE `tour_image_folders`
   MODIFY `folder_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `tour_locations`
+-- AUTO_INCREMENT cho bảng `tour_locations`
 --
 ALTER TABLE `tour_locations`
   MODIFY `location_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `tour_prices`
+-- AUTO_INCREMENT cho bảng `tour_prices`
 --
 ALTER TABLE `tour_prices`
   MODIFY `price_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `tour_price_assignments`
+-- AUTO_INCREMENT cho bảng `tour_price_assignments`
 --
 ALTER TABLE `tour_price_assignments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `tour_ratings`
+-- AUTO_INCREMENT cho bảng `tour_ratings`
 --
 ALTER TABLE `tour_ratings`
   MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tour_schedules`
+-- AUTO_INCREMENT cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
   MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tour_type`
+-- AUTO_INCREMENT cho bảng `tour_type`
 --
 ALTER TABLE `tour_type`
   MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
 
 --
--- AUTO_INCREMENT for table `type_confirms`
+-- AUTO_INCREMENT cho bảng `type_confirms`
 --
 ALTER TABLE `type_confirms`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `notifications`
+-- Các ràng buộc cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD CONSTRAINT `fk_notifications_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `orders`
+-- Các ràng buộc cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`type_confirm_id`) REFERENCES `type_confirms` (`id`),
@@ -949,7 +926,42 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`);
 
 --
--- Constraints for table `tours`
+-- Các ràng buộc cho bảng `posts`
+--
+ALTER TABLE `posts`
+  ADD CONSTRAINT `fk_posts_shared_post` FOREIGN KEY (`shared_from_post_id`) REFERENCES `posts` (`post_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_posts_shared_user` FOREIGN KEY (`shared_from_user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_posts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `post_comments`
+--
+ALTER TABLE `post_comments`
+  ADD CONSTRAINT `fk_post_comments_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_post_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `post_images`
+--
+ALTER TABLE `post_images`
+  ADD CONSTRAINT `fk_post_images_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `post_reactions`
+--
+ALTER TABLE `post_reactions`
+  ADD CONSTRAINT `fk_post_reactions_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_post_reactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `post_shares`
+--
+ALTER TABLE `post_shares`
+  ADD CONSTRAINT `fk_post_shares_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_post_shares_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `tours`
 --
 ALTER TABLE `tours`
   ADD CONSTRAINT `fk_tour_category` FOREIGN KEY (`tour_category_id`) REFERENCES `tour_categories` (`category_id`),
@@ -957,59 +969,59 @@ ALTER TABLE `tours`
   ADD CONSTRAINT `fk_tour_type` FOREIGN KEY (`tour_type_id`) REFERENCES `tour_type` (`type_id`);
 
 --
--- Constraints for table `tour_guide_assignment`
+-- Các ràng buộc cho bảng `tour_guide_assignment`
 --
 ALTER TABLE `tour_guide_assignment`
   ADD CONSTRAINT `tour_guide_assignment_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tour_guide_assignment_ibfk_2` FOREIGN KEY (`tour_guide_id`) REFERENCES `tour_guides` (`guide_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_images`
+-- Các ràng buộc cho bảng `tour_images`
 --
 ALTER TABLE `tour_images`
   ADD CONSTRAINT `tour_images_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `tour_image_folders` (`folder_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_image_assignment`
+-- Các ràng buộc cho bảng `tour_image_assignment`
 --
 ALTER TABLE `tour_image_assignment`
   ADD CONSTRAINT `tour_image_assignment_ibfk_1` FOREIGN KEY (`tour_img_id`) REFERENCES `tour_images` (`tour_img_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tour_image_assignment_ibfk_2` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_locations`
+-- Các ràng buộc cho bảng `tour_locations`
 --
 ALTER TABLE `tour_locations`
   ADD CONSTRAINT `tour_locations_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_price_assignments`
+-- Các ràng buộc cho bảng `tour_price_assignments`
 --
 ALTER TABLE `tour_price_assignments`
   ADD CONSTRAINT `tour_price_assignments_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tour_price_assignments_ibfk_2` FOREIGN KEY (`price_id`) REFERENCES `tour_prices` (`price_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_ratings`
+-- Các ràng buộc cho bảng `tour_ratings`
 --
 ALTER TABLE `tour_ratings`
   ADD CONSTRAINT `tour_ratings_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tour_ratings_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tour_schedules`
+-- Các ràng buộc cho bảng `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
   ADD CONSTRAINT `tour_schedules_ibfk_1` FOREIGN KEY (`tour_id`) REFERENCES `tours` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `user_infor`
+-- Các ràng buộc cho bảng `user_infor`
 --
 ALTER TABLE `user_infor`
   ADD CONSTRAINT `fk_user_infor_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `verify`
+-- Các ràng buộc cho bảng `verify`
 --
 ALTER TABLE `verify`
   ADD CONSTRAINT `verify_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
