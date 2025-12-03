@@ -1,5 +1,4 @@
 // lib/presentation/widgets/NavigationBar.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:tour_fe/core/utils/Notification_Center.dart';
@@ -27,7 +26,6 @@ class NavigationBarWidget extends StatefulWidget {
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   late int _selectedIndex;
-
   late final List<Widget> _screens;
   final NotificationCenter _notificationCenter = NotificationCenter.instance;
 
@@ -56,53 +54,68 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     return Scaffold(
       extendBody: true,
       body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.blueAccent,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
+
+      // BO TRÒN 4 HƯỚNG CHO NAV BAR
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30), // 🔥 FULL 4 GÓC
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-          child: GNav(
-            gap: 8,
-            backgroundColor: Colors.transparent,
-            color: Colors.white,
-            activeColor: Colors.blueAccent,
-            tabBackgroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            tabs: [
-              const GButton(icon: Icons.home, iconSize: 30),
-              const GButton(icon: Icons.calendar_today, iconSize: 30),
-              const GButton(icon: Icons.people, iconSize: 30),
-              GButton(
-                icon: Icons.notifications_none,
-                iconSize: 30,
-                leading: ValueListenableBuilder<int>(
-                  valueListenable: _notificationCenter.unreadCount,
-                  builder: (context, count, _) {
-                    final isActive = _selectedIndex == 3;
-                    return _NotificationBellIcon(
-                      count: count,
-                      isActive: isActive,
-                    );
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 8,
+                ),
+                child: GNav(
+                  gap: 8,
+                  backgroundColor: Colors.transparent,
+                  color: Colors.white,
+                  activeColor: Colors.blueAccent,
+                  tabBackgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  selectedIndex: _selectedIndex,
+                  onTabChange: (index) {
+                    setState(() => _selectedIndex = index);
                   },
+                  tabs: [
+                    const GButton(icon: Icons.home, iconSize: 26),
+                    const GButton(icon: Icons.calendar_today, iconSize: 26),
+                    const GButton(icon: Icons.people, iconSize: 26),
+                    GButton(
+                      icon: Icons.notifications_none,
+                      iconSize: 26,
+                      leading: ValueListenableBuilder<int>(
+                        valueListenable: _notificationCenter.unreadCount,
+                        builder: (context, count, _) {
+                          final isActive = _selectedIndex == 3;
+                          return _NotificationBellIcon(
+                            count: count,
+                            isActive: isActive,
+                          );
+                        },
+                      ),
+                    ),
+                    const GButton(icon: Icons.edit, iconSize: 26),
+                  ],
                 ),
               ),
-              const GButton(icon: Icons.edit, iconSize: 30),
-            ],
+            ),
           ),
         ),
       ),
