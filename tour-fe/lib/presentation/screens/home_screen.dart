@@ -14,11 +14,9 @@ import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 import 'package:tour_fe/services/tours_service.dart';
 import 'package:tour_fe/core/utils/Notification_Center.dart';
-// import '../widgets/Icon_Button.dart';
 import '../widgets/Image_Carousel.dart';
 import '../widgets/Search_Bar.dart';
 import '../widgets/Tours_Place.dart';
-import '../widgets/NavigationBar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,8 +36,11 @@ class _HomeScreenState extends State<HomeScreen> {
     symbol: '₫',
     decimalDigits: 0,
   );
+
   List<ToursModel> allTours = [];
   List<ToursModel> filteredTours = [];
+
+  late Future<ProfileModel> _profileFuture;
 
   String getDuration(String start, String end) {
     try {
@@ -57,8 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return "Không rõ";
     }
   }
-
-  late Future<ProfileModel> _profileFuture;
 
   @override
   void initState() {
@@ -99,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         filteredTours = allTours
             .where(
-                (tour) => tour.name.toLowerCase().contains(query.toLowerCase()))
+              (tour) => tour.name.toLowerCase().contains(query.toLowerCase()),
+            )
             .toList();
       }
     });
@@ -118,28 +118,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBarWidget(
-      body: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: FutureBuilder<ProfileModel>(
-            future: _profileFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return _buildMainContent("Hi, bạn 👋", "Không thể tải hồ sơ");
-              } else if (snapshot.hasData) {
-                final profile = snapshot.data!;
-                final userName = profile.userName ?? "Bạn";
-                return _buildMainContent(
-                    "Hi, $userName 👋", "Chúc bạn ngày mới tốt lành!");
-              } else {
-                return _buildMainContent(
-                    "Hi, bạn 👋", "Không có dữ liệu hồ sơ");
-              }
-            },
-          ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: FutureBuilder<ProfileModel>(
+          future: _profileFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return _buildMainContent("Hi, bạn 👋", "Không thể tải hồ sơ");
+            } else if (snapshot.hasData) {
+              final profile = snapshot.data!;
+              final userName = profile.userName ?? "Bạn";
+              return _buildMainContent(
+                "Hi, $userName 👋",
+                "Chúc bạn ngày mới tốt lành!",
+              );
+            } else {
+              return _buildMainContent(
+                "Hi, bạn 👋",
+                "Không có dữ liệu hồ sơ",
+              );
+            }
+          },
         ),
       ),
     );
@@ -154,8 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         _buildHeader(greeting, subtitle),
         const SizedBox(height: 20),
-
-        // 🔍 Search bar
         SearchBarWidget(
           controller: searchController,
           onChanged: (value) {
@@ -167,9 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _searchTours(value);
           },
         ),
-
         const SizedBox(height: 20),
-
         if (isSearching) _buildSearchResults(),
         if (!isSearching) ...[
           Text(
@@ -200,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           ),
           const SizedBox(height: 10),
-          FutureBuilder(
+          FutureBuilder<List<ToursModel>>(
             future: ToursService().fetchLatestTours(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -208,7 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Text("Chưa có tour mới nào!");
               }
-
               return _buildLatestTours(snapshot.data!);
             },
           ),
@@ -241,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.black12,
                 blurRadius: 6,
                 offset: const Offset(0, 3),
-              )
+              ),
             ],
           ),
           child: Row(
@@ -267,7 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(duration),
@@ -275,9 +274,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       price,
                       style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -313,9 +313,10 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.blue.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
+      clipBehavior: Clip.antiAlias, // đảm bảo không bị tràn pixel
       child: Stack(
         children: [
           Positioned(
@@ -338,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // 👋 Greeting + subtitle
+                // Greeting + subtitle
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -364,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Row(
                   children: [
-                    // Order management icon
+                    // Order icon
                     GestureDetector(
                       onTap: () async {
                         await Navigator.push(
@@ -386,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.black12,
                               blurRadius: 6,
                               offset: const Offset(0, 2),
-                            )
+                            ),
                           ],
                         ),
                         child: ValueListenableBuilder<int>(
@@ -406,7 +407,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     top: -6,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 1),
+                                        horizontal: 5,
+                                        vertical: 1,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.orange,
                                         borderRadius: BorderRadius.circular(12),
@@ -442,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.black12,
                               blurRadius: 6,
                               offset: const Offset(0, 2),
-                            )
+                            ),
                           ],
                         ),
                         child: ValueListenableBuilder<int>(
@@ -462,7 +465,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     top: -6,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 1),
+                                        horizontal: 5,
+                                        vertical: 1,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.redAccent,
                                         borderRadius: BorderRadius.circular(12),
@@ -514,14 +519,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          clipBehavior: Clip.antiAlias, // bo tròn hẳn, tránh tràn
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Stack(
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(14)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(14),
+                    ),
                     child: Image.network(
                       tour.firstImage.isNotEmpty
                           ? tour.firstImage
@@ -536,7 +543,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     top: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(10),
@@ -548,8 +557,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             "4.7",
                             style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -560,15 +570,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     top: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade100,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.people,
-                              size: 14, color: Colors.blue),
+                          const Icon(
+                            Icons.people,
+                            size: 14,
+                            color: Colors.blue,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             "$people",
@@ -601,13 +616,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_month,
-                            size: 20, color: Color.fromARGB(255, 172, 164, 2)),
+                        const Icon(
+                          Icons.calendar_month,
+                          size: 20,
+                          color: Color.fromARGB(255, 172, 164, 2),
+                        ),
                         const SizedBox(width: 6),
-                        Text(duration,
-                            style: const TextStyle(
-                                color: Color.fromARGB(255, 95, 93, 93),
-                                fontSize: 16)),
+                        Text(
+                          duration,
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 95, 93, 93),
+                            fontSize: 16,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -619,30 +640,38 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.person,
-                                    color: Colors.green.shade700, size: 18),
+                                Icon(
+                                  Icons.person,
+                                  color: Colors.green.shade700,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   priceAdult,
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.green.shade700),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.green.shade700,
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.child_care,
-                                    color: Colors.orange.shade700, size: 18),
+                                Icon(
+                                  Icons.child_care,
+                                  color: Colors.orange.shade700,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   priceChild,
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.orange.shade700),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.orange.shade700,
+                                  ),
                                 ),
                               ],
                             ),
@@ -652,7 +681,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -662,7 +693,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           child: const Text(
                             "Xem chi tiết",
-                            style: TextStyle(color: Colors.white, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],

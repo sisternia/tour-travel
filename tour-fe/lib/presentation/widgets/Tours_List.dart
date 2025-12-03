@@ -58,85 +58,33 @@ class TourCard extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ============ IMAGE + BADGES (NEW) ============
-          Stack(
-            children: [
-              Container(
-                width: 140,
-                height: 140,
-                margin: const EdgeInsets.all(8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(
-                      color: kcontentColor,
-                      child: const Center(
-                        child: Icon(Ionicons.image_outline, size: 32),
-                      ),
-                    ),
+          // IMAGE
+          Container(
+            width: 130,
+            height: 130,
+            margin: const EdgeInsets.all(8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Container(
+                  color: kcontentColor,
+                  child: const Center(
+                    child: Icon(Ionicons.image_outline, size: 32),
                   ),
                 ),
               ),
-              Positioned(
-                left: 16,
-                top: 16,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.star, size: 13, color: Colors.amber),
-                      const SizedBox(width: 2),
-                      Text(
-                        rating.toStringAsFixed(1),
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 16,
-                top: 16,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.people, size: 13, color: Colors.blue),
-                      const SizedBox(width: 3),
-                      Text(
-                        "$people",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
+
+          // TEXT CONTENT
           Expanded(
-            child: Container(
-              height: 150,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// TITLE
@@ -145,13 +93,14 @@ class TourCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: primaryColor,
                     ),
                   ),
+                  const SizedBox(height: 4),
 
-                  /// CATEGORY & DURATION
+                  /// DURATION
                   Row(
                     children: [
                       Icon(Ionicons.calendar_outline,
@@ -166,61 +115,69 @@ class TourCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 4),
 
-                  /// DEPARTURE → DESTINATION
+                  /// ROUTE
                   Row(
                     children: [
                       const Icon(Ionicons.compass_outline,
                           size: 14, color: darkGrey),
                       const SizedBox(width: 4),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           departure,
-                          style: const TextStyle(fontSize: 12, color: darkGrey),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: darkGrey),
                         ),
                       ),
                       const SizedBox(width: 4),
                       const Icon(Ionicons.remove_outline,
                           size: 12, color: darkGrey),
                       const SizedBox(width: 4),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           destination,
-                          style: const TextStyle(fontSize: 12, color: darkGrey),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: darkGrey),
                         ),
                       ),
                     ],
                   ),
 
-                  /// PRICE & BUTTON
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // PRICES
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Người lớn: $priceAdult",
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
-                            ),
-                          ),
-                          Text(
-                            "Trẻ em: $priceChild",
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 8),
 
+                  /// PRICE + MORE BUTTON
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Người lớn: $priceAdult",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                            Text(
+                              "Trẻ em: $priceChild",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       GestureDetector(
                         onTap: () => _navigateToDetails(context),
                         child: const Icon(
