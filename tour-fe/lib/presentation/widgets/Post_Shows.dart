@@ -73,7 +73,7 @@ class _PostShowsState extends State<PostShows> {
   bool isLoadingReactions = false;
   bool isLoadingComments = false;
   final TextEditingController _commentController = TextEditingController();
-  
+
   // Double tap detection for reactions
   DateTime? _lastTap;
   Timer? _singleTapTimer;
@@ -169,7 +169,7 @@ class _PostShowsState extends State<PostShows> {
     if (widget.onComment != null) {
       widget.onComment!(content);
       _commentController.clear();
-      
+
       // Add comment immediately to UI
       if (showComments && mounted) {
         setState(() {
@@ -182,10 +182,10 @@ class _PostShowsState extends State<PostShows> {
           });
         });
       }
-      
+
       if (!mounted) return;
       _loadCommentCount();
-      
+
       // Reload comments to get the actual data from server
       if (showComments) {
         await Future.delayed(const Duration(milliseconds: 500));
@@ -196,16 +196,17 @@ class _PostShowsState extends State<PostShows> {
 
   String _getShareNoteText() {
     if (widget.sharedFromUserName == null) return widget.sharedNote ?? "";
-    
+
     final sharerName = widget.userName;
     final originalPostOwnerName = widget.sharedFromUserName!;
-    
+
     // Nếu người đang xem là người chia sẻ
     if (widget.currentUserId == widget.userId) {
       return "Bạn đã chia sẻ bài viết của $originalPostOwnerName";
     }
     // Nếu người đang xem là người đăng bài gốc
-    else if (widget.sharedFromUserId != null && widget.currentUserId == widget.sharedFromUserId) {
+    else if (widget.sharedFromUserId != null &&
+        widget.currentUserId == widget.sharedFromUserId) {
       return "$sharerName đã chia sẻ bài viết của bạn";
     }
     // Nếu người đang xem là người khác
@@ -340,7 +341,8 @@ class _PostShowsState extends State<PostShows> {
     }
   }
 
-  Widget _buildReactionOption(String type, String emoji, Color color, String label) {
+  Widget _buildReactionOption(
+      String type, String emoji, Color color, String label) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -397,7 +399,8 @@ class _PostShowsState extends State<PostShows> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          if (widget.sharedNote != null && widget.sharedFromUserName != null) ...[
+          if (widget.sharedNote != null &&
+              widget.sharedFromUserName != null) ...[
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(8),
@@ -423,7 +426,8 @@ class _PostShowsState extends State<PostShows> {
               ),
             ),
           ],
-          if (widget.sharedFromUserAvatar != null && widget.sharedNote != null) ...[
+          if (widget.sharedFromUserAvatar != null &&
+              widget.sharedNote != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
@@ -446,7 +450,7 @@ class _PostShowsState extends State<PostShows> {
           ],
           const SizedBox(height: 10),
           if (widget.content.isNotEmpty)
-          Text(widget.content, style: const TextStyle(fontSize: 16)),
+            Text(widget.content, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 10),
           if (widget.images != null && widget.images!.isNotEmpty)
             ImagePost(images: widget.images!),
@@ -462,7 +466,8 @@ class _PostShowsState extends State<PostShows> {
                     Row(
                       children: [
                         // Hiển thị các loại react với số lượng
-                        if (reactionCounts["like"] != null && reactionCounts["like"]! > 0)
+                        if (reactionCounts["like"] != null &&
+                            reactionCounts["like"]! > 0)
                           Row(
                             children: [
                               const Text("👍", style: TextStyle(fontSize: 16)),
@@ -477,7 +482,8 @@ class _PostShowsState extends State<PostShows> {
                               const SizedBox(width: 6),
                             ],
                           ),
-                        if (reactionCounts["love"] != null && reactionCounts["love"]! > 0)
+                        if (reactionCounts["love"] != null &&
+                            reactionCounts["love"]! > 0)
                           Row(
                             children: [
                               const Text("❤️", style: TextStyle(fontSize: 16)),
@@ -492,7 +498,8 @@ class _PostShowsState extends State<PostShows> {
                               const SizedBox(width: 6),
                             ],
                           ),
-                        if (reactionCounts["haha"] != null && reactionCounts["haha"]! > 0)
+                        if (reactionCounts["haha"] != null &&
+                            reactionCounts["haha"]! > 0)
                           Row(
                             children: [
                               const Text("😂", style: TextStyle(fontSize: 16)),
@@ -507,7 +514,8 @@ class _PostShowsState extends State<PostShows> {
                               const SizedBox(width: 6),
                             ],
                           ),
-                        if (reactionCounts["wow"] != null && reactionCounts["wow"]! > 0)
+                        if (reactionCounts["wow"] != null &&
+                            reactionCounts["wow"]! > 0)
                           Row(
                             children: [
                               const Text("😮", style: TextStyle(fontSize: 16)),
@@ -522,7 +530,8 @@ class _PostShowsState extends State<PostShows> {
                               const SizedBox(width: 6),
                             ],
                           ),
-                        if (reactionCounts["sad"] != null && reactionCounts["sad"]! > 0)
+                        if (reactionCounts["sad"] != null &&
+                            reactionCounts["sad"]! > 0)
                           Row(
                             children: [
                               const Text("😢", style: TextStyle(fontSize: 16)),
@@ -537,7 +546,8 @@ class _PostShowsState extends State<PostShows> {
                               const SizedBox(width: 6),
                             ],
                           ),
-                        if (reactionCounts["angry"] != null && reactionCounts["angry"]! > 0)
+                        if (reactionCounts["angry"] != null &&
+                            reactionCounts["angry"]! > 0)
                           Row(
                             children: [
                               const Text("😡", style: TextStyle(fontSize: 16)),
@@ -608,7 +618,8 @@ class _PostShowsState extends State<PostShows> {
             children: [
               Text(
                 widget.userName,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Row(
                 children: [
@@ -624,12 +635,13 @@ class _PostShowsState extends State<PostShows> {
           ),
         ),
         if (widget.onDelete != null || widget.onEdit != null)
-        PopupMenuButton<String>(
-          onSelected: (value) {
-              if (value == "delete" && widget.onDelete != null) widget.onDelete!();
-            if (value == "edit" && widget.onEdit != null) widget.onEdit!();
-          },
-          itemBuilder: (context) => [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == "delete" && widget.onDelete != null)
+                widget.onDelete!();
+              if (value == "edit" && widget.onEdit != null) widget.onEdit!();
+            },
+            itemBuilder: (context) => [
               if (widget.onEdit != null)
                 const PopupMenuItem(
                   value: "edit",
@@ -652,18 +664,18 @@ class _PostShowsState extends State<PostShows> {
                     ],
                   ),
                 ),
-          ],
-        ),
+            ],
+          ),
       ],
     );
   }
 
   void _handleLikeTap() {
     final now = DateTime.now();
-    
+
     // Cancel any pending single tap
     _singleTapTimer?.cancel();
-    
+
     if (_lastTap != null && now.difference(_lastTap!) < _doubleTapDelay) {
       // Double tap detected - show reaction picker
       _lastTap = null;
@@ -688,12 +700,13 @@ class _PostShowsState extends State<PostShows> {
   Widget _buildActions() {
     final hasReaction = userReaction != null;
     final currentReactionType = userReaction?["reaction_type"];
-    final totalReactions = reactionCounts.values.fold<int>(0, (sum, count) => sum + count);
-    
+    final totalReactions =
+        reactionCounts.values.fold<int>(0, (sum, count) => sum + count);
+
     // Get emoji and color based on current reaction
     String reactionEmoji = "👍";
     Color reactionColor = Colors.grey.shade700;
-    
+
     if (currentReactionType != null) {
       switch (currentReactionType) {
         case "like":
@@ -722,7 +735,7 @@ class _PostShowsState extends State<PostShows> {
           break;
       }
     }
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -745,7 +758,8 @@ class _PostShowsState extends State<PostShows> {
                     style: TextStyle(
                       fontSize: 14,
                       color: hasReaction ? reactionColor : Colors.grey.shade700,
-                      fontWeight: hasReaction ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight:
+                          hasReaction ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ],
@@ -794,7 +808,8 @@ class _PostShowsState extends State<PostShows> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.share_outlined, size: 20, color: Colors.grey.shade700),
+                  Icon(Icons.share_outlined,
+                      size: 20, color: Colors.grey.shade700),
                   const SizedBox(width: 6),
                   Text(
                     "Chia sẻ",
@@ -814,7 +829,8 @@ class _PostShowsState extends State<PostShows> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isLoadingComments)
-          const Center(child: Padding(
+          const Center(
+              child: Padding(
             padding: EdgeInsets.all(16.0),
             child: CircularProgressIndicator(),
           ))
@@ -877,7 +893,8 @@ class _PostShowsState extends State<PostShows> {
             CircleAvatar(
               radius: 16,
               backgroundColor: Colors.grey.shade200,
-              child: Image.asset("assets/illustration.png", width: 20, height: 20),
+              child:
+                  Image.asset("assets/illustration.png", width: 20, height: 20),
             ),
             const SizedBox(width: 8),
             Expanded(

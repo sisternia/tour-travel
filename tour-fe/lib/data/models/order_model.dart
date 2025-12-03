@@ -1,4 +1,3 @@
-// lib\data\models\order_model.dart
 class OrderModel {
   final int id;
   final int numberOfChild;
@@ -14,6 +13,7 @@ class OrderModel {
   final int tourId;
   final String? typeName;
   final String? tourName;
+  final int isRated;
 
   OrderModel({
     required this.id,
@@ -30,6 +30,7 @@ class OrderModel {
     required this.tourId,
     this.typeName,
     this.tourName,
+    required this.isRated,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +49,7 @@ class OrderModel {
       tourId: json["tour_id"],
       typeName: json["type_name"],
       tourName: json["tour_name"],
+      isRated: json["isRated"] ?? 0,
     );
   }
 
@@ -67,6 +69,7 @@ class OrderModel {
       "tour_id": tourId,
       "type_name": typeName,
       "tour_name": tourName,
+      "isRated": isRated,
     };
   }
 }

@@ -1,12 +1,13 @@
 // controllers/orders.controller.js
 const Order = require("../models/orders.model");
-const NotificationService = require('../services/notification.service');
+const NotificationService = require("../services/notification.service");
 const { sendOrderStatusMail } = require("../services/verify.service");
 
 const STATUS_TEXT = {
   1: "Đang chờ xác nhận",
   2: "Đã xác nhận",
   3: "Đã thanh toán",
+  4: "Đã hoàn thành tour",
 };
 
 const OrderController = {
@@ -121,7 +122,11 @@ const OrderController = {
 
       const [[order]] = await Order.getOrderById(id);
 
-      await sendOrderStatusMail(order.email_tourist, STATUS_TEXT[type_confirm_id], id);
+      await sendOrderStatusMail(
+        order.email_tourist,
+        STATUS_TEXT[type_confirm_id],
+        id
+      );
 
       if (Number(type_confirm_id) === 3) {
         await NotificationService.notifyPaymentSuccess(id);
@@ -141,7 +146,41 @@ const OrderController = {
       });
     }
   },
+  userCompleted: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
 
+      const [[order]] = await Order.getOrderById(id);
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy đơn hàng",
+        });
+      }
+
+      if (order.user_id !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: "Bạn không có quyền cập nhật đơn hàng này",
+        });
+      }
+
+      await Order.updateStatus(id, 4);
+
+      return res.status(200).json({
+        success: true,
+        message: "Bạn đã xác nhận hoàn thành tour!",
+      });
+    } catch (err) {
+      console.error("User completed error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi xác nhận hoàn thành",
+      });
+    }
+  },
   delete: async (req, res) => {
     try {
       const { id } = req.params;

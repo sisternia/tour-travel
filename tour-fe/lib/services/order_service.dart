@@ -110,7 +110,6 @@ class OrderService {
       if (res.statusCode == 200) {
         List list = jsonDecode(res.body);
         final orders = list.map((e) => OrderModel.fromJson(e)).toList();
-        // Update pending count (status 1 = chưa thanh toán)
         final pendingCount = orders.where((o) => o.typeConfirmId == 1).length;
         OrderCenter.instance.setCount(pendingCount);
         return orders;
@@ -130,6 +129,32 @@ class OrderService {
       OrderCenter.instance.setCount(pendingCount);
     } catch (e) {
       print("ERROR fetch pending count: $e");
+    }
+  }
+
+  static Future<bool> markUserCompleted(int orderId) async {
+    try {
+      final userId = await TokenService().getUserId();
+
+      if (userId == null) {
+        print("ERROR: userId is NULL in markUserCompleted!");
+        return false;
+      }
+
+      final url = Uri.parse(ApiConstants.userCompleted(orderId));
+
+      final res = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"userId": userId}),
+      );
+
+      print("USER COMPLETED RESPONSE: ${res.body}");
+
+      return res.statusCode == 200;
+    } catch (e) {
+      print("ERROR markUserCompleted: $e");
+      return false;
     }
   }
 }

@@ -4,28 +4,40 @@ const db = require("../config/db");
 module.exports = {
   getAllOrders: () => {
     return db.execute(`
-      SELECT 
-        o.*,
-        tc.type_name,
-        t.name AS tour_name
-      FROM orders o
-      LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
-      LEFT JOIN tours t ON o.tour_id = t.id
-      ORDER BY o.order_at DESC
-    `);
+    SELECT 
+      o.*,
+      tc.type_name,
+      t.name AS tour_name,
+      IFNULL(r.rated, 0) AS isRated
+    FROM orders o
+    LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
+    LEFT JOIN tours t ON o.tour_id = t.id
+    LEFT JOIN (
+      SELECT tour_id, user_id, COUNT(*) AS rated
+      FROM tour_ratings
+      GROUP BY tour_id, user_id
+    ) r ON r.tour_id = o.tour_id AND r.user_id = o.user_id
+    ORDER BY o.order_at DESC
+  `);
   },
 
   getOrderById: (orderId) => {
     return db.execute(
       `
-      SELECT 
-        o.*,
-        tc.type_name,
-        t.name AS tour_name
-      FROM orders o
-      LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
-      LEFT JOIN tours t ON o.tour_id = t.id
-      WHERE o.id = ?
+    SELECT 
+      o.*,
+      tc.type_name,
+      t.name AS tour_name,
+      IFNULL(r.rated, 0) AS isRated
+    FROM orders o
+    LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
+    LEFT JOIN tours t ON o.tour_id = t.id
+    LEFT JOIN (
+      SELECT tour_id, user_id, COUNT(*) AS rated
+      FROM tour_ratings
+      GROUP BY tour_id, user_id
+    ) r ON r.tour_id = o.tour_id AND r.user_id = o.user_id
+    WHERE o.id = ?
     `,
       [orderId]
     );
@@ -34,15 +46,21 @@ module.exports = {
   getOrdersByUser: (userId) => {
     return db.execute(
       `
-      SELECT 
-        o.*,
-        tc.type_name,
-        t.name AS tour_name
-      FROM orders o
-      LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
-      LEFT JOIN tours t ON o.tour_id = t.id
-      WHERE o.user_id = ?
-      ORDER BY o.order_at DESC
+    SELECT 
+      o.*,
+      tc.type_name,
+      t.name AS tour_name,
+      IFNULL(r.rated, 0) AS isRated
+    FROM orders o
+    LEFT JOIN type_confirms tc ON o.type_confirm_id = tc.id
+    LEFT JOIN tours t ON o.tour_id = t.id
+    LEFT JOIN (
+      SELECT tour_id, user_id, COUNT(*) AS rated
+      FROM tour_ratings
+      GROUP BY tour_id, user_id
+    ) r ON r.tour_id = o.tour_id AND r.user_id = o.user_id
+    WHERE o.user_id = ?
+    ORDER BY o.order_at DESC
     `,
       [userId]
     );
