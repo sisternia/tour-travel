@@ -5,7 +5,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:tour_fe/services/order_service.dart';
-import 'package:tour_fe/core/utils/order_center.dart';
+// import 'package:tour_fe/core/utils/order_center.dart';
 import 'package:tour_fe/presentation/widgets/NavigationBar.dart';
 
 import 'payment_success_screen.dart';
@@ -82,15 +82,12 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
   }
 
   Future<void> _handleBackButton() async {
-    // Check if order is paid (status 3 = đã thanh toán)
     final currentOrder = await OrderService.getOrderById(widget.orderId);
     if (currentOrder != null && currentOrder.typeConfirmId != 3) {
-      // Order is not paid yet, show confirmation dialog
       if (!mounted) return;
-      
+
       debugPrint("Showing confirmation dialog");
-      
-      // Sử dụng showGeneralDialog để có nhiều control hơn
+
       final result = await showGeneralDialog<bool>(
         context: context,
         barrierDismissible: false,
@@ -157,7 +154,6 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
 
       debugPrint("Dialog result: $result");
       if (result == true && mounted) {
-        // User chose YES - update order count and go back to home
         debugPrint("User chose YES, updating order count and navigating home");
         await OrderService.fetchPendingCount();
         if (mounted) {
@@ -168,9 +164,7 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
           );
         }
       }
-      // If NO or result is null, do nothing - user stays on payment screen
     } else {
-      // Order is paid or doesn't exist, allow normal back navigation
       if (mounted) {
         Navigator.pop(context);
       }
@@ -192,76 +186,76 @@ class _MomoWebviewMockState extends State<MomoWebviewMock> {
           backgroundColor: Colors.pink,
         ),
         body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                if (kIsWeb && _webViewType != null)
-                  web_payment.buildMomoIframe(_webViewType!)
-                else if (!kIsWeb && _controller != null)
-                  WebViewWidget(controller: _controller!),
-                if (loading)
-                  const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-              ],
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              height: 55,
-              child: ElevatedButton(
-                onPressed: _mockPaymentSuccess,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFFF4E8A), // Màu MoMo hồng đậm
-                        Color(0xFFEF3A7B), // Màu MoMo hồng sáng
-                      ],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  if (kIsWeb && _webViewType != null)
+                    web_payment.buildMomoIframe(_webViewType!)
+                  else if (!kIsWeb && _controller != null)
+                    WebViewWidget(controller: _controller!),
+                  if (loading)
+                    const Center(
+                      child: CircularProgressIndicator(),
                     ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: _mockPaymentSuccess,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                   ),
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.account_balance_wallet_outlined,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "THANH TOÁN",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFFF4E8A),
+                          Color(0xFFEF3A7B),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.account_balance_wallet_outlined,
                             color: Colors.white,
+                            size: 22,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 10),
+                          Text(
+                            "THANH TOÁN",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );

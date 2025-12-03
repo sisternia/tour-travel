@@ -10,6 +10,9 @@ import 'package:tour_fe/data/models/tour_prices_model.dart';
 import 'package:tour_fe/data/models/tour_schedules_model.dart';
 import 'package:tour_fe/services/tours_guide_service.dart';
 import 'package:tour_fe/data/models/tours_guide_model.dart';
+import 'package:tour_fe/services/review_service.dart';
+import 'package:tour_fe/data/models/review_model.dart';
+import 'package:ionicons/ionicons.dart';
 
 class TabTourWidget extends StatefulWidget {
   final String description;
@@ -73,7 +76,7 @@ class _TabTourWidgetState extends State<TabTourWidget> {
 
   @override
   Widget build(BuildContext context) {
-    const tabs = ["Mô tả", "Bảng giá", "Bình luận"];
+    const tabs = ["Mô tả", "Bảng giá", "Đánh giá"];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,30 +417,150 @@ class _TabTourWidgetState extends State<TabTourWidget> {
               }
 
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: assignments.map((a) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                  final status = tourData["status"]?.toString() ?? "Không rõ";
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 18),
+                    padding: EdgeInsets.zero,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 12,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Giá người lớn: ${_formatCurrency(a.priceAdult)}",
-                            style:
-                                const TextStyle(fontSize: 16, color: darkGrey)),
-                        Text("Giá trẻ em: ${_formatCurrency(a.priceChild)}",
-                            style:
-                                const TextStyle(fontSize: 16, color: darkGrey)),
-                        Text(
-                          "Áp dụng: ${formatDate(a.validFrom)} → ${formatDate(a.validTo)}",
-                          style: const TextStyle(fontSize: 16, color: darkGrey),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.price_check,
+                                  color: Colors.blue, size: 24),
+                              SizedBox(width: 10),
+                              Text(
+                                "Bảng giá tour",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text("Số lượng: ${tourData["numberOfPeople"]}",
-                            style:
-                                const TextStyle(fontSize: 16, color: darkGrey)),
-                        Text("Trạng thái: ${tourData["status"]}",
-                            style:
-                                const TextStyle(fontSize: 16, color: darkGrey)),
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.person,
+                                      color: Colors.green, size: 22),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Người lớn: ${_formatCurrency(a.priceAdult)}",
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(Icons.child_care,
+                                      color: Colors.orange.shade700, size: 22),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Trẻ em: ${_formatCurrency(a.priceChild)}",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.orange.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 18),
+                              Divider(color: Colors.grey.shade300, height: 1),
+                              const SizedBox(height: 18),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.date_range,
+                                      color: Colors.blueGrey, size: 22),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      "Áp dụng: ${formatDate(a.validFrom)} → ${formatDate(a.validTo)}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: darkGrey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  const Icon(Icons.people,
+                                      color: Colors.purple, size: 22),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Số lượng: ${tourData["numberOfPeople"]}",
+                                    style: const TextStyle(
+                                        fontSize: 16, color: darkGrey),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    color: status == "Active"
+                                        ? Colors.green
+                                        : Colors.redAccent,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Trạng thái: $status",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: status == "Active"
+                                          ? Colors.green
+                                          : Colors.redAccent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -445,10 +568,118 @@ class _TabTourWidgetState extends State<TabTourWidget> {
               );
             },
           ),
-        if (selectedTab == 2)
-          const Text("Chưa có bình luận nào.",
-              style: TextStyle(fontSize: 16, color: darkGrey)),
+        if (selectedTab == 2) buildReviews(),
       ],
+    );
+  }
+
+  Widget buildReviews() {
+    return FutureBuilder<List<ReviewModel>>(
+      future: ReviewService.getReviews(widget.tourId),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snap.hasError) {
+          return Text("Lỗi tải đánh giá: ${snap.error}");
+        }
+
+        final reviews = snap.data ?? [];
+
+        if (reviews.isEmpty) {
+          return const Center(
+            child: Text("Chưa có bình luận nào.",
+                style: TextStyle(fontSize: 16, color: darkGrey)),
+          );
+        }
+        double avgRating =
+            reviews.map((e) => e.rating).reduce((a, b) => a + b) /
+                reviews.length;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.star, color: Colors.amber, size: 28),
+                const SizedBox(width: 8),
+                Text(
+                  avgRating.toStringAsFixed(1),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                Text("  (${reviews.length} đánh giá)",
+                    style: const TextStyle(color: Colors.grey)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...reviews.map((r) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Ionicons.person_circle_outline,
+                            size: 40, color: primaryColor),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r.userName,
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Row(
+                                children: List.generate(
+                                  5,
+                                  (i) => Icon(
+                                    i < r.rating
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    size: 18,
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      r.comment,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "${r.createdAt.day}/${r.createdAt.month}/${r.createdAt.year}",
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 
