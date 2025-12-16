@@ -1,7 +1,6 @@
 // lib/presentation/screens/post/social_feed_screen.dart
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/data/models/profile_model.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
@@ -154,7 +153,8 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                               : null,
                           onReaction: (reactionType) async {
                             if (currentUserId == null) return;
-                            final existing = await _reactionService.getUserReaction(
+                            final existing =
+                                await _reactionService.getUserReaction(
                               currentUserId!,
                               post["postId"],
                             );
@@ -192,7 +192,8 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                           onShare: () async {
                             if (currentUserId == null) return;
                             // If this post is already a share, use the original user ID
-                            final originalUserId = post["sharedFromUserId"] ?? post["userId"];
+                            final originalUserId =
+                                post["sharedFromUserId"] ?? post["userId"];
                             await _shareService.sharePost(
                               postId: post["postId"],
                               userId: currentUserId!,
@@ -345,5 +346,3 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
     );
   }
 }
-
-

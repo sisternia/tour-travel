@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/api.dart';
-import '../data/models/tours_guide_model.dart';
+import '../data/models/tour_guides_model.dart';
 
 class TourGuideService {
   Future<List<TourGuideModel>> getAllGuides() async {

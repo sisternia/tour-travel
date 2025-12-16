@@ -32,21 +32,21 @@ class OrderService {
     }
   }
 
-  static Future<String> createMomoPayment({
-    required int orderId,
-    required int amount,
-  }) async {
-    final url = Uri.parse(ApiConstants.momoPayment);
+  // static Future<String> createMomoPayment({
+  //   required int orderId,
+  //   required int amount,
+  // }) async {
+  //   final url = Uri.parse(ApiConstants.momoPayment);
 
-    final res = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"orderId": orderId, "amount": amount}),
-    );
+  //   final res = await http.post(
+  //     url,
+  //     headers: {"Content-Type": "application/json"},
+  //     body: jsonEncode({"orderId": orderId, "amount": amount}),
+  //   );
 
-    final data = jsonDecode(res.body);
-    return data["payUrl"];
-  }
+  //   final data = jsonDecode(res.body);
+  //   return data["payUrl"];
+  // }
 
   static Future<List<OrderModel>> getOrders() async {
     try {

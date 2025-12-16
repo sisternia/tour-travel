@@ -1,4 +1,4 @@
-// lib/presentation/widgets/Category.dart
+// lib/presentation/widgets/Tours_Category.dart
 import 'package:flutter/material.dart';
 import 'package:tour_fe/core/constants/color.dart';
 
@@ -26,7 +26,7 @@ class _CategorySelectorState extends State<CategorySelector> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 82,
+      height: 70,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -42,7 +42,7 @@ class _CategorySelectorState extends State<CategorySelector> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              width: 92,
+              width: 90,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               decoration: BoxDecoration(
                 color: isSelected ? tPrimaryColor : Colors.grey.shade100,

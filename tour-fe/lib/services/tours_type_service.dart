@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tour_fe/core/constants/api.dart';
-import 'package:tour_fe/data/models/tours_type_model.dart';
+import 'package:tour_fe/data/models/tour_types_model.dart';
 
 class TourTypeService {
   Future<List<TouristPlacesModel>> fetchTourTypes() async {

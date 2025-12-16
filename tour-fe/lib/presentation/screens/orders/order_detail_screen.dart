@@ -1,9 +1,10 @@
+// lib\presentation\screens\orders\order_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../services/order_service.dart';
 import '../../../controllers/payment_controller.dart';
 import '../../../data/models/order_model.dart';
-import '../../widgets/rating_dialog.dart';
+import '../../widgets/Rating_Dialog.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
@@ -130,10 +131,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _momoButton() {
+  Widget _vnpayButton() {
     return ElevatedButton.icon(
       onPressed: () async {
-        await PaymentController.payWithMomo(
+        await PaymentController.payWithVnpay(
           context: context,
           orderId: widget.orderId,
           amount: order!.total.toInt(),
@@ -142,11 +143,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       },
       icon: const Icon(Ionicons.card_outline, color: Colors.white),
       label: const Text(
-        "Thanh toán MOMO",
+        "Thanh toán VNPAY",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.pink,
+        backgroundColor: Colors.blue,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -311,7 +312,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget? _buildBottomButton() {
-    if (order!.typeConfirmId == 1) return _momoButton();
+    if (order!.typeConfirmId == 1) return _vnpayButton();
     if (order!.typeConfirmId == 2) return _markCompletedButton();
 
     if (order!.typeConfirmId == 4) {

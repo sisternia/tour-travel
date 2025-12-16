@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tour_fe/data/models/tours_model.dart';
-import 'package:tour_fe/presentation/screens/orders/details_tour_screen.dart';
+import 'package:tour_fe/presentation/screens/tour/details_tour_screen.dart';
 
 class ToursLatest extends StatelessWidget {
   final List<ToursModel> tours;

@@ -18,9 +18,9 @@ const tourSchedulesRoutes = require("./routes/tour_schedules.routes");
 const mapboxRoutes = require("./services/mapbox.service");
 const postRoutes = require("./routes/posts.routes");
 const orderRoutes = require("./routes/order.routes");
-const momoRoute = require("./routes/momo.routes");
 const notificationRoutes = require("./routes/notification.routes");
-// const vnpayRoute = require("./routes/vnpay.route");
+const vnpayRoutes = require("./routes/vnpay.routes");
+// const momoRoute = require("./routes/momo.routes");
 
 const pool = require("./config/db");
 
@@ -47,21 +47,21 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/tour-types", tourTypeRoutes);
 app.use("/api/tour-categories", tourCategoriesRoutes);
 app.use("/api/tours", tourRoutes);
-app.use("/api/tour-images", tourImagesRoutes);
 app.use("/api/tour-prices", tourPricesRoutes);
+app.use("/api/tour-images", tourImagesRoutes);
 app.use("/api/tour-locations", tourLocationsRoutes);
 app.use("/api/tour-guides", tourGuideRoutes);
 app.use("/api/tour-guide-assignment", tourGuideAssignmentRoutes);
 app.use("/api/tour-schedules", tourSchedulesRoutes);
-app.use("/api/orders", orderRoutes);
-// app.use("/api/vnpay", vnpayRoute);
 app.use("/api/mapbox", mapboxRoutes);
-app.use("/api/momo", momoRoute);
 app.use("/api/posts", postRoutes);
-app.use("/api/post-reactions", require("./routes/post_reactions.routes"));
-app.use("/api/post-comments", require("./routes/post_comments.routes"));
 app.use("/api/post-shares", require("./routes/post_shares.routes"));
+app.use("/api/post-comments", require("./routes/post_comments.routes"));
+app.use("/api/post-reactions", require("./routes/post_reactions.routes"));
+app.use("/api/orders", orderRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/vnpay", vnpayRoutes);
+// app.use("/api/momo", momoRoute);
 
 app.get("/", (req, res) => {
   res.send("Server đang chạy!");

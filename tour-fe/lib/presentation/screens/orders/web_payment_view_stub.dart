@@ -1,13 +1,5 @@
+// lib\presentation\screens\orders\web_payment_view_stub.dart
 import 'package:flutter/widgets.dart';
 
-void registerMomoIframe(String viewType, String url) {}
-
-Widget buildMomoIframe(String viewType) => const SizedBox.shrink();
-
-
-
-
-
-
-
-
+void registerPaymentIframe(String viewType, String url) {}
+Widget buildPaymentIframe(String viewType) => const SizedBox.shrink();

@@ -1,13 +1,12 @@
-// lib\presentation\screens\orders\booking_tour_screen.dart
+// lib/presentation/screens/orders/booking_tour_screen.dart
 import 'package:flutter/material.dart';
-import '../../../services/order_service.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../../services/order_service.dart';
+import '../../../services/token_service.dart';
+import '../../../services/profile_service.dart';
 import '../../widgets/Button.dart';
 import '../../widgets/TextField.dart';
 import 'booking_detail_screen.dart';
-import '../../../services/token_service.dart';
-import '../../widgets/NavigationBar.dart';
-import '../../../services/profile_service.dart';
 
 class BookingTourScreen extends StatefulWidget {
   final int tourId;
@@ -31,10 +30,10 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   int adult = 1;
   int child = 0;
 
-  TextEditingController nameCtrl = TextEditingController();
-  TextEditingController phoneCtrl = TextEditingController();
-  TextEditingController emailCtrl = TextEditingController();
-  TextEditingController noteCtrl = TextEditingController();
+  final nameCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final noteCtrl = TextEditingController();
 
   bool loading = false;
 
@@ -47,13 +46,9 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   }
 
   Future<void> _loadUserEmail() async {
-    final tokenService = TokenService();
-    final profileService = ProfileService();
-
-    final token = await tokenService.getToken();
+    final token = await TokenService().getToken();
     if (token == null) return;
-
-    final profile = await profileService.getProfile(token);
+    final profile = await ProfileService().getProfile(token);
     emailCtrl.text = profile.email ?? "";
   }
 
@@ -169,11 +164,14 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller,
-      {int maxLines = 1,
-      String? Function(String?)? validator,
-      TextInputType keyboard = TextInputType.text,
-      IconData? icon}) {
+  Widget _buildInput(
+    String label,
+    TextEditingController controller, {
+    int maxLines = 1,
+    String? Function(String?)? validator,
+    TextInputType keyboard = TextInputType.text,
+    IconData? icon,
+  }) {
     return CustomTextField(
       controller: controller,
       label: label,
@@ -188,8 +186,8 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     required String title,
     required int value,
     required IconData icon,
-    required Function onAdd,
-    required Function onMinus,
+    required VoidCallback onAdd,
+    required VoidCallback onMinus,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -221,9 +219,9 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     );
   }
 
-  Widget _circleBtn(IconData icon, Function onTap) {
+  Widget _circleBtn(IconData icon, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () => onTap(),
+      onTap: onTap,
       child: Container(
         width: 34,
         height: 34,
@@ -251,7 +249,10 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           Text(
-            "${total.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')} VNĐ",
+            "${total.toString().replaceAllMapped(
+                  RegExp(r'\B(?=(\d{3})+(?!\d))'),
+                  (m) => '.',
+                )} VNĐ",
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -266,10 +267,9 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
   Future<void> _handleCancel() async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text("Xác nhận"),
-        content: const Text(
-            "Bạn chưa thanh toán, đơn hàng sẽ được lưu với trạng thái Chưa Thanh Toán ?"),
+        content: const Text("Bạn có chắc chắn muốn hủy đặt tour?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -277,81 +277,14 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("YES", style: TextStyle(color: Colors.blue)),
+            child: const Text("YES", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
 
     if (result == true && mounted) {
-      await _createUnpaidOrder();
-    }
-  }
-
-  Future<void> _createUnpaidOrder() async {
-    setState(() => loading = true);
-    final tokenService = TokenService();
-    final userId = await tokenService.getUserId();
-
-    if (userId == null) {
-      setState(() => loading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Không tìm thấy tài khoản người dùng!")),
-        );
-      }
-      return;
-    }
-
-    // Validate required fields
-    if (nameCtrl.text.trim().isEmpty || phoneCtrl.text.trim().isEmpty) {
-      setState(() => loading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Vui lòng nhập đầy đủ thông tin bắt buộc!")),
-        );
-      }
-      return;
-    }
-
-    final orderId = await OrderService.createOrder({
-      "number_of_child": child,
-      "number_of_adult": adult,
-      "name_tourist": nameCtrl.text.trim(),
-      "phone_tourist": phoneCtrl.text.trim(),
-      "email_tourist": emailCtrl.text.trim(),
-      "total": total,
-      "note": noteCtrl.text.trim(),
-      "user_id": userId,
-      "tour_id": widget.tourId,
-    });
-
-    setState(() => loading = false);
-
-    if (orderId != null) {
-      await OrderService.fetchPendingCount();
-
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const NavigationBarWidget()),
-          (route) => false,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("Đơn hàng đã được lưu với trạng thái Chưa Thanh Toán"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Tạo đơn hàng thất bại!")),
-        );
-      }
+      Navigator.pop(context);
     }
   }
 
@@ -360,9 +293,7 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
 
     setState(() => loading = true);
 
-    final tokenService = TokenService();
-    final userId = await tokenService.getUserId();
-
+    final userId = await TokenService().getUserId();
     if (userId == null) {
       setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -374,11 +305,11 @@ class _BookingTourScreenState extends State<BookingTourScreen> {
     final orderId = await OrderService.createOrder({
       "number_of_child": child,
       "number_of_adult": adult,
-      "name_tourist": nameCtrl.text,
-      "phone_tourist": phoneCtrl.text,
-      "email_tourist": emailCtrl.text,
+      "name_tourist": nameCtrl.text.trim(),
+      "phone_tourist": phoneCtrl.text.trim(),
+      "email_tourist": emailCtrl.text.trim(),
       "total": total,
-      "note": noteCtrl.text,
+      "note": noteCtrl.text.trim(),
       "user_id": userId,
       "tour_id": widget.tourId,
     });

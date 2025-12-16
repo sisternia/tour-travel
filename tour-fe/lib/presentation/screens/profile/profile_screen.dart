@@ -7,12 +7,6 @@ import 'package:tour_fe/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:tour_fe/services/profile_service.dart';
 import 'package:tour_fe/services/token_service.dart';
 import 'package:tour_fe/services/post_service.dart';
-import 'package:tour_fe/services/post_reaction_service.dart';
-import 'package:tour_fe/services/post_comment_service.dart';
-import 'package:tour_fe/services/post_share_service.dart';
-import 'package:tour_fe/presentation/widgets/Post_Shows.dart';
-import '../orders/order_list_screen.dart';
-import '../auth/login_screen.dart';
 
 String _formatDate(String? dateString) {
   if (dateString == null || dateString.isEmpty || dateString == 'Not set') {
@@ -42,10 +36,7 @@ class ProfileScreenState extends State<ProfileScreen>
   final ProfileService _profileService = ProfileService();
   final TokenService _tokenService = TokenService();
   final PostService _postService = PostService();
-  final PostReactionService _reactionService = PostReactionService();
-  final PostCommentService _commentService = PostCommentService();
-  final PostShareService _shareService = PostShareService();
-  
+
   late Future<ProfileModel> _profileFuture;
   List<Map<String, dynamic>> posts = [];
   bool isLoadingPosts = false;
@@ -64,7 +55,7 @@ class ProfileScreenState extends State<ProfileScreen>
     try {
       final profile = await _profileFuture;
       final list = await _postService.getPostsByUserId(profile.userId ?? "");
-      
+
       if (!mounted) return;
       setState(() {
         posts = list.map<Map<String, dynamic>>((item) {
@@ -173,7 +164,6 @@ class ProfileScreenState extends State<ProfileScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
@@ -186,53 +176,7 @@ class ProfileScreenState extends State<ProfileScreen>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
-            onSelected: (value) async {
-              if (value == "logout") {
-                final shouldLogout = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Đăng xuất"),
-                    content: const Text("Bạn có chắc chắn muốn đăng xuất?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text("Hủy"),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
-                  ),
-                );
-                
-                if (shouldLogout == true && mounted) {
-                  await _tokenService.deleteToken();
-                  if (mounted) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  }
-                }
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: "logout",
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, size: 20, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text("Đăng xuất", style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -291,9 +235,10 @@ class ProfileScreenState extends State<ProfileScreen>
               border: Border.all(color: Colors.white, width: 4),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4))
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
               ],
             ),
             child: CircleAvatar(
@@ -349,115 +294,6 @@ class ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildPostsSection(ProfileModel profile) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text(
-            "Bài đăng",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
-            ),
-          ),
-        ),
-        if (isLoadingPosts)
-          const Center(child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: CircularProgressIndicator(),
-          ))
-        else if (posts.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Center(
-              child: Text(
-                "Chưa có bài đăng nào",
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          )
-        else
-          ...posts.map((post) {
-            return PostShows(
-              postId: post["postId"],
-              userId: post["userId"],
-              userName: post["userName"],
-              userAvatar: post["userAvatar"],
-              currentUserId: profile.userId ?? "",
-              content: post["content"],
-              images: post["images"],
-              createdAt: post["createdAt"],
-              privacy: post["privacy"],
-              sharedNote: post["sharedNote"],
-              sharedFromUserName: post["sharedFromUserName"],
-              sharedFromUserAvatar: post["sharedFromUserAvatar"],
-              sharedFromUserId: post["sharedFromUserId"],
-              onDelete: () async {
-                await _postService.deletePost(
-                  postId: post["postId"],
-                  userName: profile.userName ?? "",
-                );
-                _loadPosts();
-              },
-              onEdit: () {
-                // Edit functionality can be added here
-              },
-              onReaction: (reactionType) async {
-                final existing = await _reactionService.getUserReaction(
-                  profile.userId ?? "",
-                  post["postId"],
-                );
-                if (existing != null) {
-                  if (existing["reaction_type"] == reactionType) {
-                    await _reactionService.removeReaction(
-                      postId: post["postId"],
-                      userId: profile.userId ?? "",
-                    );
-                  } else {
-                    await _reactionService.addReaction(
-                      postId: post["postId"],
-                      userId: profile.userId ?? "",
-                      reactionType: reactionType,
-                    );
-                  }
-                } else {
-                  await _reactionService.addReaction(
-                    postId: post["postId"],
-                    userId: profile.userId ?? "",
-                    reactionType: reactionType,
-                  );
-                }
-                _loadPosts();
-              },
-              onComment: (content) async {
-                await _commentService.addComment(
-                  postId: post["postId"],
-                  userId: profile.userId ?? "",
-                  content: content,
-                );
-                _loadPosts();
-              },
-              onShare: () async {
-                if (profile.userId == null) return;
-                // If this post is already a share, use the original user ID
-                final originalUserId = post["sharedFromUserId"] ?? post["userId"];
-                await _shareService.sharePost(
-                  postId: post["postId"],
-                  userId: profile.userId!,
-                  sharedFromUserId: originalUserId,
-                );
-                _loadPosts();
-              },
-            );
-          }),
-        const SizedBox(height: 30),
-      ],
-    );
-  }
-
   Widget _buildInfoFields(ProfileModel profile) {
     final infoItems = [
       _InfoItem(Icons.person, 'Full Name', profile.userName ?? 'Not set'),
@@ -495,9 +331,10 @@ class ProfileScreenState extends State<ProfileScreen>
                   subtitle: Text(
                     item.value,
                     style: TextStyle(
-                        fontSize: 14,
-                        color: item.value == 'Not set' ? iosGray : Colors.black,
-                        fontWeight: FontWeight.w400),
+                      fontSize: 14,
+                      color: item.value == 'Not set' ? iosGray : Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -507,20 +344,6 @@ class ProfileScreenState extends State<ProfileScreen>
               ],
             );
           }),
-          ListTile(
-            leading: Icon(Icons.list_alt, color: iosGray),
-            title: const Text(
-              'Quản lý đơn hàng',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const OrderListScreen()),
-              );
-            },
-          ),
         ],
       ),
     );

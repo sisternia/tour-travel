@@ -1,8 +1,8 @@
-// lib/services/tours_category_service.dart
+// lib/services/tour_category_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tour_fe/core/constants/api.dart';
-import 'package:tour_fe/data/models/tours_category_model.dart';
+import 'package:tour_fe/data/models/tour_category_model.dart';
 
 class ToursCategoryService {
   Future<List<ToursCategoryModel>> fetchCategories() async {

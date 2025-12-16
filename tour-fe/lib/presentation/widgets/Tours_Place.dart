@@ -1,7 +1,7 @@
 // lib/presentation/widgets/Tour_Place.dart
 
 import 'package:flutter/material.dart';
-import 'package:tour_fe/data/models/tours_type_model.dart';
+import 'package:tour_fe/data/models/tour_types_model.dart';
 import 'package:tour_fe/core/constants/color.dart';
 import 'package:tour_fe/core/constants/api.dart';
 import 'package:tour_fe/services/tours_type_service.dart';
@@ -66,7 +66,6 @@ class _TouristPlacesState extends State<TouristPlaces> {
             itemBuilder: (context, index) {
               final item = firstRow[index];
 
-              // ✅ Tạo URL ảnh đầy đủ
               final imageUrl = item.images.startsWith('http')
                   ? item.images
                   : '${ApiConstants.baseServerUrl}${item.images}';

@@ -6,6 +6,7 @@ import '../../../controllers/payment_controller.dart';
 import '../../../services/order_service.dart';
 import '../../../data/models/order_model.dart';
 import 'payment_success_screen.dart';
+import '../../../core/constants/color.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final int orderId;
@@ -103,7 +104,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
       ),
       body: loading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xffD82D8B)),
+              child: CircularProgressIndicator(color: tPrimaryColor),
             )
           : order == null
               ? const Center(child: Text("Không tìm thấy đơn hàng"))
@@ -116,29 +117,29 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _momoSection("Thông tin khách hàng"),
-                          _momoCard([
-                            _momoRow("Tên khách", order!.nameTourist,
+                          _vnpaySection("Thông tin khách hàng"),
+                          _vnpayCard([
+                            _vnpayRow("Tên khách", order!.nameTourist,
                                 Ionicons.person_outline),
-                            _momoRow("Số điện thoại", order!.phoneTourist,
+                            _vnpayRow("Số điện thoại", order!.phoneTourist,
                                 Ionicons.call_outline),
-                            _momoRow("Email", order!.emailTourist,
+                            _vnpayRow("Email", order!.emailTourist,
                                 Ionicons.mail_outline),
-                            _momoRow("Ghi chú", order!.note ?? "—",
+                            _vnpayRow("Ghi chú", order!.note ?? "—",
                                 Ionicons.document_text_outline),
                           ]),
                           const SizedBox(height: 26),
-                          _momoSection("Chi tiết số lượng"),
-                          _momoCard([
-                            _momoRow("Người lớn", "${order!.numberOfAdult}",
+                          _vnpaySection("Chi tiết số lượng"),
+                          _vnpayCard([
+                            _vnpayRow("Người lớn", "${order!.numberOfAdult}",
                                 Ionicons.body_outline),
-                            _momoRow("Trẻ em", "${order!.numberOfChild}",
+                            _vnpayRow("Trẻ em", "${order!.numberOfChild}",
                                 Ionicons.happy_outline),
                           ]),
                           const SizedBox(height: 26),
-                          _momoSection("Thanh toán"),
-                          _momoCard([
-                            _momoRow(
+                          _vnpaySection("Thanh toán"),
+                          _vnpayCard([
+                            _vnpayRow(
                               "Tổng tiền",
                               "${order!.total.toString().replaceAllMapped(
                                     RegExp(r'\B(?=(\d{3})+(?!\d))'),
@@ -148,7 +149,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                               valueColor: Colors.red,
                               bold: true,
                             ),
-                            _momoRow("Ngày đặt", _formatDate(order!.orderAt),
+                            _vnpayRow("Ngày đặt", _formatDate(order!.orderAt),
                                 Ionicons.calendar_outline),
                           ]),
                           const SizedBox(height: 50),
@@ -160,75 +161,45 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
       bottomNavigationBar: order == null
           ? null
           : Container(
-              padding: const EdgeInsets.all(18),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 14,
-                    color: Colors.black26,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: GestureDetector(
-                onTapDown: (_) => setState(() {}),
-                child: AnimatedScale(
-                  duration: const Duration(milliseconds: 120),
-                  scale: 0.98,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await PaymentController.payWithMomo(
-                          context: context,
-                          orderId: widget.orderId,
-                          amount: order!.total.toInt(),
-                        );
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  try {
+                    await PaymentController.payWithVnpay(
+                      context: context,
+                      orderId: widget.orderId,
+                      amount: order!.total.toInt(),
+                    );
 
-                        Future.delayed(const Duration(seconds: 2), () {
-                          _checkPaymentSuccess();
-                        });
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text("Lỗi thanh toán: $e",
-                                  style: const TextStyle(color: Colors.white))),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xffD82D8B),
-                            Color(0xffF25BAE),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Container(
-                        height: 58,
-                        alignment: Alignment.center,
-                        child: const Text(
-                          "Thanh toán MoMo",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.3,
-                          ),
+                    Future.delayed(const Duration(seconds: 2), () {
+                      _checkPaymentSuccess();
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Lỗi thanh toán: $e",
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
-                    ),
+                    );
+                  }
+                },
+                icon: const Icon(Ionicons.card_outline, color: Colors.white),
+                label: const Text(
+                  "Thanh toán VNPAY",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: tPrimaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -236,7 +207,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     );
   }
 
-  Widget _momoSection(String title) {
+  Widget _vnpaySection(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -245,9 +216,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
             width: 4,
             height: 22,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xffD82D8B), Color(0xffF25BAE)],
-              ),
+              color: tPrimaryColor,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -265,7 +234,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     );
   }
 
-  Widget _momoCard(List<Widget> children) {
+  Widget _vnpayCard(List<Widget> children) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeOut,
@@ -286,7 +255,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     );
   }
 
-  Widget _momoRow(
+  Widget _vnpayRow(
     String label,
     String value,
     IconData icon, {
@@ -300,10 +269,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xffFDE4F1),
+              color: tPrimaryColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: const Color(0xffD82D8B), size: 20),
+            child: Icon(icon, color: tPrimaryColor, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(

@@ -14,6 +14,8 @@ import '../../widgets/Post_Shows.dart';
 import '../profile/profile_screen.dart';
 import '../profile/edit_profile_screen.dart';
 import 'package:tour_fe/presentation/widgets/Button.dart';
+import '../auth/login_screen.dart';
+import 'package:ionicons/ionicons.dart';
 
 class PostHeaderScreen extends StatefulWidget {
   const PostHeaderScreen({super.key});
@@ -53,32 +55,32 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
       final list = await _postService.getPostsByUserId(profile.userId ?? "");
 
       if (!mounted) return;
-    setState(() {
-      posts = list.map<Map<String, dynamic>>((item) {
-        return {
-          "postId": item["post_id"],
-          "userId": item["user_id"],
+      setState(() {
+        posts = list.map<Map<String, dynamic>>((item) {
+          return {
+            "postId": item["post_id"],
+            "userId": item["user_id"],
             "userName": item["user_name"] ?? "Người dùng",
             "userAvatar": item["avatar"],
-          "content": item["content"],
-          "privacy": item["privacy"],
-          "createdAt": DateTime.parse(item["created_at"]),
+            "content": item["content"],
+            "privacy": item["privacy"],
+            "createdAt": DateTime.parse(item["created_at"]),
             "sharedFromPostId": item["shared_from_post_id"],
             "sharedFromUserId": item["shared_from_user_id"],
             "sharedFromUserName": item["shared_from_user_name"],
             "sharedFromUserAvatar": item["shared_from_user_avatar"],
             "sharedNote": item["shared_note"],
-          "images": (item["images"] ?? []).map<Map<String, dynamic>>((img) {
-            return {
-              "url": img["image_url"],
-              "bytes": null,
-              "isVertical": false,
-            };
-          }).toList(),
-        };
-      }).toList();
+            "images": (item["images"] ?? []).map<Map<String, dynamic>>((img) {
+              return {
+                "url": img["image_url"],
+                "bytes": null,
+                "isVertical": false,
+              };
+            }).toList(),
+          };
+        }).toList();
         isLoading = false;
-    });
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
@@ -103,13 +105,10 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
             }
 
             final profile = snapshot.data!;
-            final avatar = profile.avatar;
-            final background = profile.background;
-
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  _buildHeader(background, avatar, profile),
+                  _buildHeader(profile),
                   const SizedBox(height: 120),
                   _buildButtons(context),
                   const SizedBox(height: 20),
@@ -119,39 +118,40 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                   const SizedBox(height: 20),
                   if (isLoading)
                     const Padding(
-                      padding: EdgeInsets.all(20.0),
+                      padding: EdgeInsets.all(20),
                       child: CircularProgressIndicator(),
                     )
                   else
-                  ...posts.asMap().entries.map((p) {
-                    return PostShows(
+                    ...posts.asMap().entries.map((p) {
+                      return PostShows(
                         postId: p.value["postId"],
                         userId: p.value["userId"],
                         userName: p.value["userName"],
                         userAvatar: p.value["userAvatar"],
                         currentUserId: currentUserId ?? "",
-                      content: p.value["content"],
-                      images: p.value["images"],
-                      createdAt: p.value["createdAt"],
-                      privacy: p.value["privacy"],
+                        content: p.value["content"],
+                        images: p.value["images"],
+                        createdAt: p.value["createdAt"],
+                        privacy: p.value["privacy"],
                         sharedNote: p.value["sharedNote"],
                         sharedFromUserName: p.value["sharedFromUserName"],
                         sharedFromUserAvatar: p.value["sharedFromUserAvatar"],
                         sharedFromUserId: p.value["sharedFromUserId"],
-                      onDelete: () async {
-                        await _postService.deletePost(
-                          postId: p.value["postId"],
-                          userName: profile.userName ?? "",
-                        );
-                        _loadPosts();
-                      },
-                      onEdit: () {
-                        editingIndex = p.key;
-                        _openEditPostModal(profile, posts[p.key]);
-                      },
+                        onDelete: () async {
+                          await _postService.deletePost(
+                            postId: p.value["postId"],
+                            userName: profile.userName ?? "",
+                          );
+                          _loadPosts();
+                        },
+                        onEdit: () {
+                          editingIndex = p.key;
+                          _openEditPostModal(profile, posts[p.key]);
+                        },
                         onReaction: (reactionType) async {
                           if (currentUserId == null) return;
-                          final existing = await _reactionService.getUserReaction(
+                          final existing =
+                              await _reactionService.getUserReaction(
                             currentUserId!,
                             p.value["postId"],
                           );
@@ -188,8 +188,8 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                         },
                         onShare: () async {
                           if (currentUserId == null) return;
-                          // If this post is already a share, use the original user ID
-                          final originalUserId = p.value["sharedFromUserId"] ?? p.value["userId"];
+                          final originalUserId =
+                              p.value["sharedFromUserId"] ?? p.value["userId"];
                           await _shareService.sharePost(
                             postId: p.value["postId"],
                             userId: currentUserId!,
@@ -197,8 +197,8 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                           );
                           _loadPosts();
                         },
-                    );
-                  }),
+                      );
+                    }),
                   const SizedBox(height: 30),
                 ],
               ),
@@ -208,8 +208,11 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
       ),
     );
   }
-  Widget _buildHeader(
-      String? background, String? avatar, ProfileModel profile) {
+
+  Widget _buildHeader(ProfileModel profile) {
+    final background = profile.background;
+    final avatar = profile.avatar;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -238,6 +241,28 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                   ),
           ),
         ),
+
+        // LOGOUT BUTTON (TOP RIGHT)
+        Positioned(
+          top: 12,
+          right: 12,
+          child: GestureDetector(
+            onTap: _handleLogout,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Ionicons.log_out_outline,
+                color: Colors.redAccent,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+
         Positioned(
           bottom: -40,
           left: 0,
@@ -274,6 +299,36 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _handleLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Đăng xuất"),
+        content: const Text("Bạn có chắc chắn muốn đăng xuất?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Hủy"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true && mounted) {
+      await _tokenService.deleteToken();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   Widget _buildButtons(BuildContext context) {
@@ -314,9 +369,9 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
               ),
               onPressed: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen()));
+                  context,
+                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                );
               },
             ),
           ),
@@ -426,8 +481,8 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
       barrierLabel: 'Post',
       barrierColor: Colors.black.withOpacity(0.35),
       transitionDuration: const Duration(milliseconds: 180),
-      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
-      transitionBuilder: (context, a1, a2, child) {
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (context, a1, _, __) {
         final curved = Curves.easeOut.transform(a1.value);
         return Opacity(
           opacity: a1.value,
@@ -438,14 +493,12 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                 profile: profile,
                 onPost: (content, images, privacy) async {
                   if (content.isEmpty && images.isEmpty) return;
-
                   final bytesList = <Uint8List>[];
                   for (var img in images) {
                     if (img['bytes'] is Uint8List) {
                       bytesList.add(img['bytes']);
                     }
                   }
-
                   final res = await _postService.createPost(
                     userId: profile.userId ?? "",
                     userName: profile.userName ?? "",
@@ -453,7 +506,6 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                     privacy: privacy,
                     images: bytesList,
                   );
-
                   if (res["success"] == true) {
                     await _loadPosts();
                   }
@@ -473,10 +525,9 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
       barrierLabel: 'Edit',
       barrierColor: Colors.black.withOpacity(0.35),
       transitionDuration: const Duration(milliseconds: 180),
-      pageBuilder: (context, a1, a2) => const SizedBox.shrink(),
-      transitionBuilder: (context, a1, a2, child) {
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (context, a1, _, __) {
         final curved = Curves.easeOut.transform(a1.value);
-
         return Opacity(
           opacity: a1.value,
           child: Transform.scale(
@@ -492,7 +543,6 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                   for (var img in images) {
                     if (img["bytes"] != null) bytesList.add(img["bytes"]);
                   }
-
                   final ok = await _postService.updatePost(
                     postId: post["postId"],
                     userName: profile.userName ?? "",
@@ -500,7 +550,6 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
                     privacy: privacy,
                     imagesBytes: bytesList,
                   );
-
                   if (ok) await _loadPosts();
                 },
               ),

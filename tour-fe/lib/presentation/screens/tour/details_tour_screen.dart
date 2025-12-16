@@ -9,8 +9,8 @@ import '../../../services/tour_images_service.dart';
 import '../../widgets/Tab_Tour.dart';
 import '../../widgets/Button.dart';
 import '../../widgets/Image_List.dart';
-import 'booking_tour_screen.dart';
-import '../../screens/tour/tour_locations_screen.dart';
+import '../orders/booking_tour_screen.dart';
+import 'tour_locations_screen.dart';
 
 class DetailsCardScreen extends StatefulWidget {
   final int tourId;

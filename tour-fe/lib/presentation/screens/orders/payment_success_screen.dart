@@ -3,7 +3,6 @@
 // import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:tour_fe/services/notification_service.dart';
-import '../../widgets/NavigationBar.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   final int orderId;
@@ -102,13 +101,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       ),
                     ),
                     onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NavigationBarWidget(),
-                        ),
-                        (route) => false,
-                      );
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                     child: const Text(
                       "VỀ TRANG CHỦ",

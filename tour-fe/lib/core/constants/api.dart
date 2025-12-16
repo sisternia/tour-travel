@@ -106,11 +106,15 @@ class ApiConstants {
   static String get payments => '$baseUrl/api/payments';
   static String paymentByOrder(int orderId) => '$baseUrl/api/payments/$orderId';
 
-  static String get momoPayment => '$baseUrl/api/momo/payment';
+  // static String get momoPayment => '$baseUrl/api/momo/payment';
 
-  static String momoRedirect(String orderId) =>
-      '$baseUrl/api/momo/redirect?orderId=$orderId';
-  static String get momoIpn => '$baseUrl/api/momo/ipn';
+  // static String momoRedirect(String orderId) =>
+  //     '$baseUrl/api/momo/redirect?orderId=$orderId';
+  // static String get momoIpn => '$baseUrl/api/momo/ipn';
+
+  static String get vnpayPayment => '$baseUrl/api/vnpay/payment';
+  static String get vnpayReturn => '$baseUrl/api/vnpay/return';
+  static String get vnpayIpn => '$baseUrl/api/vnpay/ipn';
 
   // Notifications routes
   static String get notifications => '$baseUrl/api/notifications';
