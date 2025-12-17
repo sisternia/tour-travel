@@ -113,7 +113,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(icon, color: Colors.teal, size: 22),
+          Icon(icon, color: Colors.blue, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Text(label,
@@ -125,6 +125,46 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 fontSize: 16,
                 fontWeight: bold ? FontWeight.bold : FontWeight.w500,
                 color: valueColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRowVertical(
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.blue, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -144,7 +184,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       icon: const Icon(Ionicons.card_outline, color: Colors.white),
       label: const Text(
         "Thanh toán VNPAY",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: TextStyle(
+            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.blue,
@@ -263,8 +304,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                         Row(children: [_statusTag(order!.typeConfirmId)]),
                         _sectionCard("Thông tin Tour", [
-                          _infoRow(Ionicons.location_outline, "Tên tour",
-                              order!.tourName ?? "—"),
+                          _infoRowVertical(
+                            Ionicons.location_outline,
+                            "Tên tour",
+                            order!.tourName ?? "—",
+                          ),
                         ]),
                         _sectionCard("Thông tin khách hàng", [
                           _infoRow(Ionicons.person_outline, "Tên khách",
@@ -301,7 +345,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ),
                   ),
       ),
-      bottomNavigationBar: order == null
+      bottomNavigationBar: (order == null || order!.typeConfirmId == 3)
           ? null
           : Container(
               padding: const EdgeInsets.all(16),
@@ -312,13 +356,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget? _buildBottomButton() {
-    if (order!.typeConfirmId == 1) return _vnpayButton();
-    if (order!.typeConfirmId == 2) return _markCompletedButton();
-
-    if (order!.typeConfirmId == 4) {
-      return order!.isRated == 1 ? _ratedButton() : _rateButton();
+    switch (order!.typeConfirmId) {
+      case 1:
+        return _vnpayButton();
+      case 2:
+        return _markCompletedButton();
+      case 4:
+        return order!.isRated == 1 ? _ratedButton() : _rateButton();
+      default:
+        return null;
     }
-
-    return null;
   }
 }

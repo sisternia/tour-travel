@@ -220,29 +220,25 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
           height: 180,
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: background == null
-                ? LinearGradient(
-                    colors: [
-                      iosBlue.withOpacity(0.8),
-                      iosBlue.withOpacity(0.6)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
+            color: Colors.grey.shade200,
             image: background != null
                 ? DecorationImage(
                     image: NetworkImage(background),
                     fit: BoxFit.cover,
+                    onError: (_, __) {},
                   )
-                : const DecorationImage(
-                    image: AssetImage("assets/anhbia.jpg"),
-                    fit: BoxFit.cover,
-                  ),
+                : null,
           ),
+          child: background == null
+              ? const Center(
+                  child: Icon(
+                    Icons.image_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                )
+              : null,
         ),
-
-        // LOGOUT BUTTON (TOP RIGHT)
         Positioned(
           top: 12,
           right: 12,
@@ -262,7 +258,6 @@ class _PostHeaderScreenState extends State<PostHeaderScreen> {
             ),
           ),
         ),
-
         Positioned(
           bottom: -40,
           left: 0,
