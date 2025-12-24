@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 class ApiConstants {
-  static String androidHost = '10.0.2.2';
+  static String androidHost = 'localhost';
   static String iosHost = 'localhost';
   static String webHost = 'localhost';
   static int port = 3000;

@@ -246,12 +246,12 @@ class _TabTourWidgetState extends State<TabTourWidget> {
               final int totalDays = schedules
                   .map((e) => e.dayNumber)
                   .fold(0, (a, b) => a > b ? a : b);
-
               final int totalNights = totalDays > 0 ? totalDays - 1 : 0;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Toàn bộ description trước
                   Text(
                     schedules.first.description ?? "Không có mô tả",
                     style: const TextStyle(
@@ -261,6 +261,23 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                     ),
                   ),
                   const SizedBox(height: 14),
+                  ...schedules.skip(1).map((s) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        s.description ?? "Không có mô tả",
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: darkGrey,
+                          height: 1.5,
+                        ),
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 14),
+
+                  // Rồi mới tới tổng ngày/đêm
                   Text(
                     "$totalDays ngày và $totalNights đêm",
                     style: const TextStyle(
@@ -269,7 +286,10 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                       color: primaryColor,
                     ),
                   ),
+
                   const SizedBox(height: 14),
+
+                  // Và thông tin hướng dẫn viên ở cuối
                   const Text(
                     "Hướng dẫn viên",
                     style: TextStyle(
@@ -365,20 +385,6 @@ class _TabTourWidgetState extends State<TabTourWidget> {
                       );
                     },
                   ),
-                  const SizedBox(height: 20),
-                  ...schedules.skip(1).map((s) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Text(
-                        s.description ?? "Không có mô tả",
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: darkGrey,
-                          height: 1.5,
-                        ),
-                      ),
-                    );
-                  }),
                 ],
               );
             },

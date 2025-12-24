@@ -6,3 +6,10 @@ Content-Type: application/json
   "orderId": 5,
   "orderInfo": "Thanh toán đơn hàng #5"
 }
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+{
+  "email": "lethikimoanh2k4@gmail.com",
+  "password": "1234567"
+}
